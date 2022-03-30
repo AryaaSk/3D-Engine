@@ -10,14 +10,13 @@ canvas.setAttribute('height', String(canvasHeight * dpi));
 canvas.setAttribute('width', String(canvasWidth * dpi));
 
 
-document.onmousedown = ($e) => {
-    console.log($e.clientX);
-    console.log($e.clientY);
-}
-
 //ACTUAL DRAWING FUNCTIONS
-const gridX = (x: number) => { return x; }
-const gridY = (y: number) => { return canvasHeight - y; } //on the page y = 0 is at the top, however in an actual grid y = 0 is at the bottom
+const gridX = (x: number) => { 
+    return (canvasWidth / 2) + x;
+}
+const gridY = (y: number) => {  //on the page y = 0 is at the top, however in an actual grid y = 0 is at the bottom
+    return (canvasHeight / 2) - y;
+}
 const drawLine = (p1: number[], p2: number[]) => {
     //points will be in format: [x, y]
     //I need to convert the javascript x and y into actual grid x and y
@@ -35,7 +34,7 @@ const plotPoint = (p: number[]) => {
 
 
 
-
+//MATRIX FUNCTIONS
 class matrix
 {
     /* The data will be stored like on the left, on the right is how the actual matrix will look if you wrote it in mathmatics
@@ -43,7 +42,7 @@ class matrix
     [0, 1]      =       0],  1],  0] ]
     [0, 0]]                
     */
-    data: number[][] = []; /* DO NOT SET THIS EXPLICITLY, USE THE FUNCTIONS */
+    private data: number[][] = []; /* DO NOT SET THIS EXPLICITLY, USE THE FUNCTIONS */
     width: number = 0; //num of columns
     height: number = 0; //num of rows
 
@@ -141,25 +140,21 @@ const multiplyMatrixs = (m1: matrix, m2: matrix) =>
         columnIndex += 1;
     }
 
-    resultMatrix.printMatrix();
+    return resultMatrix
 }
 
 
 
 
 
-
-
-
-
-
+//RENDERING AN OBJECT
 //first we need to define our transformation matrix, iHat = x axis, jHat = y axis, kHat = z axis, these are vectors
 //            x, y  (Physical grid)
 const iHat = [1, 0];
-const jHat = [0, 1];
-const kHat = [0, 0];
+const jHat = [0, 0.7];
+const kHat = [0, 0.3];
 
-const tMatrix = new matrix(); //transformation matrix
+const tMatrix = new matrix(); //transformation matrix, cube pointing slightly forward
 tMatrix.addColumn(iHat);
 tMatrix.addColumn(jHat);
 tMatrix.addColumn(kHat);
@@ -177,11 +172,23 @@ cubeMatrix.addColumn([1, 0, 1]);
 cubeMatrix.addColumn([1, 1, 1]);
 cubeMatrix.addColumn([0, 1, 1]);
 
-tMatrix.printMatrix();
-cubeMatrix.printMatrix();
+//tMatrix.printMatrix();
+//cubeMatrix.printMatrix();
 
-multiplyMatrixs(tMatrix, cubeMatrix);
+//By multiplying the tMatrix and cubeMatrix, you get the coordinates of the cube on the physical graph
+const rMatrix = multiplyMatrixs(tMatrix, cubeMatrix);
+//rMatrix.printMatrix();
 
+//loop through the columns, and plot the points with the scale transformation applied to them
+const scale = 100;
+for (let i = 0; i != rMatrix.width; i += 1)
+{
+    const points = rMatrix.getColumn(i);
+    points[0] = points[0] * scale;
+    points[1] = points[1] * scale;
+
+    plotPoint(points);
+}
 
 
 
