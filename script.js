@@ -68,9 +68,52 @@ class matrix {
         }
         console.log(finalOutput);
     }
+    getColumn(columnIndex) { return this.data[columnIndex]; }
+    getRow(rowIndex) {
+        let returnArray = [];
+        for (let i in this.data) {
+            returnArray.push(this.data[i][rowIndex]);
+        }
+        return returnArray;
+    }
+    setValue(columnIndex, rowIndex, value) { this.data[columnIndex][rowIndex] = value; }
+    getValue(columnIndex, rowIndex) { return this.data[columnIndex][rowIndex]; }
     constructor() { }
     ;
 }
+const multiplyMatrixs = (m1, m2) => {
+    //check that m1.width == m2.height, the result matrix will be m1.height x m2.width
+    //create result matrix:
+    const resultMatrix = new matrix();
+    const rMatrixHeight = m1.height;
+    const rMatrixWidth = m2.width;
+    for (let _ = 0; _ != rMatrixWidth; _ += 1) {
+        const newColumn = [];
+        for (let __ = 0; __ != rMatrixHeight; __ += 1) {
+            newColumn.push(0);
+        }
+        resultMatrix.addColumn(newColumn);
+    }
+    //now loop through each element in the result matrix with the rowIndex and columnIndex, and calculate it
+    let columnIndex = 0;
+    while (columnIndex != resultMatrix.width) {
+        let rowIndex = 0;
+        while (rowIndex != resultMatrix.height) {
+            const currentRow = m1.getRow(rowIndex);
+            const currentColumn = m2.getColumn(columnIndex); //these 2 should be the same length
+            let value = 0;
+            let i = 0;
+            while (i != currentRow.length) {
+                value += currentRow[i] * currentColumn[i];
+                i += 1;
+            }
+            resultMatrix.setValue(columnIndex, rowIndex, value);
+            rowIndex += 1;
+        }
+        columnIndex += 1;
+    }
+    resultMatrix.printMatrix();
+};
 //first we need to define our transformation matrix, iHat = x axis, jHat = y axis, kHat = z axis, these are vectors
 //            x, y  (Physical grid)
 const iHat = [1, 0];
@@ -92,6 +135,7 @@ cubeMatrix.addColumn([1, 1, 1]);
 cubeMatrix.addColumn([0, 1, 1]);
 tMatrix.printMatrix();
 cubeMatrix.printMatrix();
+multiplyMatrixs(tMatrix, cubeMatrix);
 /*
 //DEFINE OUR HAT VECTORS (X, Y, Z)
 //The hat vector is in the form [x, y], the physical direction is it pointing on the graph
