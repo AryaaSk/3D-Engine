@@ -1,4 +1,5 @@
 "use strict";
+//TO ENABLE AUTO RELOAD, RUN LIVE-SERVER, AND CLICK CMD+SHIFT+B, THEN CLICK WATCH TSC: WATCH
 const dpi = window.devicePixelRatio;
 const canvas = document.getElementById('renderingWindow');
 const c = canvas.getContext('2d');
@@ -25,37 +26,15 @@ const plotPoint = (p) => {
     //point will be in format: [x, y]
     c.fillRect(gridX(p[0] * dpi), gridY(p[1] * dpi), 10, 10);
 };
-//first we need to define our transformation matrix, iHat = x axis, jHat = y axis, kHat = z axis, these are vectors
-const iHat = [1,
-    0];
-const jHat = [0,
-    1];
-const kHat = [0,
-    0];
-//const transformationMatrix = [iHat, jHat, kHat];
-//lets define our points, we are just going to make a basic cube
-const cubeVertexs = [
-    [0, 0, 0],
-    [1, 0, 0],
-    [1, 1, 0],
-    [0, 1, 0],
-    [0, 0, 1],
-    [1, 0, 1],
-    [1, 1, 1],
-    [0, 1, 1],
-    //   x, y, z
-];
 class matrix {
-    constructor() {
-        /* The data will be stored like on the left, on the right is how the actual matrix will look if you wrote it in mathmatics
-       [[1, 0],          [ [1   [0   [0
-        [0, 1]      =       0],  1],  0] ]
-        [0, 0]]
-        */
-        this.data = []; /* DO NOT SET THIS EXPLICITLY, USE THE FUNCTIONS */
-        this.width = 0; //num of columns
-        this.height = 0; //num of rows
-    }
+    /* The data will be stored like on the left, on the right is how the actual matrix will look if you wrote it in mathmatics
+   [[1, 0],          [ [1   [0   [0
+    [0, 1]      =       0],  1],  0] ]
+    [0, 0]]
+    */
+    data = []; /* DO NOT SET THIS EXPLICITLY, USE THE FUNCTIONS */
+    width = 0; //num of columns
+    height = 0; //num of rows
     addColumn(nums) {
         this.data.push(nums);
         this.height = nums.length;
@@ -89,13 +68,19 @@ class matrix {
         }
         console.log(finalOutput);
     }
+    constructor() { }
     ;
 }
+//first we need to define our transformation matrix, iHat = x axis, jHat = y axis, kHat = z axis, these are vectors
+//            x, y  (Physical grid)
+const iHat = [1, 0];
+const jHat = [0, 1];
+const kHat = [0, 0];
 const tMatrix = new matrix(); //transformation matrix
 tMatrix.addColumn(iHat);
 tMatrix.addColumn(jHat);
 tMatrix.addColumn(kHat);
-//create our cube matrix
+//create our cube matrix (Pseudo Grid)
 const cubeMatrix = new matrix();
 cubeMatrix.addColumn([0, 0, 0]);
 cubeMatrix.addColumn([1, 0, 0]);
