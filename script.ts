@@ -143,21 +143,37 @@ const multiplyMatrixs = (m1: matrix, m2: matrix) =>
     return resultMatrix
 }
 
+class cameraMatrix
+{
+    //first we need to define our transformation matrix, iHat = x axis, jHat = y axis, kHat = z axis, these are vectors
+    //      x, y  (Physical grid)
+    iHat = [1, 0];
+    jHat = [0, 1]; 
+    kHat = [0, 0];
+    tMatrix = new matrix();
+
+    scale = 300;
+
+    createTMatrix()
+    {
+        this.tMatrix = new matrix();
+        this.tMatrix.addColumn(this.iHat);
+        this.tMatrix.addColumn(this.jHat);
+        this.tMatrix.addColumn(this.kHat);
+    }
+
+    constructor( ) { this.createTMatrix(); };
+}
 
 
 
 
 //RENDERING AN OBJECT
-//first we need to define our transformation matrix, iHat = x axis, jHat = y axis, kHat = z axis, these are vectors
-//            x, y  (Physical grid)
-const iHat = [1, 0];
-const jHat = [0, 0.7];
-const kHat = [0, 0.3];
-
-const tMatrix = new matrix(); //transformation matrix, cube pointing slightly forward
-tMatrix.addColumn(iHat);
-tMatrix.addColumn(jHat);
-tMatrix.addColumn(kHat);
+const camera = new cameraMatrix();
+camera.iHat = [0.7, 0.1];
+camera.jHat = [0, 0.7];
+camera.kHat = [-0.3, 0.3];
+camera.createTMatrix();
 
 
 //create our cube matrix (Pseudo Grid)
@@ -168,24 +184,99 @@ cubeMatrix.addColumn([1, 1, 0]);
 cubeMatrix.addColumn([0, 1, 0]);
 
 cubeMatrix.addColumn([0, 0, 1]);
-cubeMatrix.addColumn([1, 0, 1]);
+cubeMatrix.addColumn([1, 0, 1]); 
 cubeMatrix.addColumn([1, 1, 1]);
 cubeMatrix.addColumn([0, 1, 1]);
 
-//tMatrix.printMatrix();
-//cubeMatrix.printMatrix();
-
 //By multiplying the tMatrix and cubeMatrix, you get the coordinates of the cube on the physical graph
-const rMatrix = multiplyMatrixs(tMatrix, cubeMatrix);
-//rMatrix.printMatrix();
+const rMatrix = multiplyMatrixs(camera.tMatrix, cubeMatrix);
 
 //loop through the columns, and plot the points with the scale transformation applied to them
-const scale = 100;
 for (let i = 0; i != rMatrix.width; i += 1)
 {
-    const points = rMatrix.getColumn(i);
-    points[0] = points[0] * scale;
-    points[1] = points[1] * scale;
+    const point = rMatrix.getColumn(i);
+    point[0] = point[0] * camera.scale;
+    point[1] = point[1] * camera.scale;
 
-    plotPoint(points);
+    plotPoint(point);
+}
+
+//to draw shapes we just need to draw rectangles between the points, but we need to draw the furthest ones first so we overlap them (will develop the sorting algorithm later)
+
+let diagonals: {point1: number[], point2: number[]}[] = [];
+let lines: {point1: number[], point2: number[]}[] = [];
+//we need to look for diagonals (only 2 of the axis change)
+for (let i = 0; i != cubeMatrix.width; i += 1)
+{
+    const point1 = cubeMatrix.getColumn(i);
+    
+    //loop through all the others, and check if only 2 of the axis changed
+    for (let a = 0; a != cubeMatrix.width; a += 1)
+    {
+        if (a == i) { continue; }
+        const point2 = cubeMatrix.getColumn(a);
+
+        const condition1 = point1[0] == point2[0] && point1[1] != point2[1] && point1[2] != point2[2] //x remains constant
+        const condition2 = point1[0] != point2[0] && point1[1] == point2[1] && point1[2] != point2[2] //y remains constant
+        const condition3 = point1[0] != point2[0] && point1[1] != point2[1] && point1[2] == point2[2] //z remains constant
+        let result = 0; //converting to int so that I can add them together and make sure that only 1 of them is true
+        if (condition1 == true) { result += 1; }
+        if (condition2 == true) { result += 1; }
+        if (condition3 == true) { result += 1; }
+
+        if (result == 1)
+        { 
+            //before adding it we flip it and check if it already exist
+            const flipped = {point1: point2, point2: point1};
+            let containsAlready = false;
+            for (let b in diagonals)
+            { if (JSON.stringify(diagonals[b]) == JSON.stringify(flipped)) { containsAlready = true; break; } }
+
+            if (containsAlready == false) { diagonals.push({point1: point1, point2: point2}); }
+        }
+
+        else
+        {
+            //we can also check if it is a line (change in 1 axis)
+            const condition1 = point1[0] != point2[0] && point1[1] == point2[1] && point1[2] == point2[2] //change in x axis
+            const condition2 = point1[0] == point2[0] && point1[1] != point2[1] && point1[2] == point2[2] //change in y axis
+            const condition3 = point1[0] == point2[0] && point1[1] == point2[1] && point1[2] != point2[2] //change in z axis
+
+            if (condition1 || condition2 || condition3)
+            { 
+                //before adding it we flip it and check if it already exist
+                const flipped = {point1: point2, point2: point1};
+                let containsAlready = false;
+                for (let b in lines)
+                { if (JSON.stringify(lines[b]) == JSON.stringify(flipped)) { containsAlready = true; break; } }
+
+                if (containsAlready == false) { lines.push({point1: point1, point2: point2}); }
+            }
+        }
+    }
+}
+
+const allLines = diagonals.concat(lines);
+
+//now lets draw lines with these
+for (let i in lines)
+{
+    const line = lines[i];
+    const point1 = line.point1;
+    const point2 = line.point2;
+
+    //these points are in the pseudo grid, we need to multiply the tMatrix by them to get physical points
+    const pointMatrix = new matrix();
+    pointMatrix.addColumn(point1);
+    pointMatrix.addColumn(point2);
+    const physicalPoints = multiplyMatrixs(camera.tMatrix, pointMatrix)
+
+    const phyPoint1 = physicalPoints.getColumn(0);
+    phyPoint1[0] *= camera.scale;
+    phyPoint1[1] *= camera.scale;
+    const phyPoint2 = physicalPoints.getColumn(1);
+    phyPoint2[0] *= camera.scale;
+    phyPoint2[1] *= camera.scale;
+
+    drawLine(phyPoint1, phyPoint2)
 }
