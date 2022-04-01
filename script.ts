@@ -29,6 +29,16 @@ const plotPoint = (p: number[]) => {
     //point will be in format: [x, y]
     c.fillRect(gridX(p[0] * dpi), gridY(p[1] * dpi), 10, 10);
 }
+const drawQuadrilateral = (p1: number[], p2: number[], p3: number[], p4: number[], colour: string) => {
+    c.fillStyle = colour;
+    c.beginPath();
+    c.moveTo(gridX(p1[0] * dpi), gridY(p1[1] * dpi));
+    c.lineTo(gridX(p2[0] * dpi), gridY(p2[1] * dpi));
+    c.lineTo(gridX(p3[0] * dpi), gridY(p3[1] * dpi));
+    c.lineTo(gridX(p4[0] * dpi), gridY(p4[1] * dpi));
+    c.closePath();
+    c.fill();
+}
 
 
 
@@ -153,6 +163,7 @@ class cameraMatrix
     tMatrix = new matrix();
 
     scale = 300;
+    position = [0, 0, 0];
 
     createTMatrix()
     {
@@ -170,10 +181,11 @@ class cameraMatrix
 
 //RENDERING AN OBJECT
 const camera = new cameraMatrix();
-camera.iHat = [0.7, 0.1];
-camera.jHat = [0, 0.7];
-camera.kHat = [-0.3, 0.3];
+camera.iHat = [1, -0.4];
+camera.jHat = [0.4, 0.8];
+camera.kHat = [0, 0.2];
 camera.createTMatrix();
+camera.position = [0, 0, -5]
 
 
 //create our cube matrix (Pseudo Grid)
@@ -203,12 +215,16 @@ for (let i = 0; i != rMatrix.width; i += 1)
 
 //to draw shapes we just need to draw rectangles between the points, but we need to draw the furthest ones first so we overlap them (will develop the sorting algorithm later)
 
-let diagonals: {point1: number[], point2: number[]}[] = [];
-let lines: {point1: number[], point2: number[]}[] = [];
+let diagonals: {point1: number[], point2: number[], center: number[]}[] = [];
+let edges: {point1: number[], point2: number[], center: number[]}[] = [];
+
+let faces: {[k: string] : {diagonal1: {point1: number[], point2: number[], center: number[]}, diagonal2: {point1: number[], point2: number[], center: number[]}, constantAxis: string}} = {};
+//we get the faces by going through diagonals, and checking the centers
+
 //we need to look for diagonals (only 2 of the axis change)
 for (let i = 0; i != cubeMatrix.width; i += 1)
 {
-    const point1 = cubeMatrix.getColumn(i);
+    const point1 = cubeMatrix.getColumn(i); //[x, y, z]
     
     //loop through all the others, and check if only 2 of the axis changed
     for (let a = 0; a != cubeMatrix.width; a += 1)
@@ -219,10 +235,14 @@ for (let i = 0; i != cubeMatrix.width; i += 1)
         const condition1 = point1[0] == point2[0] && point1[1] != point2[1] && point1[2] != point2[2] //x remains constant
         const condition2 = point1[0] != point2[0] && point1[1] == point2[1] && point1[2] != point2[2] //y remains constant
         const condition3 = point1[0] != point2[0] && point1[1] != point2[1] && point1[2] == point2[2] //z remains constant
+
         let result = 0; //converting to int so that I can add them together and make sure that only 1 of them is true
-        if (condition1 == true) { result += 1; }
-        if (condition2 == true) { result += 1; }
-        if (condition3 == true) { result += 1; }
+        let constantAxis = "";
+        if (condition1 == true) { result += 1; constantAxis = "x"; }
+        if (condition2 == true) { result += 1; constantAxis = "y"; }
+        if (condition3 == true) { result += 1; constantAxis = "z"; }
+
+        const center = [(point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2, (point1[2] + point2[2]) / 2]
 
         if (result == 1)
         { 
@@ -230,9 +250,16 @@ for (let i = 0; i != cubeMatrix.width; i += 1)
             const flipped = {point1: point2, point2: point1};
             let containsAlready = false;
             for (let b in diagonals)
-            { if (JSON.stringify(diagonals[b]) == JSON.stringify(flipped)) { containsAlready = true; break; } }
+            { if (diagonals[b].point1 == flipped.point1 && diagonals[b].point2 == flipped.point2) { containsAlready = true; break; } }
 
-            if (containsAlready == false) { diagonals.push({point1: point1, point2: point2}); }
+            if (containsAlready == false) { 
+                diagonals.push({point1: point1, point2: point2, center: center});
+
+                if (faces[String(center)] == undefined)
+                { faces[String(center)] = {diagonal1: {point1: point1, point2: point2, center: center}, diagonal2: {point1: [], point2: [], center: []}, constantAxis: constantAxis}}
+                else 
+                { faces[String(center)].diagonal2 = {point1: point1, point2: point2, center: center}; }
+            }
         }
 
         else
@@ -245,23 +272,22 @@ for (let i = 0; i != cubeMatrix.width; i += 1)
             if (condition1 || condition2 || condition3)
             { 
                 //before adding it we flip it and check if it already exist
-                const flipped = {point1: point2, point2: point1};
                 let containsAlready = false;
-                for (let b in lines)
-                { if (JSON.stringify(lines[b]) == JSON.stringify(flipped)) { containsAlready = true; break; } }
+                for (let b in edges)
+                { if (JSON.stringify(edges[b].center) == JSON.stringify(center)) { containsAlready = true; break; } }
 
-                if (containsAlready == false) { lines.push({point1: point1, point2: point2}); }
+                if (containsAlready == false) { edges.push({point1: point1, point2: point2, center: center}); }
             }
         }
     }
 }
 
-const allLines = diagonals.concat(lines);
+
 
 //now lets draw lines with these
-for (let i in lines)
+for (let i in edges)
 {
-    const line = lines[i];
+    const line = edges[i];
     const point1 = line.point1;
     const point2 = line.point2;
 
@@ -279,4 +305,75 @@ for (let i in lines)
     phyPoint2[1] *= camera.scale;
 
     drawLine(phyPoint1, phyPoint2)
+}
+
+
+
+//draw the faces, but we have to order the keys (the centers), based on the distance from camera in the z-axis
+const centers = Object.keys(faces);
+
+const centersParsed: number[][] = []; //the centers will be strings so we need to parse them
+for (let i in centers) {  
+    const splitCenter = centers[i].split(",");
+    centersParsed.push([ Number(splitCenter[0]), Number(splitCenter[1]), Number(splitCenter[2]) ]);
+}
+
+let sortedCenters: string[] = [];
+while (centersParsed.length != 0)
+{
+    let furthestZIndex = 0;
+    for (let i = 0; i != centersParsed.length; i += 1 )
+    { 
+        if ((centersParsed[i][2] - camera.position[2] > (centersParsed[furthestZIndex][2] - camera.position[2])))
+        { furthestZIndex = i; }
+    }
+
+    let sortedString = JSON.stringify(centersParsed[furthestZIndex]);
+    sortedString = sortedString.replace("[", "");
+    sortedString = sortedString.replace("]", "");
+    sortedCenters.push(sortedString);
+    centersParsed.splice(furthestZIndex, 1);
+}
+
+//TODO: SORTED BASED ON DISTANCE TO CAMERA POSITION, RATHER THAN JUST DISTANCE TO CAMERA'S Z POSITION
+//WILL NEED TO MAKE A FUNCTION THAT TAKES IN P1 AND P2 AND RETURS DISTANCE
+
+for (let i in sortedCenters)
+{
+    const center = sortedCenters[i];
+    const diagonal1 = faces[center].diagonal1;
+    const diagonal2 = faces[center].diagonal2;
+    const constantAxis = faces[center].constantAxis;
+
+    //since we know the diagonals cross over, to draw the face we want point1 of diagonal1, then point1 of diagonal2, then point2 of diagonal1, then point2 of diagonal2
+    const points: number[][] = [diagonal1.point1, diagonal2.point1, diagonal1.point2, diagonal2.point2];
+
+    //now we just need to convert these points into physical points, by multiplying the tMatrix by them
+    const pointMatrix = new matrix();
+    for (let i in points)
+    { pointMatrix.addColumn(points[i]);}
+
+    const physicalPointsMatrix = multiplyMatrixs(camera.tMatrix, pointMatrix); //these are our real points
+    points[0] = physicalPointsMatrix.getColumn(0);
+    points[0][0] *= camera.scale;
+    points[0][1] *= camera.scale;
+
+    points[1] = physicalPointsMatrix.getColumn(1);
+    points[1][0] *= camera.scale;
+    points[1][1] *= camera.scale;
+
+    points[2] = physicalPointsMatrix.getColumn(2);
+    points[2][0] *= camera.scale;
+    points[2][1] *= camera.scale;
+
+    points[3] = physicalPointsMatrix.getColumn(3);
+    points[3][0] *= camera.scale;
+    points[3][1] *= camera.scale;
+
+    let colour = ""
+    if (constantAxis == "x") { colour = "#ff0000"; } //sides facing in the x axis
+    else if (constantAxis == "y") { colour = "#00ff00"; } //y axis
+    else if (constantAxis == "z") { colour = "#0000ff"; } //z axis
+
+    drawQuadrilateral(points[0], points[1], points[2], points[3], colour);
 }
