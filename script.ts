@@ -157,90 +157,127 @@ const multiplyMatrixs = (m1: matrix, m2: matrix) =>
 }
 
 const toRadians = (angle: number) => { return angle * (Math.PI / 180); }
-class cameraMatrix
+class Box
 {
+    constructor(width: number, height: number, depth: number) {
+        //Populate the pointMatrix
+        const offsetX = -(width / 2);
+        const offsetY = -(height / 2);
+        const offsetZ = 0;
+
+        this.pointMatrix.addColumn([0 + offsetX, 0 + offsetY, 0 + offsetZ]);
+        this.pointMatrix.addColumn([width + offsetX, 0 + offsetY, 0 + offsetZ]);
+        this.pointMatrix.addColumn([width + offsetX, height + offsetY, 0 + offsetZ]);
+        this.pointMatrix.addColumn([0 + offsetX, height + offsetY, 0 + offsetZ]);
+
+        this.pointMatrix.addColumn([0 + offsetX, 0 + offsetY, depth + offsetZ]);
+        this.pointMatrix.addColumn([width + offsetX, 0 + offsetY, depth + offsetZ]);
+        this.pointMatrix.addColumn([width + offsetX, height + offsetY, depth + offsetZ]);
+        this.pointMatrix.addColumn([0 + offsetX, height + offsetY, depth + offsetZ]);
+
+        //This is what the default rotation is when all rotations are set to 0
+        this.rotationMatrix.addColumn([1, 0, 0]); //x (iHat)
+        this.rotationMatrix.addColumn([0, 1, 0]); //y (jHat)
+        this.rotationMatrix.addColumn([0, 0, 1]); //z (kHat)
+
+        this.updateRotationMatrix()
+    }
+
     //first we need to define our transformation matrix, iHat = x axis, jHat = y axis, kHat = z axis, these are vectors
     //      x, y  (Physical grid)
-    iHat = [1, 0];
-    jHat = [0, 1]; 
-    kHat = [0, 0];
-    tMatrix = new matrix(); //transformation matrix, or also known as the rotation matrix.
-    private updateTMatrix()
-    {
-        this.tMatrix = new matrix();
-        this.tMatrix.addColumn(this.iHat);
-        this.tMatrix.addColumn(this.jHat);
-        this.tMatrix.addColumn(this.kHat);
-    }
+    private iHat: number[] = [1, 0, 0];
+    private jHat: number[] = [0, 1, 0];
+    private kHat: number[] = [0, 0, 1];
+
+    private pointMatrix = new matrix() //Positions of points without any rotation transformations applied to them
 
     rotationX = 0;
     rotationY = 0;
     rotationZ = 0;
-    updateRotation()
+    private rotationMatrix = new matrix() //multiply this by the pointMatrix to get the actual positions of the points on the pseudo grid (physical points)
+
+    private updateRotationMatrix()
     {
         //Source: http://eecs.qmul.ac.uk/~gslabaugh/publications/euler.pdf
         //Using the ZYX Euler angle rotation matrix
 
         //x-axis (iHat)
-        this.iHat[0] = Math.cos(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.cos(toRadians(this.rotationZ)) + Math.sin(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationZ));
-        this.iHat[1] = Math.cos(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.sin(toRadians(this.rotationZ)) - Math.sin(toRadians(this.rotationX)) * Math.cos(toRadians(this.rotationZ));
+        this.iHat[0] = Math.cos(toRadians(this.rotationY)) * Math.cos(toRadians(this.rotationZ));
+        this.iHat[1] = Math.cos(toRadians(this.rotationY)) * Math.sin(toRadians(this.rotationZ));
+        this.iHat[2] = -(Math.sin(toRadians(this.rotationY)));
 
         //y-axis (jHat)
         this.jHat[0] = Math.sin(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.cos(toRadians(this.rotationZ)) - Math.cos(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationZ));
         this.jHat[1] = Math.sin(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.sin(toRadians(this.rotationZ)) + Math.cos(toRadians(this.rotationX)) * Math.cos(toRadians(this.rotationZ));
+        this.jHat[2] = Math.sin(toRadians(this.rotationX) * Math.cos(toRadians(this.rotationY)));
 
         //z-axis (kHat)
-        this.kHat[0] = Math.cos(toRadians(this.rotationY)) * Math.cos(toRadians(this.rotationZ));
-        this.kHat[1] = Math.cos(toRadians(this.rotationY)) * Math.sin(toRadians(this.rotationZ));
-        
-        this.updateTMatrix();
+        this.kHat[0] = Math.cos(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.cos(toRadians(this.rotationZ)) + Math.sin(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationZ));
+        this.kHat[1] = Math.cos(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.sin(toRadians(this.rotationZ)) - Math.sin(toRadians(this.rotationX)) * Math.cos(toRadians(this.rotationZ))
+        this.kHat[2] = Math.cos(toRadians(this.rotationX) * Math.cos(toRadians(this.rotationY)))
+
+        //Set the unit vectors onto the singular rotation matrix
+        this.rotationMatrix.setValue(0, 0, this.iHat[0]);
+        this.rotationMatrix.setValue(0, 1, this.iHat[1]);
+        this.rotationMatrix.setValue(0, 2, this.iHat[2])
+        this.rotationMatrix.setValue(1, 0, this.jHat[0]);
+        this.rotationMatrix.setValue(1, 1, this.jHat[1]);
+        this.rotationMatrix.setValue(1, 2, this.jHat[2]);
+        this.rotationMatrix.setValue(2, 0, this.kHat[0]);
+        this.rotationMatrix.setValue(2, 1, this.kHat[1]);
+        this.rotationMatrix.setValue(2, 2, this.kHat[2]);
+
+        this.updatePhysicalMatrix();
     }
 
+    physicalMatrix = new matrix(); //the physical points that we plot on the screen
+    private updatePhysicalMatrix()
+    {  
+        this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix);
+        this.physicalMatrix.scaleUp(camera.scale);
+    }
+
+    updateMatrices()
+    {
+        this.updateRotationMatrix();
+        this.updatePhysicalMatrix();
+    }
+}
+
+class Camera
+{
     scale = 1;
     position = [0, 0, 0];
 
-    constructor( ) { this.updateTMatrix(); };
+    render(object: Box)
+    {
+        //use the object's physicalMatrix, and just plot the points
+        //loop through the columns, and plot the points with the scale transformation applied to them
+        for (let i = 0; i != object.physicalMatrix.width; i += 1)
+        {  const point = object.physicalMatrix.getColumn(i);  plotPoint(point);  }
+    }
+
+    constructor( ) {  };
 }
+
 
 
 //RENDERING AN OBJECT
-const camera = new cameraMatrix();
-camera.rotationX = 10;
-camera.rotationY = 10;
-camera.rotationZ = 0;
-camera.updateRotation();
-
+const camera = new Camera();
 camera.position = [0, 0, -5]
-camera.scale = 500;
-
+camera.scale = 1;
 
 //create our cube matrix (Pseudo Grid)
-const cubeMatrix = new matrix();
-cubeMatrix.addColumn([0, 0, 0]);
-cubeMatrix.addColumn([1, 0, 0]);
-cubeMatrix.addColumn([1, 1, 0]);
-cubeMatrix.addColumn([0, 1, 0]);
+const cube = new Box(300, 500, 200)
+cube.rotationX = 0;
+cube.rotationY = 0;
+cube.rotationZ = 0;
+cube.updateMatrices();
 
-cubeMatrix.addColumn([0, 0, 1]);
-cubeMatrix.addColumn([1, 0, 1]); 
-cubeMatrix.addColumn([1, 1, 1]);
-cubeMatrix.addColumn([0, 1, 1]);
+camera.render(cube);
 
-//By multiplying the tMatrix and cubeMatrix, you get the coordinates of the cube on the physical graph
-const physicalMatrix = multiplyMatrixs(camera.tMatrix, cubeMatrix);
-
-//loop through the columns, and plot the points with the scale transformation applied to them
-for (let i = 0; i != physicalMatrix.width; i += 1)
-{
-    const point = physicalMatrix.getColumn(i);
-    point[0] = point[0] * camera.scale;
-    point[1] = point[1] * camera.scale;
-
-    plotPoint(point);
-}
-
+/*
 //to draw shapes we just need to draw rectangles between the points, but we need to draw the furthest ones first so we overlap them (will develop the sorting algorithm later)
-
 let diagonals: {point1: number[], point2: number[], center: number[]}[] = [];
 let edges: {point1: number[], point2: number[], center: number[]}[] = [];
 
@@ -391,3 +428,4 @@ for (let i in sortedCenters)
 
     drawQuadrilateral(points[0], points[1], points[2], points[3], colour);
 }
+*/
