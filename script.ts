@@ -107,6 +107,9 @@ class matrix
     getValue(columnIndex: number, rowIndex: number)
     { return this.data[columnIndex][rowIndex]; }
 
+    scaleUp(factor: number)
+    { for (let i in this.data) { for (let a in this.data[i]) { this.data[i][a] *= factor; } } }
+
     constructor() {};
 }
 
@@ -153,6 +156,7 @@ const multiplyMatrixs = (m1: matrix, m2: matrix) =>
     return resultMatrix
 }
 
+const toRadians = (angle: number) => { return angle * (Math.PI / 180); }
 class cameraMatrix
 {
     //first we need to define our transformation matrix, iHat = x axis, jHat = y axis, kHat = z axis, these are vectors
@@ -160,12 +164,8 @@ class cameraMatrix
     iHat = [1, 0];
     jHat = [0, 1]; 
     kHat = [0, 0];
-    tMatrix = new matrix();
-
-    scale = 300;
-    position = [0, 0, 0];
-
-    createTMatrix()
+    tMatrix = new matrix(); //transformation matrix, or also known as the rotation matrix.
+    private updateTMatrix()
     {
         this.tMatrix = new matrix();
         this.tMatrix.addColumn(this.iHat);
@@ -173,19 +173,45 @@ class cameraMatrix
         this.tMatrix.addColumn(this.kHat);
     }
 
-    constructor( ) { this.createTMatrix(); };
+    rotationX = 0;
+    rotationY = 0;
+    rotationZ = 0;
+    updateRotation()
+    {
+        //Source: http://eecs.qmul.ac.uk/~gslabaugh/publications/euler.pdf
+        //Using the ZYX Euler angle rotation matrix
+
+        //x-axis (iHat)
+        this.iHat[0] = Math.cos(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.cos(toRadians(this.rotationZ)) + Math.sin(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationZ));
+        this.iHat[1] = Math.cos(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.sin(toRadians(this.rotationZ)) - Math.sin(toRadians(this.rotationX)) * Math.cos(toRadians(this.rotationZ));
+
+        //y-axis (jHat)
+        this.jHat[0] = Math.sin(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.cos(toRadians(this.rotationZ)) - Math.cos(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationZ));
+        this.jHat[1] = Math.sin(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.sin(toRadians(this.rotationZ)) + Math.cos(toRadians(this.rotationX)) * Math.cos(toRadians(this.rotationZ));
+
+        //z-axis (kHat)
+        this.kHat[0] = Math.cos(toRadians(this.rotationY)) * Math.cos(toRadians(this.rotationZ));
+        this.kHat[1] = Math.cos(toRadians(this.rotationY)) * Math.sin(toRadians(this.rotationZ));
+        
+        this.updateTMatrix();
+    }
+
+    scale = 1;
+    position = [0, 0, 0];
+
+    constructor( ) { this.updateTMatrix(); };
 }
-
-
 
 
 //RENDERING AN OBJECT
 const camera = new cameraMatrix();
-camera.iHat = [1, -0.4];
-camera.jHat = [0.4, 0.8];
-camera.kHat = [0, 0.2];
-camera.createTMatrix();
+camera.rotationX = 10;
+camera.rotationY = 10;
+camera.rotationZ = 0;
+camera.updateRotation();
+
 camera.position = [0, 0, -5]
+camera.scale = 500;
 
 
 //create our cube matrix (Pseudo Grid)
@@ -201,12 +227,12 @@ cubeMatrix.addColumn([1, 1, 1]);
 cubeMatrix.addColumn([0, 1, 1]);
 
 //By multiplying the tMatrix and cubeMatrix, you get the coordinates of the cube on the physical graph
-const rMatrix = multiplyMatrixs(camera.tMatrix, cubeMatrix);
+const physicalMatrix = multiplyMatrixs(camera.tMatrix, cubeMatrix);
 
 //loop through the columns, and plot the points with the scale transformation applied to them
-for (let i = 0; i != rMatrix.width; i += 1)
+for (let i = 0; i != physicalMatrix.width; i += 1)
 {
-    const point = rMatrix.getColumn(i);
+    const point = physicalMatrix.getColumn(i);
     point[0] = point[0] * camera.scale;
     point[1] = point[1] * camera.scale;
 
@@ -296,13 +322,10 @@ for (let i in edges)
     pointMatrix.addColumn(point1);
     pointMatrix.addColumn(point2);
     const physicalPoints = multiplyMatrixs(camera.tMatrix, pointMatrix)
+    physicalPoints.scaleUp(camera.scale);
 
     const phyPoint1 = physicalPoints.getColumn(0);
-    phyPoint1[0] *= camera.scale;
-    phyPoint1[1] *= camera.scale;
     const phyPoint2 = physicalPoints.getColumn(1);
-    phyPoint2[0] *= camera.scale;
-    phyPoint2[1] *= camera.scale;
 
     drawLine(phyPoint1, phyPoint2)
 }
@@ -311,7 +334,6 @@ for (let i in edges)
 
 //draw the faces, but we have to order the keys (the centers), based on the distance from camera in the z-axis
 const centers = Object.keys(faces);
-
 const centersParsed: number[][] = []; //the centers will be strings so we need to parse them
 for (let i in centers) {  
     const splitCenter = centers[i].split(",");
@@ -335,6 +357,8 @@ while (centersParsed.length != 0)
     centersParsed.splice(furthestZIndex, 1);
 }
 
+console.log(sortedCenters);
+
 //TODO: SORTED BASED ON DISTANCE TO CAMERA POSITION, RATHER THAN JUST DISTANCE TO CAMERA'S Z POSITION
 //WILL NEED TO MAKE A FUNCTION THAT TAKES IN P1 AND P2 AND RETURS DISTANCE
 
@@ -354,21 +378,11 @@ for (let i in sortedCenters)
     { pointMatrix.addColumn(points[i]);}
 
     const physicalPointsMatrix = multiplyMatrixs(camera.tMatrix, pointMatrix); //these are our real points
+    physicalPointsMatrix.scaleUp(camera.scale);
     points[0] = physicalPointsMatrix.getColumn(0);
-    points[0][0] *= camera.scale;
-    points[0][1] *= camera.scale;
-
     points[1] = physicalPointsMatrix.getColumn(1);
-    points[1][0] *= camera.scale;
-    points[1][1] *= camera.scale;
-
     points[2] = physicalPointsMatrix.getColumn(2);
-    points[2][0] *= camera.scale;
-    points[2][1] *= camera.scale;
-
     points[3] = physicalPointsMatrix.getColumn(3);
-    points[3][0] *= camera.scale;
-    points[3][1] *= camera.scale;
 
     let colour = ""
     if (constantAxis == "x") { colour = "#ff0000"; } //sides facing in the x axis
