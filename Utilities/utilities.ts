@@ -55,6 +55,7 @@ class matrix {
     constructor() { };
 }
 
+
 const multiplyMatrixs = (m1: matrix, m2: matrix) => {
     //check that m1.width == m2.height, the result matrix will be m1.height x m2.width
     //create result matrix:
@@ -89,9 +90,14 @@ const multiplyMatrixs = (m1: matrix, m2: matrix) => {
     return resultMatrix
 }
 
+
 const toRadians = (angle: number) => {
     return angle * (Math.PI / 180);
 }
+const sin = (num: number) => { return Math.sin(toRadians(num)) }
+const cos = (num: number) => { return Math.cos(toRadians(num)) }
+
+
 const distanceBetween = (p1: number[], p2: number[]) => {
     //first use pythagoruses thoerm to get the bottom diagonal
     const bottomDiagonal = Math.sqrt((p2[0] - p1[0]) ** 2 + (p2[2] - p1[2]) ** 2)

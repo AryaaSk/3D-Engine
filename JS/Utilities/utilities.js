@@ -98,6 +98,8 @@ const multiplyMatrixs = (m1, m2) => {
 const toRadians = (angle) => {
     return angle * (Math.PI / 180);
 };
+const sin = (num) => { return Math.sin(toRadians(num)); };
+const cos = (num) => { return Math.cos(toRadians(num)); };
 const distanceBetween = (p1, p2) => {
     //first use pythagoruses thoerm to get the bottom diagonal
     const bottomDiagonal = Math.sqrt(Math.pow((p2[0] - p1[0]), 2) + Math.pow((p2[2] - p1[2]), 2));

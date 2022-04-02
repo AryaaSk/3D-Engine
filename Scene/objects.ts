@@ -79,9 +79,6 @@ class Box {
         //XYZ Euler rotation
         //Source: https://support.zemax.com/hc/en-us/articles/1500005576822-Rotation-Matrix-and-Tilt-About-X-Y-Z-in-OpticStudio
 
-        const sin = (num: number) => { return Math.sin(toRadians(num)) }
-        const cos = (num: number) => { return Math.cos(toRadians(num)) }
-
         //x-axis (iHat)
         this.iHat[0] = cos(rY) * cos(rZ);
         this.iHat[1] = cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ);
