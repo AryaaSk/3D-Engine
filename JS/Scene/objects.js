@@ -8,6 +8,7 @@ class Box {
         this.faces = [];
         this.edges = []; //pairs of indexes of vertices which are edges of the shape
         this.dimensions = { width: 5, height: 5, depth: 5 };
+        this.scale = 1;
         this.position = { x: 0, y: 0, z: 0 };
         //we need to define our transformation/rotation matrix, iHat = x axis, jHat = y axis, kHat = z axis, these are vectors
         //      x, y  (Physical grid)
@@ -92,6 +93,7 @@ class Box {
     }
     updatePhysicalMatrix() {
         this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix);
+        this.physicalMatrix.scaleUp(this.scale);
         //this is where we apply the translations
         for (let i = 0; i != this.physicalMatrix.width; i += 1) {
             const point = this.physicalMatrix.getColumn(i);

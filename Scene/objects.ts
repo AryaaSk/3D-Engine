@@ -39,6 +39,7 @@ class Box {
     }
 
     dimensions: {width: number, height: number, depth: number} = {width: 5, height: 5, depth: 5};
+    scale: number = 1;
     position: {x: number, y: number, z: number} = {x: 0, y: 0, z: 0};
     private updatePointMatrix()
     {
@@ -109,6 +110,8 @@ class Box {
     physicalMatrix = new matrix(); //the physical points that we plot on the screen
     private updatePhysicalMatrix() {
         this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix);
+        this.physicalMatrix.scaleUp(this.scale);
+         
         //this is where we apply the translations
         for (let i = 0; i != this.physicalMatrix.width; i += 1)
         {
