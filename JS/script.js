@@ -200,28 +200,25 @@ class Box {
         this.updateMatrices();
     }
     updateRotationMatrix() {
-        const rotationX = this.rotation.x % 360;
-        const rotationY = this.rotation.y % 360;
-        const rotationZ = this.rotation.z % 360;
-        //Source: http://eecs.qmul.ac.uk/~gslabaugh/publications/euler.pdf
-        //Using the ZYX Euler angle rotation matrix
-        //What I want:
-        //Given rotationX: 0, rotationY: -90, rotationZ: 0
-        //iHat = [0, 0, 1]
-        //jHat = [0, 1, 0]
-        //kHat = [-1, 0, 0]
+        const rX = this.rotation.x % 360;
+        const rY = this.rotation.y % 360;
+        const rZ = this.rotation.z % 360;
+        //XYZ Euler rotation
+        //Source: https://support.zemax.com/hc/en-us/articles/1500005576822-Rotation-Matrix-and-Tilt-About-X-Y-Z-in-OpticStudio
+        const sin = (num) => { return Math.sin(toRadians(num)); };
+        const cos = (num) => { return Math.cos(toRadians(num)); };
         //x-axis (iHat)
-        this.iHat[0] = Math.cos(toRadians(rotationY)) * Math.cos(toRadians(rotationZ));
-        this.iHat[1] = Math.cos(toRadians(rotationY)) * Math.sin(toRadians(rotationZ));
-        this.iHat[2] = -(Math.sin(toRadians(rotationY)));
+        this.iHat[0] = cos(rY) * cos(rZ);
+        this.iHat[1] = cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ);
+        this.iHat[2] = sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ);
         //y-axis (jHat)
-        this.jHat[0] = Math.sin(toRadians(rotationX)) * Math.sin(toRadians(rotationY)) * Math.cos(toRadians(rotationZ)) - Math.cos(toRadians(rotationX)) * Math.sin(toRadians(rotationZ));
-        this.jHat[1] = Math.sin(toRadians(rotationX)) * Math.sin(toRadians(rotationY)) * Math.sin(toRadians(rotationZ)) + Math.cos(toRadians(rotationX)) * Math.cos(toRadians(rotationZ));
-        this.jHat[2] = Math.sin(toRadians(rotationX) * Math.cos(toRadians(rotationY)));
+        this.jHat[0] = -(cos(rY)) * sin(rZ);
+        this.jHat[1] = cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ);
+        this.jHat[2] = sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ);
         //z-axis (kHat)
-        this.kHat[0] = Math.cos(toRadians(rotationX)) * Math.sin(toRadians(rotationY)) * Math.cos(toRadians(rotationZ)) + Math.sin(toRadians(rotationX)) * Math.sin(toRadians(rotationZ));
-        this.kHat[1] = Math.cos(toRadians(rotationX)) * Math.sin(toRadians(rotationY)) * Math.sin(toRadians(rotationZ)) - Math.sin(toRadians(rotationX)) * Math.cos(toRadians(rotationZ));
-        this.kHat[2] = Math.cos(toRadians(rotationX)) * Math.round(Math.cos(toRadians(rotationY))); //THE MISSING BRACKET
+        this.kHat[0] = sin(rY);
+        this.kHat[1] = -(sin(rX)) * cos(rY);
+        this.kHat[2] = cos(rX) * cos(rY);
         //Set the unit vectors onto the singular rotation matrix
         this.rotationMatrix.setValue(0, 0, this.iHat[0]);
         this.rotationMatrix.setValue(0, 1, this.iHat[1]);
@@ -271,27 +268,46 @@ class Camera {
             sortedFaces.push(facesCopy[furthestDistanceIndex]);
             facesCopy.splice(furthestDistanceIndex, 1);
         }
+        //To minimize overlapping of faces, I can calculate which faces are facing the camera, then just hide the ones which arent
         //and finally we can draw the faces with the box's faces object
         for (let i = 0; i != sortedFaces.length; i += 1) {
             const point1 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal1.p1Index);
             const point2 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal2.p1Index);
             const point3 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal1.p2Index);
             const point4 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal2.p2Index);
-            const distanceToCamera = Math.round(distanceBetween(this.position, sortedFaces[i].center));
-            const centerRounded = [Math.round(sortedFaces[i].center[0]), Math.round(sortedFaces[i].center[1]), Math.round(sortedFaces[i].center[2])];
-            //plotPoint(sortedFaces[i].center, "#000000", `Rendered: ${i} CenterZ: ${centerRounded[2]}`); //plotting a point in the center of the face and including the order of which the faces were rendered
             const facingAxis = sortedFaces[i].facingAxis;
             let colour = "";
-            continue; //delete this once i have fixed rotation matrix
+            if (facingAxis == "-x") {
+                colour = "#ff0000";
+            }
+            else if (facingAxis == "-y") {
+                colour = "#00ff00";
+            }
+            else if (facingAxis == "-z") {
+                colour = "#0000ff";
+            }
+            else if (facingAxis == "+x") {
+                colour = "#ffff00";
+            }
+            else if (facingAxis == "+y") {
+                colour = "#00ffff";
+            }
+            else if (facingAxis == "+z") {
+                colour = "#ff00ff";
+            }
+            else {
+                continue;
+            }
             drawQuadrilateral(point1, point2, point3, point4, colour);
         }
+        //Don't want to see borders and points
+        /*
         //use the object's physicalMatrix, and just plot the points, the physicalMatrix will actually contain 3 rows, but the third one is the z-axis, so we just ignore it
         for (let i = 0; i != box.physicalMatrix.width; i += 1) {
             const point = box.physicalMatrix.getColumn(i);
-            const pointRounded = [Math.round(point[0]), Math.round(point[1]), Math.round(point[2])];
-            plotPoint(point, "#000000", String(i + 1) + ": " + String(pointRounded));
+            plotPoint(point, "#000000");
         }
-        /*
+
         //can also use the object's edges, with the physicalMatrix, to draw the edges of the box
         for (let i = 0; i != box.edges.length; i += 1) {
             const point1 = box.physicalMatrix.getColumn(box.edges[i].p1Index);
@@ -305,11 +321,11 @@ class Camera {
 //RENDERING AN OBJECT
 const camera = new Camera();
 camera.position = [0, 0, -500];
-camera.scale = 200;
+camera.scale = 400;
 //create our cube matrix (Pseudo Grid)
 const cube = new Box(2, 1, 1);
 cube.rotation.x = 0;
-cube.rotation.y = -90;
+cube.rotation.y = 0;
 cube.rotation.z = 0;
 camera.render(cube);
 let stopped = true;
@@ -318,6 +334,7 @@ const interval = setInterval(() => {
     if (stopped == true) {
         return;
     }
+    cube.rotation.x += rotationInterval;
     cube.rotation.y += rotationInterval;
     cube.updateMatrices();
     clearCanvas();
@@ -326,8 +343,6 @@ const interval = setInterval(() => {
 document.onkeydown = ($e) => {
     if ($e.key == " ") {
         stopped = true;
-        cube.physicalMatrix.printMatrix();
-        console.log(cube.faces);
     }
     else {
         stopped = false;
