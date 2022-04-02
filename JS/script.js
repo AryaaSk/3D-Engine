@@ -14,10 +14,14 @@ const gridX = (x) => {
 const gridY = (y) => {
     return (canvasHeight / 2) - y;
 };
-const plotPoint = (p, colour) => {
+const plotPoint = (p, colour, label) => {
     //point will be in format: [x, y]
     c.fillStyle = colour;
     c.fillRect(gridX(p[0] * dpi), gridY(p[1] * dpi), 10, 10);
+    if (label != undefined) {
+        c.font = "30px Arial";
+        c.fillText(label, gridX(p[0] * dpi) + 10, gridY(p[1] * dpi) + 10);
+    }
 };
 const drawLine = (p1, p2, colour) => {
     //points will be in format: [x, y]
@@ -181,13 +185,14 @@ class Box {
         this.diagonals = [{ p1Index: 0, p2Index: 2 }, { p1Index: 0, p2Index: 5 }, { p1Index: 0, p2Index: 7 }, { p1Index: 6, p2Index: 1 }, { p1Index: 6, p2Index: 3 }, { p1Index: 6, p2Index: 4 }];
         this.diagonals.push({ p1Index: 1, p2Index: 3 }, { p1Index: 1, p2Index: 4 }, { p1Index: 3, p2Index: 4 }, { p1Index: 2, p2Index: 5 }, { p1Index: 2, p2Index: 7 }, { p1Index: 5, p2Index: 7 });
         this.faces = [
-            { diagonal1: this.diagonals[0], diagonal2: this.diagonals[0 + 6], facingAxis: "z", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[1], diagonal2: this.diagonals[1 + 6], facingAxis: "y", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[2], diagonal2: this.diagonals[2 + 6], facingAxis: "x", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[3], diagonal2: this.diagonals[3 + 6], facingAxis: "x", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[4], diagonal2: this.diagonals[4 + 6], facingAxis: "y", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[5], diagonal2: this.diagonals[5 + 6], facingAxis: "z", center: [0, 0, 0] }
+            { diagonal1: this.diagonals[0], diagonal2: this.diagonals[0 + 6], facingAxis: "-z", center: [0, 0, 0] },
+            { diagonal1: this.diagonals[1], diagonal2: this.diagonals[1 + 6], facingAxis: "-y", center: [0, 0, 0] },
+            { diagonal1: this.diagonals[2], diagonal2: this.diagonals[2 + 6], facingAxis: "-x", center: [0, 0, 0] },
+            { diagonal1: this.diagonals[3], diagonal2: this.diagonals[3 + 6], facingAxis: "+x", center: [0, 0, 0] },
+            { diagonal1: this.diagonals[4], diagonal2: this.diagonals[4 + 6], facingAxis: "+y", center: [0, 0, 0] },
+            { diagonal1: this.diagonals[5], diagonal2: this.diagonals[5 + 6], facingAxis: "+z", center: [0, 0, 0] }
         ];
+        //- / + refers to the direction it is pointing in, for example -z means it is pointing towards the camera at default rotations
         //This is what the default rotation is when all rotations are set to 0
         this.rotationMatrix.addColumn([1, 0, 0]); //x (iHat)
         this.rotationMatrix.addColumn([0, 1, 0]); //y (jHat)
@@ -248,12 +253,7 @@ class Camera {
         this.position = [0, 0, 0];
     }
     render(box) {
-        //use the object's physicalMatrix, and just plot the points, the physicalMatrix will actually contain 3 rows, but the third one is the z-axis, so we just ignore it
-        for (let i = 0; i != box.physicalMatrix.width; i += 1) {
-            const point = box.physicalMatrix.getColumn(i);
-            plotPoint(point, "#000000");
-        }
-        //sort faces based on distance to camera, so the furthest away get rendered first
+        //sort faces based on distance to camera from center (Not entirely accurate, not sure how to fix), so the furthest away get rendered first
         let sortedFaces = [];
         const facesCopy = JSON.parse(JSON.stringify(box.faces));
         while (facesCopy.length != 0) {
@@ -272,24 +272,24 @@ class Camera {
             const point2 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal2.p1Index);
             const point3 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal1.p2Index);
             const point4 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal2.p2Index);
+            //plot the center
+            const centerRounded = [Math.round(sortedFaces[i].center[0]), Math.round(sortedFaces[i].center[1]), Math.round(sortedFaces[i].center[2])];
+            plotPoint(sortedFaces[i].center, "#000000", String(i)); //plotting a point in the center of the face and including the order of which the faces were rendered
             const facingAxis = sortedFaces[i].facingAxis;
             let colour = "";
-            if (facingAxis == "x") {
-                colour = "#ff0000";
-            }
-            else if (facingAxis == "y") {
-                colour = "#00ff00";
-            }
-            else if (facingAxis == "z") {
-                colour = "#0000ff";
-            }
+            continue; //remove this, Im just using this to be able to see the labels which indicate which face was rendered first
             drawQuadrilateral(point1, point2, point3, point4, colour);
+        }
+        //use the object's physicalMatrix, and just plot the points, the physicalMatrix will actually contain 3 rows, but the third one is the z-axis, so we just ignore it
+        for (let i = 0; i != box.physicalMatrix.width; i += 1) {
+            const point = box.physicalMatrix.getColumn(i);
+            plotPoint(point, "#000000");
         }
         //can also use the object's edges, with the physicalMatrix, to draw the edges of the box
         for (let i = 0; i != box.edges.length; i += 1) {
             const point1 = box.physicalMatrix.getColumn(box.edges[i].p1Index);
             const point2 = box.physicalMatrix.getColumn(box.edges[i].p2Index);
-            drawLine(point1, point2, "#000000");
+            drawLine(point1, point2, "#606060");
         }
     }
     ;
@@ -297,20 +297,24 @@ class Camera {
 //RENDERING AN OBJECT
 const camera = new Camera();
 camera.position = [0, 0, -500];
-camera.scale = 1;
+camera.scale = 200;
 //create our cube matrix (Pseudo Grid)
-const cube = new Box(400, 200, 200);
+const cube = new Box(2, 1, 1);
 cube.rotation.x = 0;
 cube.rotation.y = 0;
 cube.rotation.y = 0;
 cube.updateMatrices();
-let stopped = false;
+cube.physicalMatrix.printMatrix();
+camera.render(cube);
+let stopped = true;
+let rotationInterval = 1;
 const interval = setInterval(() => {
     if (stopped == true) {
         return;
     }
-    cube.rotation.x += 1;
-    cube.rotation.y += 1;
+    cube.rotation.x += rotationInterval;
+    cube.rotation.y += rotationInterval;
+    cube.rotation.z += rotationInterval;
     cube.updateMatrices();
     clearCanvas();
     camera.render(cube);
