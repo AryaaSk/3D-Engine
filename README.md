@@ -3,7 +3,7 @@ I had to do a lot of research to learn about how to render 3D shapes, into a 2D 
 This project is based off of Matrix Transformations, and using unit vectors to rotate the objects.
 
 ## Importing
-To import just download the JS files, then import using script tags and linked to the correct directory: (You should also make sure to import in the correct order)
+To import download the JS files, then import using script tags and linked to the correct directory: (You should also make sure to import in the correct order)
 ```
 <script src="JS/canvasUtilities.js" defer></script>
 <script src="JS/utilities.js" defer></script>
@@ -12,6 +12,12 @@ To import just download the JS files, then import using script tags and linked t
 <script src="JS/script.js" defer></script>
 ```
 
+Then create a canvas element in the DOM with id="renderingWindow"
+```
+<canvas id="renderingWindow"></canvas>
+```
+
+You can apply whatever CSS styles you want to this element, such as width and height
 
 ## Creating a box
 The box object has 3 matrixes: PointMatrix, RotationMatrix, and PhysicalMatrix
