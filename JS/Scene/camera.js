@@ -29,7 +29,7 @@ class Camera {
             sortedFaces.push(facesCopy[furthestDistanceIndex]);
             facesCopy.splice(furthestDistanceIndex, 1);
         }
-        //To minimize overlapping of faces, I can calculate which faces are facing the camera, then just hide the ones which arent
+        //TODO: To minimize overlapping of faces, I can calculate which faces are facing the camera, then just hide the ones which arent
         //and finally we can draw the faces with the box's faces object
         for (let i = 0; i != sortedFaces.length; i += 1) {
             const point1 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal1.p1Index);

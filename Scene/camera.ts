@@ -30,7 +30,7 @@ class Camera {
             facesCopy.splice(furthestDistanceIndex, 1);
         }
 
-        //To minimize overlapping of faces, I can calculate which faces are facing the camera, then just hide the ones which arent
+        //TODO: To minimize overlapping of faces, I can calculate which faces are facing the camera, then just hide the ones which arent
 
         //and finally we can draw the faces with the box's faces object
         for (let i = 0; i != sortedFaces.length; i += 1) {
