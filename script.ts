@@ -1,370 +1,61 @@
 //TO ENABLE AUTO RELOAD, RUN LIVE-SERVER, AND CLICK CMD+SHIFT+B, THEN CLICK WATCH TSC: WATCH
-
-const dpi = window.devicePixelRatio;
-const canvas = <HTMLCanvasElement>document.getElementById('renderingWindow');
-const c = canvas.getContext('2d')!;
-
-const canvasHeight = document.getElementById('renderingWindow')!.getBoundingClientRect().height; //Fix blury lines
-const canvasWidth = document.getElementById('renderingWindow')!.getBoundingClientRect().width;
-canvas.setAttribute('height', String(canvasHeight * dpi));
-canvas.setAttribute('width', String(canvasWidth * dpi));
-
-
-//ACTUAL DRAWING FUNCTIONS
-const gridX = (x: number) => {
-    return (canvasWidth / 2) + x;
-}
-const gridY = (y: number) => {  //on the page y = 0 is at the top, however in an actual grid y = 0 is at the bottom
-    return (canvasHeight / 2) - y;
-}
-const plotPoint = (p: number[], colour: string, label?: string) => {
-    //point will be in format: [x, y]
-    c.fillStyle = colour;
-    c.fillRect(gridX(p[0] * dpi), gridY(p[1] * dpi), 10, 10);
-
-    if (label != undefined) {
-        c.font = "20px Arial";
-        c.fillText(label, gridX(p[0] * dpi) + 10, gridY(p[1] * dpi) + 10);
-    }
-}
-const drawLine = (p1: number[], p2: number[], colour: string) => {
-    //points will be in format: [x, y]
-    //I need to convert the javascript x and y into actual grid x and y
-    c.fillStyle = colour;
-    c.beginPath()
-    c.moveTo(gridX(p1[0] * dpi), gridY(p1[1] * dpi))
-    c.lineTo(gridX(p2[0] * dpi), gridY(p2[1] * dpi));
-    c.stroke();
-}
-const drawQuadrilateral = (p1: number[], p2: number[], p3: number[], p4: number[], colour: string) => {
-    c.fillStyle = colour;
-    c.beginPath();
-    c.moveTo(gridX(p1[0] * dpi), gridY(p1[1] * dpi));
-    c.lineTo(gridX(p2[0] * dpi), gridY(p2[1] * dpi));
-    c.lineTo(gridX(p3[0] * dpi), gridY(p3[1] * dpi));
-    c.lineTo(gridX(p4[0] * dpi), gridY(p4[1] * dpi));
-    c.closePath();
-    c.fill();
-}
-const clearCanvas = () => {
-    c.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-
-
-
-
-//MATRIX FUNCTIONS
-class matrix {
-    /* The data will be stored like on the left, on the right is how the actual matrix will look if you wrote it in mathmatics
-   [[1, 0],          [ [1   [0   [0
-    [0, 1]      =       0],  1],  0] ]
-    [0, 0]]                
-    */
-    private data: number[][] = []; /* DO NOT SET THIS EXPLICITLY, USE THE FUNCTIONS */
-    width: number = 0; //num of columns
-    height: number = 0; //num of rows
-
-    addColumn(nums: number[]) {
-        this.data.push(nums);
-        this.height = nums.length;
-        this.width += 1;
-    }
-    addRow(nums: number[]) {
-        //to add a row you just need to add the given nums to the end of each column, we first need to check that nums == width
-        if (nums.length != this.width) { console.error("Unable to add row since length of inputs is not equal to number of columns"); return; }
-
-        for (let i in nums) { this.data[i].push(nums[i]); i += 1; }
-        this.height += 1;
-    }
-
-    printMatrix() {
-        //loop through the rows, and inside of that loop, loop through all the columns
-        let finalOutput = "Matrix:";
-        let currentRow = 0;
-        while (currentRow != this.height) {
-            let currentLineOutput = "\n"
-            let currentColumn = 0;
-            while (currentColumn != this.width) {
-                currentLineOutput = currentLineOutput + (this.data[currentColumn][currentRow]) + "      ";
-                currentColumn += 1;
-            }
-
-            finalOutput = finalOutput + currentLineOutput;
-            currentRow += 1;
-        }
-        console.log(finalOutput);
-    }
-
-    getColumn(columnIndex: number) { return this.data[columnIndex]; }
-    getRow(rowIndex: number) //loop through data, and get the element at rowIndex for each one
-    {
-        let returnArray: number[] = [];
-        for (let i in this.data) { returnArray.push(this.data[i][rowIndex]); }
-        return returnArray;
-    }
-    setValue(columnIndex: number, rowIndex: number, value: number) { this.data[columnIndex][rowIndex] = value; }
-    getValue(columnIndex: number, rowIndex: number) { return this.data[columnIndex][rowIndex]; }
-
-    scaleUp(factor: number) { for (let i in this.data) { for (let a in this.data[i]) { this.data[i][a] *= factor; } } }
-
-    constructor() { };
-}
-
-const multiplyMatrixs = (m1: matrix, m2: matrix) => {
-    //check that m1.width == m2.height, the result matrix will be m1.height x m2.width
-    //create result matrix:
-    const resultMatrix = new matrix();
-    const rMatrixHeight = m1.height;
-    const rMatrixWidth = m2.width;
-
-    for (let _ = 0; _ != rMatrixWidth; _ += 1) {
-        const newColumn: number[] = [];
-        for (let __ = 0; __ != rMatrixHeight; __ += 1) { newColumn.push(0); }
-        resultMatrix.addColumn(newColumn);
-    }
-
-    //now loop through each element in the result matrix with the rowIndex and columnIndex, and calculate it
-    let columnIndex = 0;
-    while (columnIndex != resultMatrix.width) {
-        let rowIndex = 0;
-        while (rowIndex != resultMatrix.height) {
-            //these 2 should be the same length
-            const currentRow = m1.getRow(rowIndex); const currentColumn = m2.getColumn(columnIndex);
-
-            let value = 0;
-            let i = 0;
-            while (i != currentRow.length) { value += currentRow[i] * currentColumn[i]; i += 1; }
-            resultMatrix.setValue(columnIndex, rowIndex, value);
-
-            rowIndex += 1;
-        }
-        columnIndex += 1;
-    }
-
-    return resultMatrix
-}
-
-const toRadians = (angle: number) => {
-    return angle * (Math.PI / 180);
-}
-const distanceBetween = (p1: number[], p2: number[]) => {
-    //first use pythagoruses thoerm to get the bottom diagonal
-    const bottomDiagonal = Math.sqrt((p2[0] - p1[0]) ** 2 + (p2[2] - p1[2]) ** 2)
-    const distance = Math.sqrt(bottomDiagonal ** 2 + (p2[1] - p1[1]) ** 2);
-    return distance;
-}
-
-//WHEN DOING OTHER SHAPES I FOUND THIS QUESTIONS: https://math.stackexchange.com/questions/3635017/calculate-edge-and-plane-of-a-box-given-its-vertices
-//RESEARCH ABOUT PAIRWISE DOT PRODUCTS, IT MAY HELP WHEN DEALING WITH THINGS LIKE PRISMS AND OTHER SHAPES
-class Box {
-    pointMatrix = new matrix() //Positions of points without any rotation transformations applied to them
-    diagonals: { p1Index: number, p2Index: number }[] = []; //pairs of indexes of vertices which are diagonals
-    faces: { diagonal1: { p1Index: number, p2Index: number }, diagonal2: { p1Index: number, p2Index: number }, facingAxis: string, center: number[] }[] = [];
-    edges: { p1Index: number, p2Index: number }[] = []; //pairs of indexes of vertices which are edges of the shape
-
-    constructor(width: number, height: number, depth: number) {
-        //Populate the pointMatrix, offsets are so that the shape rotates around it's center rather than the first point
-        const offsetX = -(width / 2);
-        const offsetY = -(height / 2);
-        const offsetZ = -(depth / 2); //this doesn't really matter since the z-axis can't get rendered anyway
-
-        this.pointMatrix.addColumn([0 + offsetX, 0 + offsetY, 0 + offsetZ]);
-        this.pointMatrix.addColumn([width + offsetX, 0 + offsetY, 0 + offsetZ]);
-        this.pointMatrix.addColumn([width + offsetX, height + offsetY, 0 + offsetZ]);
-        this.pointMatrix.addColumn([0 + offsetX, height + offsetY, 0 + offsetZ]);
-        this.pointMatrix.addColumn([0 + offsetX, 0 + offsetY, depth + offsetZ]);
-        this.pointMatrix.addColumn([width + offsetX, 0 + offsetY, depth + offsetZ]);
-        this.pointMatrix.addColumn([width + offsetX, height + offsetY, depth + offsetZ]);
-        this.pointMatrix.addColumn([0 + offsetX, height + offsetY, depth + offsetZ]);
-
-        //You are given the dimensions of the box, so we don't need to individually calculate the edges and planes
-        //we can just put the vertices of the box in a specific order so that we know which pairs are diagonals and which pairs are edges
-        //since it is a box we can be sure that there will always be 12 edges, 8 vertices, and 6 planes
-
-        this.edges = [{ p1Index: 0, p2Index: 1 }, { p1Index: 1, p2Index: 2 }, { p1Index: 2, p2Index: 3 }, { p1Index: 3, p2Index: 0 }, { p1Index: 0, p2Index: 4 }, { p1Index: 1, p2Index: 5 }, { p1Index: 2, p2Index: 6 }, { p1Index: 3, p2Index: 7 }, { p1Index: 4, p2Index: 5 }, { p1Index: 5, p2Index: 6 }, { p1Index: 6, p2Index: 7 }, { p1Index: 7, p2Index: 4 }]
-        this.diagonals = [{ p1Index: 0, p2Index: 2 }, { p1Index: 0, p2Index: 5 }, { p1Index: 0, p2Index: 7 }, { p1Index: 6, p2Index: 1 }, { p1Index: 6, p2Index: 3 }, { p1Index: 6, p2Index: 4 }];
-        this.diagonals.push({ p1Index: 1, p2Index: 3 }, { p1Index: 1, p2Index: 4 }, { p1Index: 3, p2Index: 4 }, { p1Index: 2, p2Index: 5 }, { p1Index: 2, p2Index: 7 }, { p1Index: 5, p2Index: 7 });
-        this.faces = [
-            { diagonal1: this.diagonals[0], diagonal2: this.diagonals[0 + 6], facingAxis: "-z", center: [0, 0, 0] }, //center's are calculated when the object is rendered by the camera
-            { diagonal1: this.diagonals[1], diagonal2: this.diagonals[1 + 6], facingAxis: "-y", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[2], diagonal2: this.diagonals[2 + 6], facingAxis: "-x", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[3], diagonal2: this.diagonals[3 + 6], facingAxis: "+x", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[4], diagonal2: this.diagonals[4 + 6], facingAxis: "+y", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[5], diagonal2: this.diagonals[5 + 6], facingAxis: "+z", center: [0, 0, 0] }
-        ]
-
-        //- / + refers to the direction it is pointing in, for example -z means it is pointing towards the camera at default rotations
-
-
-        //This is what the default rotation is when all rotations are set to 0
-        this.rotationMatrix.addColumn([1, 0, 0]); //x (iHat)
-        this.rotationMatrix.addColumn([0, 1, 0]); //y (jHat)
-        this.rotationMatrix.addColumn([0, 0, 1]); //z (kHat)
-
-        this.updateMatrices()
-    }
-
-    //we need to define our transformation/rotation matrix, iHat = x axis, jHat = y axis, kHat = z axis, these are vectors
-    //      x, y  (Physical grid)
-    private iHat: number[] = [1, 0, 0];
-    private jHat: number[] = [0, 1, 0];
-    private kHat: number[] = [0, 0, 1];
-
-    rotation: { x: number, y: number, z: number } = { x: 0, y: 0, z: 0 };
-    rotationMatrix = new matrix() //multiply this by the pointMatrix to get the actual positions of the points on the pseudo grid (physical points)
-    private updateRotationMatrix() {
-        const rX = this.rotation.x % 360;
-        const rY = this.rotation.y % 360;
-        const rZ = this.rotation.z % 360;
-
-        //XYZ Euler rotation
-        //Source: https://support.zemax.com/hc/en-us/articles/1500005576822-Rotation-Matrix-and-Tilt-About-X-Y-Z-in-OpticStudio
-
-        const sin = (num: number) => { return Math.sin(toRadians(num)) }
-        const cos = (num: number) => { return Math.cos(toRadians(num)) }
-
-        //x-axis (iHat)
-        this.iHat[0] = cos(rY) * cos(rZ);
-        this.iHat[1] = cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ);
-        this.iHat[2] = sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ);
-
-        //y-axis (jHat)
-        this.jHat[0] = -(cos(rY)) * sin(rZ);
-        this.jHat[1] = cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ);
-        this.jHat[2] = sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ);
-
-        //z-axis (kHat)
-        this.kHat[0] = sin(rY);
-        this.kHat[1] = -(sin(rX)) * cos(rY);
-        this.kHat[2] = cos(rX) * cos(rY);
-
-        //Set the unit vectors onto the singular rotation matrix
-        this.rotationMatrix.setValue(0, 0, this.iHat[0]);
-        this.rotationMatrix.setValue(0, 1, this.iHat[1]);
-        this.rotationMatrix.setValue(0, 2, this.iHat[2])
-        this.rotationMatrix.setValue(1, 0, this.jHat[0]);
-        this.rotationMatrix.setValue(1, 1, this.jHat[1]);
-        this.rotationMatrix.setValue(1, 2, this.jHat[2]);
-        this.rotationMatrix.setValue(2, 0, this.kHat[0]); //FOR SOME REASON THE KHAT IS ROTATING AROUND THE WRONG AXIS
-        this.rotationMatrix.setValue(2, 1, this.kHat[1]);
-        this.rotationMatrix.setValue(2, 2, this.kHat[2]);
-    }
-
-    physicalMatrix = new matrix(); //the physical points that we plot on the screen
-    updatePhysicalMatrix() {
-        this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix);
-        this.physicalMatrix.scaleUp(camera.scale);
-    }
-
-    updateMatrices() {
-        this.updateRotationMatrix();
-        this.updatePhysicalMatrix();
-    }
-}
-
-class Camera {
-    scale = 1;
-    position = [0, 0, 0];
-
-    render(box: Box) {
-
-        //the first thing to do is to calculate the centers of the faces
-        for (let i = 0; i != box.faces.length; i += 1)
-        {
-            //we can just calculate the midpoint of one of the diagonals, since that is where it should cross
-            const point1 = box.physicalMatrix.getColumn(box.faces[i].diagonal1.p1Index);
-            const point2 = box.physicalMatrix.getColumn(box.faces[i].diagonal1.p2Index);
-
-            const averageX = (point1[0] + point2[0]) / 2;
-            const averageY = (point1[1] + point2[1]) / 2;
-            const averageZ = (point1[2] + point2[2]) / 2;
-            box.faces[i].center = [averageX, averageY, averageZ];
-        }
-
-        //sort faces based on distance to camera from center (Not entirely accurate, not sure how to fix), so the furthest away get rendered first
-        let sortedFaces: { diagonal1: { p1Index: number, p2Index: number }, diagonal2: { p1Index: number, p2Index: number }, facingAxis: string, center: number[] }[] = [];
-        const facesCopy = JSON.parse(JSON.stringify(box.faces))
-        while (facesCopy.length != 0) {
-            let furthestDistanceIndex = 0;
-            for (let i = 0; i != facesCopy.length; i += 1) {
-                if (distanceBetween(this.position, facesCopy[i].center) > distanceBetween(this.position, facesCopy[furthestDistanceIndex].center)) { furthestDistanceIndex = i; }
-            }
-            sortedFaces.push(facesCopy[furthestDistanceIndex]);
-            facesCopy.splice(furthestDistanceIndex, 1);
-        }
-
-        //To minimize overlapping of faces, I can calculate which faces are facing the camera, then just hide the ones which arent
-
-        //and finally we can draw the faces with the box's faces object
-        for (let i = 0; i != sortedFaces.length; i += 1) {
-            const point1 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal1.p1Index);
-            const point2 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal2.p1Index);
-            const point3 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal1.p2Index);
-            const point4 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal2.p2Index);
-
-            const facingAxis = sortedFaces[i].facingAxis;
-            let colour = "";
-            if ( facingAxis == "-x") { colour = "#ff0000"; }
-            else if ( facingAxis == "-y") { colour = "#00ff00"; }
-            else if ( facingAxis == "-z") { colour = "#0000ff"; }
-            else if ( facingAxis == "+x") { colour = "#ffff00"; }
-            else if ( facingAxis == "+y") { colour = "#00ffff"; }
-            else if ( facingAxis == "+z") { colour = "#ff00ff"; }
-            else { continue; }
-
-            drawQuadrilateral(point1, point2, point3, point4, colour);
-        }
-
-        //Don't want to see borders and points
-        /*
-        //use the object's physicalMatrix, and just plot the points, the physicalMatrix will actually contain 3 rows, but the third one is the z-axis, so we just ignore it
-        for (let i = 0; i != box.physicalMatrix.width; i += 1) { 
-            const point = box.physicalMatrix.getColumn(i); 
-            plotPoint(point, "#000000");
-        }
-
-        //can also use the object's edges, with the physicalMatrix, to draw the edges of the box
-        for (let i = 0; i != box.edges.length; i += 1) {
-            const point1 = box.physicalMatrix.getColumn(box.edges[i].p1Index);
-            const point2 = box.physicalMatrix.getColumn(box.edges[i].p2Index);
-            drawLine(point1, point2, "#606060");
-        }
-        */
-
-    }
-
-    constructor() { };
-}
-
-
-
 //RENDERING AN OBJECT
 const camera = new Camera();
-camera.position = [0, 0, -500]
-camera.scale = 400;
+camera.scale = 300;
+
+//ONE PROBLEM IS THAT THE CAMERA RENDERS A SHAPES SIDES IN ORDER OF HOW CLOSE THEY ARE TO THE CAMERA, HOWEVER THIS MEANS THAT THE CAMERA'S POSITION CAN ONLY BE OPTIMIZED FOR ONE OBJECT
+//I MAY HAVE TO PASS IN A CAMERAPOSITION ARGUEMENT INTO THE RENDER FUNCTION, AND NOT HAVE A GLOBAL CAMERA POSITION OBJECT
+//OR ANOTHER WAY TO SOLVE THIS ISSUE IS TO PUSH THE CAMERA VERY FAR AWAY IN THE NEGATIVE Z-DIRECTION, I BELIEVE THIS IS A BETTER WAY
+
+camera.position = [-3, 0, -50] //you can see I have just positioned it very far away, to negate the position differences between objects
 
 //create our cube matrix (Pseudo Grid)
-const cube = new Box(2, 1, 1);
-cube.rotation.x = 0;
+const cube = new Box(1, 1, 1);
+cube.rotation.x = -30;
 cube.rotation.y = 0;
 cube.rotation.z = 0;
+cube.position.x = 1;
+cube.position.y = -0.7;
+cube.position.z = 0;
+cube.updateMatrices();
 
-camera.render(cube);
+const cube2 = new Box(2, 1, 1);
+cube2.rotation.x = -30;
+cube2.rotation.y = 0;
+cube2.rotation.z = 0;
+cube2.position.x = -1;
+cube2.position.y = -0.7;
+cube2.position.z = 0;
+cube2.updateMatrices();
 
-let stopped = true;
+const cube3 = new Box(0.5, 1, 0.5);
+cube3.position.y = 1.5;
+cube3.updateMatrices();
+
+
+let stopped = false;
 let rotationInterval = 1;
 const interval = setInterval(() => {
     if (stopped == true) { return }
 
-    cube.rotation.x += rotationInterval;
-    cube.rotation.y += rotationInterval;
-
+    cube.rotation.x -= rotationInterval;
+    cube.rotation.y -= rotationInterval;
     cube.updateMatrices();
 
+    cube2.rotation.x -= rotationInterval;
+    cube2.rotation.y -= rotationInterval;
+    cube2.updateMatrices();
+
+    cube3.rotation.x -= rotationInterval;
+    cube3.rotation.z -= rotationInterval;
+    cube3.updateMatrices();
+
     clearCanvas();
-    camera.render(cube);
+    camera.render(cube, true);
+    camera.render(cube2);
+    camera.render(cube3, true);
 }, 16);
+
 document.onkeydown = ($e) => {
     if ($e.key == " ") {
         stopped = true;
