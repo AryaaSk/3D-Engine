@@ -14,17 +14,19 @@ const gridX = (x) => {
 const gridY = (y) => {
     return (canvasHeight / 2) - y;
 };
-const drawLine = (p1, p2) => {
+const plotPoint = (p, colour) => {
+    //point will be in format: [x, y]
+    c.fillStyle = colour;
+    c.fillRect(gridX(p[0] * dpi), gridY(p[1] * dpi), 10, 10);
+};
+const drawLine = (p1, p2, colour) => {
     //points will be in format: [x, y]
     //I need to convert the javascript x and y into actual grid x and y
+    c.fillStyle = colour;
     c.beginPath();
     c.moveTo(gridX(p1[0] * dpi), gridY(p1[1] * dpi));
     c.lineTo(gridX(p2[0] * dpi), gridY(p2[1] * dpi));
     c.stroke();
-};
-const plotPoint = (p) => {
-    //point will be in format: [x, y]
-    c.fillRect(gridX(p[0] * dpi), gridY(p[1] * dpi), 10, 10);
 };
 const drawQuadrilateral = (p1, p2, p3, p4, colour) => {
     c.fillStyle = colour;
@@ -35,6 +37,9 @@ const drawQuadrilateral = (p1, p2, p3, p4, colour) => {
     c.lineTo(gridX(p4[0] * dpi), gridY(p4[1] * dpi));
     c.closePath();
     c.fill();
+};
+const clearCanvas = () => {
+    c.clearRect(0, 0, canvas.width, canvas.height);
 };
 //MATRIX FUNCTIONS
 class matrix {
@@ -154,9 +159,7 @@ class Box {
         this.iHat = [1, 0, 0];
         this.jHat = [0, 1, 0];
         this.kHat = [0, 0, 1];
-        this.rotationX = 0;
-        this.rotationY = 0;
-        this.rotationZ = 0;
+        this.rotation = { x: 0, y: 0, z: 0 };
         this.rotationMatrix = new matrix(); //multiply this by the pointMatrix to get the actual positions of the points on the pseudo grid (physical points)
         this.physicalMatrix = new matrix(); //the physical points that we plot on the screen
         //Populate the pointMatrix, offsets are so that the shape rotates around it's center rather than the first point
@@ -194,18 +197,21 @@ class Box {
     updateRotationMatrix() {
         //Source: http://eecs.qmul.ac.uk/~gslabaugh/publications/euler.pdf
         //Using the ZYX Euler angle rotation matrix
+        const rotationX = this.rotation.x % 360;
+        const rotationY = this.rotation.y % 360;
+        const rotationZ = this.rotation.z % 360;
         //x-axis (iHat)
-        this.iHat[0] = Math.cos(toRadians(this.rotationY)) * Math.cos(toRadians(this.rotationZ));
-        this.iHat[1] = Math.cos(toRadians(this.rotationY)) * Math.sin(toRadians(this.rotationZ));
-        this.iHat[2] = -(Math.sin(toRadians(this.rotationY)));
+        this.iHat[0] = Math.cos(toRadians(rotationY)) * Math.cos(toRadians(rotationZ));
+        this.iHat[1] = Math.cos(toRadians(rotationY)) * Math.sin(toRadians(rotationZ));
+        this.iHat[2] = -(Math.sin(toRadians(rotationY)));
         //y-axis (jHat)
-        this.jHat[0] = Math.sin(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.cos(toRadians(this.rotationZ)) - Math.cos(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationZ));
-        this.jHat[1] = Math.sin(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.sin(toRadians(this.rotationZ)) + Math.cos(toRadians(this.rotationX)) * Math.cos(toRadians(this.rotationZ));
-        this.jHat[2] = Math.sin(toRadians(this.rotationX) * Math.cos(toRadians(this.rotationY)));
+        this.jHat[0] = Math.sin(toRadians(rotationX)) * Math.sin(toRadians(rotationY)) * Math.cos(toRadians(rotationZ)) - Math.cos(toRadians(rotationX)) * Math.sin(toRadians(rotationZ));
+        this.jHat[1] = Math.sin(toRadians(rotationX)) * Math.sin(toRadians(rotationY)) * Math.sin(toRadians(rotationZ)) + Math.cos(toRadians(rotationX)) * Math.cos(toRadians(rotationZ));
+        this.jHat[2] = Math.sin(toRadians(rotationX) * Math.cos(toRadians(rotationY)));
         //z-axis (kHat)
-        this.kHat[0] = Math.cos(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.cos(toRadians(this.rotationZ)) + Math.sin(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationZ));
-        this.kHat[1] = Math.cos(toRadians(this.rotationX)) * Math.sin(toRadians(this.rotationY)) * Math.sin(toRadians(this.rotationZ)) - Math.sin(toRadians(this.rotationX)) * Math.cos(toRadians(this.rotationZ));
-        this.kHat[2] = Math.cos(toRadians(this.rotationX) * Math.cos(toRadians(this.rotationY)));
+        this.kHat[0] = Math.cos(toRadians(rotationX)) * Math.sin(toRadians(rotationY)) * Math.cos(toRadians(rotationZ)) + Math.sin(toRadians(rotationX)) * Math.sin(toRadians(rotationZ));
+        this.kHat[1] = Math.cos(toRadians(rotationX)) * Math.sin(toRadians(rotationY)) * Math.sin(toRadians(rotationZ)) - Math.sin(toRadians(rotationX)) * Math.cos(toRadians(rotationZ));
+        this.kHat[2] = Math.cos(toRadians(rotationX) * Math.cos(toRadians(rotationY)));
         //Set the unit vectors onto the singular rotation matrix
         this.rotationMatrix.setValue(0, 0, this.iHat[0]);
         this.rotationMatrix.setValue(0, 1, this.iHat[1]);
@@ -245,14 +251,9 @@ class Camera {
         //use the object's physicalMatrix, and just plot the points, the physicalMatrix will actually contain 3 rows, but the third one is the z-axis, so we just ignore it
         for (let i = 0; i != box.physicalMatrix.width; i += 1) {
             const point = box.physicalMatrix.getColumn(i);
-            plotPoint(point);
+            plotPoint(point, "#000000");
         }
-        //can also use the object's edges, with the physicalMatrix, to draw the edges of the box
-        for (let i = 0; i != box.edges.length; i += 1) {
-            const point1 = box.physicalMatrix.getColumn(box.edges[i].p1Index);
-            const point2 = box.physicalMatrix.getColumn(box.edges[i].p2Index);
-            drawLine(point1, point2);
-        }
+        //sort faces based on distance to camera, so the furthest away get rendered first
         let sortedFaces = [];
         const facesCopy = JSON.parse(JSON.stringify(box.faces));
         while (facesCopy.length != 0) {
@@ -284,6 +285,12 @@ class Camera {
             }
             drawQuadrilateral(point1, point2, point3, point4, colour);
         }
+        //can also use the object's edges, with the physicalMatrix, to draw the edges of the box
+        for (let i = 0; i != box.edges.length; i += 1) {
+            const point1 = box.physicalMatrix.getColumn(box.edges[i].p1Index);
+            const point2 = box.physicalMatrix.getColumn(box.edges[i].p2Index);
+            drawLine(point1, point2, "#000000");
+        }
     }
     ;
 }
@@ -293,8 +300,28 @@ camera.position = [0, 0, -500];
 camera.scale = 1;
 //create our cube matrix (Pseudo Grid)
 const cube = new Box(400, 200, 200);
-cube.rotationX = -160;
-cube.rotationY = -30;
-cube.rotationZ = 0;
+cube.rotation.x = 0;
+cube.rotation.y = 0;
+cube.rotation.y = 0;
 cube.updateMatrices();
-camera.render(cube);
+let stopped = false;
+const interval = setInterval(() => {
+    if (stopped == true) {
+        return;
+    }
+    cube.rotation.x += 1;
+    cube.rotation.y += 1;
+    cube.updateMatrices();
+    clearCanvas();
+    camera.render(cube);
+}, 16);
+document.onkeydown = ($e) => {
+    if ($e.key == " ") {
+        stopped = true;
+        cube.physicalMatrix.printMatrix();
+        console.log(cube.faces);
+    }
+    else {
+        stopped = false;
+    }
+};
