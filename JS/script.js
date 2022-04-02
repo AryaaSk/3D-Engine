@@ -200,11 +200,16 @@ class Box {
         this.updateMatrices();
     }
     updateRotationMatrix() {
-        //Source: http://eecs.qmul.ac.uk/~gslabaugh/publications/euler.pdf
-        //Using the ZYX Euler angle rotation matrix
         const rotationX = this.rotation.x % 360;
         const rotationY = this.rotation.y % 360;
         const rotationZ = this.rotation.z % 360;
+        //Source: http://eecs.qmul.ac.uk/~gslabaugh/publications/euler.pdf
+        //Using the ZYX Euler angle rotation matrix
+        //What I want:
+        //Given rotationX: 0, rotationY: -90, rotationZ: 0
+        //iHat = [0, 0, 1]
+        //jHat = [0, 1, 0]
+        //kHat = [-1, 0, 0]
         //x-axis (iHat)
         this.iHat[0] = Math.cos(toRadians(rotationY)) * Math.cos(toRadians(rotationZ));
         this.iHat[1] = Math.cos(toRadians(rotationY)) * Math.sin(toRadians(rotationZ));
@@ -216,7 +221,7 @@ class Box {
         //z-axis (kHat)
         this.kHat[0] = Math.cos(toRadians(rotationX)) * Math.sin(toRadians(rotationY)) * Math.cos(toRadians(rotationZ)) + Math.sin(toRadians(rotationX)) * Math.sin(toRadians(rotationZ));
         this.kHat[1] = Math.cos(toRadians(rotationX)) * Math.sin(toRadians(rotationY)) * Math.sin(toRadians(rotationZ)) - Math.sin(toRadians(rotationX)) * Math.cos(toRadians(rotationZ));
-        this.kHat[2] = Math.cos(toRadians(rotationX) * Math.cos(toRadians(rotationY)));
+        this.kHat[2] = Math.cos(toRadians(rotationX)) * Math.round(Math.cos(toRadians(rotationY))); //THE MISSING BRACKET
         //Set the unit vectors onto the singular rotation matrix
         this.rotationMatrix.setValue(0, 0, this.iHat[0]);
         this.rotationMatrix.setValue(0, 1, this.iHat[1]);
@@ -277,7 +282,7 @@ class Camera {
             //plotPoint(sortedFaces[i].center, "#000000", `Rendered: ${i} CenterZ: ${centerRounded[2]}`); //plotting a point in the center of the face and including the order of which the faces were rendered
             const facingAxis = sortedFaces[i].facingAxis;
             let colour = "";
-            continue;
+            continue; //delete this once i have fixed rotation matrix
             drawQuadrilateral(point1, point2, point3, point4, colour);
         }
         //use the object's physicalMatrix, and just plot the points, the physicalMatrix will actually contain 3 rows, but the third one is the z-axis, so we just ignore it
@@ -303,27 +308,9 @@ camera.position = [0, 0, -500];
 camera.scale = 200;
 //create our cube matrix (Pseudo Grid)
 const cube = new Box(2, 1, 1);
-cube.rotationMatrix.printMatrix();
-cube.physicalMatrix.printMatrix();
 cube.rotation.x = 0;
 cube.rotation.y = -90;
 cube.rotation.z = 0;
-cube.updateMatrices();
-cube.rotationMatrix.printMatrix();
-cube.physicalMatrix.printMatrix();
-cube.rotationMatrix = new matrix();
-cube.rotationMatrix.addColumn([0, 0, 1]);
-cube.rotationMatrix.addColumn([0, 1, 0]);
-cube.rotationMatrix.addColumn([-1, 0, 0]);
-cube.updatePhysicalMatrix();
-cube.rotationMatrix.printMatrix();
-cube.physicalMatrix.printMatrix();
-//THE ROTATION MATRIX IS BEING CALCULATED WRONG
-//BY USING THIS WEBSITE: https://www.andre-gaschler.com/rotationconverter/
-//I INPUTTED 90 DEGREE Y-AXIS ROTATION IN [Euler angles of multiple axis rotations (degrees)] SECTION
-//THE OUTPUT ROTATION MATRIX IS [0, 0, 1], [0, 1, 0], [-1, 0, 0]
-//HOWEVER CURRENTLY IN MY PROGRAM IOT IS SAYING [0, 0, 1], [0, 1, 0], [-1, 0, 1]
-//I WILL LOOK THROUGH THIS WEBSITES SOURCE CODE, AND TRY TO FIND THE CORRECT ROTATION ANGLE
 camera.render(cube);
 let stopped = true;
 let rotationInterval = 1;
