@@ -23,7 +23,7 @@ const plotPoint = (p: number[], colour: string, label?: string) => {
     c.fillRect(gridX(p[0] * dpi), gridY(p[1] * dpi), 10, 10);
 
     if (label != undefined) {
-        c.font = "30px Arial";
+        c.font = "20px Arial";
         c.fillText(label, gridX(p[0] * dpi) + 10, gridY(p[1] * dpi) + 10);
     }
 }
@@ -186,7 +186,7 @@ class Box {
         this.diagonals = [{ p1Index: 0, p2Index: 2 }, { p1Index: 0, p2Index: 5 }, { p1Index: 0, p2Index: 7 }, { p1Index: 6, p2Index: 1 }, { p1Index: 6, p2Index: 3 }, { p1Index: 6, p2Index: 4 }];
         this.diagonals.push({ p1Index: 1, p2Index: 3 }, { p1Index: 1, p2Index: 4 }, { p1Index: 3, p2Index: 4 }, { p1Index: 2, p2Index: 5 }, { p1Index: 2, p2Index: 7 }, { p1Index: 5, p2Index: 7 });
         this.faces = [
-            { diagonal1: this.diagonals[0], diagonal2: this.diagonals[0 + 6], facingAxis: "-z", center: [0, 0, 0] }, //haven't calculated center yet
+            { diagonal1: this.diagonals[0], diagonal2: this.diagonals[0 + 6], facingAxis: "-z", center: [0, 0, 0] }, //center's are calculated when the object is rendered by the camera
             { diagonal1: this.diagonals[1], diagonal2: this.diagonals[1 + 6], facingAxis: "-y", center: [0, 0, 0] },
             { diagonal1: this.diagonals[2], diagonal2: this.diagonals[2 + 6], facingAxis: "-x", center: [0, 0, 0] },
             { diagonal1: this.diagonals[3], diagonal2: this.diagonals[3 + 6], facingAxis: "+x", center: [0, 0, 0] },
@@ -212,7 +212,7 @@ class Box {
     private kHat: number[] = [0, 0, 1];
 
     rotation: { x: number, y: number, z: number } = { x: 0, y: 0, z: 0 };
-    private rotationMatrix = new matrix() //multiply this by the pointMatrix to get the actual positions of the points on the pseudo grid (physical points)
+    rotationMatrix = new matrix() //multiply this by the pointMatrix to get the actual positions of the points on the pseudo grid (physical points)
     private updateRotationMatrix() {
         //Source: http://eecs.qmul.ac.uk/~gslabaugh/publications/euler.pdf
         //Using the ZYX Euler angle rotation matrix
@@ -243,27 +243,15 @@ class Box {
         this.rotationMatrix.setValue(1, 0, this.jHat[0]);
         this.rotationMatrix.setValue(1, 1, this.jHat[1]);
         this.rotationMatrix.setValue(1, 2, this.jHat[2]);
-        this.rotationMatrix.setValue(2, 0, this.kHat[0]);
+        this.rotationMatrix.setValue(2, 0, this.kHat[0]); //FOR SOME REASON THE KHAT IS ROTATING AROUND THE WRONG AXIS
         this.rotationMatrix.setValue(2, 1, this.kHat[1]);
         this.rotationMatrix.setValue(2, 2, this.kHat[2]);
     }
 
     physicalMatrix = new matrix(); //the physical points that we plot on the screen
-    private updatePhysicalMatrix() {
+    updatePhysicalMatrix() {
         this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix);
         this.physicalMatrix.scaleUp(camera.scale);
-
-        //we will also update the faces here
-        for (let i = 0; i != this.faces.length; i += 1) {
-            //we can just calculate the midpoint of one of the diagonals, since that is where it should cross
-
-            const point1 = this.physicalMatrix.getColumn(this.faces[i].diagonal1.p1Index);
-            const point2 = this.physicalMatrix.getColumn(this.faces[i].diagonal1.p2Index);
-            const averageX = (point1[0] + point2[0]) / 2;
-            const averageY = (point1[1] + point2[1]) / 2;
-            const averageZ = (point1[2] + point2[2]) / 2;
-            this.faces[i].center = [averageX, averageY, averageZ];
-        }
     }
 
     updateMatrices() {
@@ -277,6 +265,21 @@ class Camera {
     position = [0, 0, 0];
 
     render(box: Box) {
+
+        //the first thing to do is to calculate the centers of the faces
+        for (let i = 0; i != box.faces.length; i += 1)
+        {
+            //we can just calculate the midpoint of one of the diagonals, since that is where it should cross
+            const point1 = box.physicalMatrix.getColumn(box.faces[i].diagonal1.p1Index);
+            const point2 = box.physicalMatrix.getColumn(box.faces[i].diagonal1.p2Index);
+
+            const averageX = (point1[0] + point2[0]) / 2;
+            const averageY = (point1[1] + point2[1]) / 2;
+            const averageZ = (point1[2] + point2[2]) / 2;
+            box.faces[i].center = [averageX, averageY, averageZ];
+        }
+
+
         //sort faces based on distance to camera from center (Not entirely accurate, not sure how to fix), so the furthest away get rendered first
         let sortedFaces: { diagonal1: { p1Index: number, p2Index: number }, diagonal2: { p1Index: number, p2Index: number }, facingAxis: string, center: number[] }[] = [];
         const facesCopy = JSON.parse(JSON.stringify(box.faces))
@@ -296,27 +299,34 @@ class Camera {
             const point3 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal1.p2Index);
             const point4 = box.physicalMatrix.getColumn(sortedFaces[i].diagonal2.p2Index);
 
-            //plot the center
+
+            const distanceToCamera = Math.round(distanceBetween(this.position, sortedFaces[i].center));
             const centerRounded = [Math.round(sortedFaces[i].center[0]), Math.round(sortedFaces[i].center[1]), Math.round(sortedFaces[i].center[2])]
-            plotPoint(sortedFaces[i].center, "#000000", String(i)); //plotting a point in the center of the face and including the order of which the faces were rendered
+            //plotPoint(sortedFaces[i].center, "#000000", `Rendered: ${i} CenterZ: ${centerRounded[2]}`); //plotting a point in the center of the face and including the order of which the faces were rendered
 
             const facingAxis = sortedFaces[i].facingAxis;
             let colour = "";
 
-            continue; //remove this, Im just using this to be able to see the labels which indicate which face was rendered first
+            continue
 
             drawQuadrilateral(point1, point2, point3, point4, colour);
         }
 
         //use the object's physicalMatrix, and just plot the points, the physicalMatrix will actually contain 3 rows, but the third one is the z-axis, so we just ignore it
-        for (let i = 0; i != box.physicalMatrix.width; i += 1) { const point = box.physicalMatrix.getColumn(i); plotPoint(point, "#000000"); }
+        for (let i = 0; i != box.physicalMatrix.width; i += 1) { 
+            const point = box.physicalMatrix.getColumn(i); 
+            const pointRounded = [Math.round(point[0]), Math.round(point[1]), Math.round(point[2])];
+            plotPoint(point, "#000000", String(i + 1) + ": " + String(pointRounded));
+        }
 
+        /*
         //can also use the object's edges, with the physicalMatrix, to draw the edges of the box
         for (let i = 0; i != box.edges.length; i += 1) {
             const point1 = box.physicalMatrix.getColumn(box.edges[i].p1Index);
             const point2 = box.physicalMatrix.getColumn(box.edges[i].p2Index);
             drawLine(point1, point2, "#606060");
         }
+        */
 
     }
 
@@ -332,11 +342,32 @@ camera.scale = 200;
 
 //create our cube matrix (Pseudo Grid)
 const cube = new Box(2, 1, 1);
-cube.rotation.x = 0;
-cube.rotation.y = 0;
-cube.rotation.y = 0;
-cube.updateMatrices();
+cube.rotationMatrix.printMatrix();
 cube.physicalMatrix.printMatrix();
+
+cube.rotation.x = 0;
+cube.rotation.y = -90;
+cube.rotation.z = 0;
+cube.updateMatrices();
+cube.rotationMatrix.printMatrix();
+cube.physicalMatrix.printMatrix();
+
+cube.rotationMatrix = new matrix();
+cube.rotationMatrix.addColumn([0, 0, 1]);
+cube.rotationMatrix.addColumn([0, 1, 0]);
+cube.rotationMatrix.addColumn([-1, 0, 0]);
+cube.updatePhysicalMatrix();
+cube.rotationMatrix.printMatrix();
+cube.physicalMatrix.printMatrix();
+
+//THE ROTATION MATRIX IS BEING CALCULATED WRONG
+//BY USING THIS WEBSITE: https://www.andre-gaschler.com/rotationconverter/
+//I INPUTTED 90 DEGREE Y-AXIS ROTATION IN [Euler angles of multiple axis rotations (degrees)] SECTION
+//THE OUTPUT ROTATION MATRIX IS [0, 0, 1], [0, 1, 0], [-1, 0, 0]
+//HOWEVER CURRENTLY IN MY PROGRAM IOT IS SAYING [0, 0, 1], [0, 1, 0], [-1, 0, 1]
+
+//I WILL LOOK THROUGH THIS WEBSITES SOURCE CODE, AND TRY TO FIND THE CORRECT ROTATION ANGLE
+
 
 camera.render(cube);
 
@@ -345,10 +376,7 @@ let rotationInterval = 1;
 const interval = setInterval(() => {
     if (stopped == true) { return }
 
-    cube.rotation.x += rotationInterval;
     cube.rotation.y += rotationInterval;
-    cube.rotation.z += rotationInterval;
-
     cube.updateMatrices();
 
     clearCanvas();
