@@ -23,7 +23,7 @@ You can apply whatever CSS styles you want to this element, such as width and he
 The box object has 3 matrixes: PointMatrix, RotationMatrix, and PhysicalMatrix
 - The PointMatrix contains the points around the origin (0, 0), and doesn't have any transformations applied to it, such as rotation, scale or position
 - The RotationMatrix contains the Unit Vectors: iHat, jHat, and kHat, which are basically the X-Axis, Y-Axis, and Z-Axis respectively. When you rotate a shape, you actually just change these unit vectors, the way I calculate the RotationMatrix is using Euler's XYZ Rotation Matrix Formula, refer to *Research/xyzrotationmatrix.jpeg* for more infomation.
-- The PhysicalMatrix contains the actual points where the shape is in the 3D World, it has the transformations rotation, position and scale applied to it. To calculate this matrix you do RotationMatrix * PointMatrix, and then you individually add the x/y/z position offsets to each vector (stored as columns in the matrix). The scale is applied at the end by individually multiplying each vector (column), by the camera.scale.
+- The PhysicalMatrix contains the actual points where the shape is in the 3D World, it has the transformations rotation, position applied to it. To calculate this matrix you do RotationMatrix * PointMatrix, and then you individually add the x/y/z position offsets to each vector (stored as columns in the matrix). The scale is applied at by the camera, by just individually multiplying each vector (column), by the Scale Factor
 
 To create a box the user passes in 3 arguments: width, height: depth, as seen below:
 ```
@@ -69,3 +69,8 @@ Finally to render an object:
 camera.render(cube);
 ```
 You can also pass in an optional boolean parameter *outline*, which will show the outline of the object, however this will also show the edges which should originally be hidden.
+
+You may also want to clear the page before rendering again, since otherwise there will be a copy created
+```
+clearCanvas();
+```

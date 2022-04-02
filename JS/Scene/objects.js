@@ -99,7 +99,6 @@ class Box {
             this.physicalMatrix.setValue(i, 1, point[1] + this.position.y);
             this.physicalMatrix.setValue(i, 2, point[2] + this.position.z);
         }
-        this.physicalMatrix.scaleUp(camera.scale);
     }
     updateMatrices() {
         this.updatePointMatrix();

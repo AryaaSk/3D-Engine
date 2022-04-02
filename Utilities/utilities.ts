@@ -51,6 +51,17 @@ class matrix {
     getValue(columnIndex: number, rowIndex: number) { return this.data[columnIndex][rowIndex]; }
 
     scaleUp(factor: number) { for (let i in this.data) { for (let a in this.data[i]) { this.data[i][a] *= factor; } } }
+    scaledUp(factor: number) { //returns a scaled up version of the matrix, instead of directly modifying it
+        const returnMatrix = new matrix(); //create new matrix object, and scale it up
+        for (let i = 0; i != this.width; i += 1 )
+        { 
+            const column = this.getColumn(i)
+            const columnCopy = JSON.parse(JSON.stringify(column))
+            returnMatrix.addColumn(columnCopy); 
+        }
+        for (let i in returnMatrix.data) { for (let a in returnMatrix.data[i]) { returnMatrix.data[i][a] *= factor; } }  //scale up
+        return returnMatrix;
+    }
 
     constructor() { };
 }

@@ -59,6 +59,20 @@ class matrix {
             this.data[i][a] *= factor;
         }
     } }
+    scaledUp(factor) {
+        const returnMatrix = new matrix(); //create new matrix object, and scale it up
+        for (let i = 0; i != this.width; i += 1) {
+            const column = this.getColumn(i);
+            const columnCopy = JSON.parse(JSON.stringify(column));
+            returnMatrix.addColumn(columnCopy);
+        }
+        for (let i in returnMatrix.data) {
+            for (let a in returnMatrix.data[i]) {
+                returnMatrix.data[i][a] *= factor;
+            }
+        } //scale up
+        return returnMatrix;
+    }
     ;
 }
 const multiplyMatrixs = (m1, m2) => {

@@ -1,13 +1,16 @@
 "use strict";
-//TO ENABLE AUTO RELOAD, RUN LIVE-SERVER, AND CLICK CMD+SHIFT+B, THEN CLICK WATCH TSC: WATCH
-//RENDERING AN OBJECT:
-const camera = new Camera();
-camera.scale = 1;
-//ONE PROBLEM IS THAT THE CAMERA RENDERS A SHAPES SIDES IN ORDER OF HOW CLOSE THEY ARE TO THE CAMERA, HOWEVER THIS MEANS THAT THE CAMERA'S POSITION CAN ONLY BE OPTIMIZED FOR ONE OBJECT
-//I MAY HAVE TO PASS IN A CAMERAPOSITION ARGUEMENT INTO THE RENDER FUNCTION, AND NOT HAVE A GLOBAL CAMERA POSITION OBJECT
-//OR ANOTHER WAY TO SOLVE THIS ISSUE IS TO PUSH THE CAMERA VERY FAR AWAY IN THE NEGATIVE Z-DIRECTION, I BELIEVE THIS IS A BETTER WAY
-camera.position = [0, 0, -50]; //you can see I have just positioned it very far away, to negate the position differences between objects
-const cube = new Box(300, 300, 300);
+const cube = new Box(100, 100, 100);
 cube.rotation = { x: -20, y: -20, z: 0 };
+cube.position = { x: 2, y: 0, z: 0 };
 cube.updateMatrices();
+const camera = new Camera();
+camera.scale = 5;
+camera.position = [0, 0, -50]; //positioned very far away on Z-Axis, distance between objects may only be 2 or something
+camera.render(cube);
+camera.render(cube);
+camera.render(cube);
+camera.render(cube);
+clearCanvas();
+camera.scale = 2;
+camera.render(cube);
 camera.render(cube);
