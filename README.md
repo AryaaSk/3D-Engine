@@ -1,4 +1,4 @@
-**This is not meant to be used for any serious projects, later I may try and add Camera Rotation to make it a full 3D Engine**
+**This is not meant to be used for any serious projects, later I may try and add Camera Rotation to make it a full 3D Engine, but then I would also have to add a perspective camera**
 
 I just made this to learn more about 3D rendering and Matrix transformations, it just allows you to render some boxes (may add more shapes in the future), and move the camera around with perspective and parallax viewing.
 
