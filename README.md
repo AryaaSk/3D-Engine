@@ -23,7 +23,7 @@ You can apply whatever CSS styles you want to this element, such as width and he
 The box object has 3 matrixes: PointMatrix, RotationMatrix, and PhysicalMatrix
 - The PointMatrix contains the points around the origin (0, 0), and doesn't have any transformations applied to it, such as rotation, scale or position
 - The RotationMatrix contains the Unit Vectors: iHat, jHat, and kHat, which are basically the X-Axis, Y-Axis, and Z-Axis respectively. When you rotate a shape, you actually just change these unit vectors, the way I calculate the RotationMatrix is using Euler's XYZ Rotation Matrix Formula, refer to *Research/xyzrotationmatrix.jpeg* for more infomation.
-- The PhysicalMatrix contains the actual points where the shape is in the 3D World, it has the transformations rotation, scale, and position applied to it. To calculate this matrix you do RotationMatrix * PointMatrix, then you scale up every vector by the scale, and then you individually add the x/y/z position offsets to each vector (stored as columns in the matrix).
+- The PhysicalMatrix contains the actual points where the shape is in the 3D World, it has the transformations rotation and scale applied to it. To calculate this matrix you do RotationMatrix * PointMatrix, then you scale up every vector by the scale. The position is added in the camera, since it needs to render based on the object's position to the camera.
 
 To create a box the user passes in 3 arguments: width, height: depth, as seen below:
 ```
@@ -53,10 +53,16 @@ To create a camera object:
 const camera = new Camera();
 ```
 
-One problem can arise when there are multiple objects and the camera is positioned too close to one of the objects, the default position is (0, 0, 0), this is because it detects that one of the faces of one of the objects is closest to the camera, when in reality it's not at the front.\
-To fix this issue you have to position the camera quite far away so that the distance between objects is insignificant compared to the distance to the camera:
+You can then position this camera in the scene somewhere
 ```
-camera.position = [0, 0, -500] //positioned very far away on Z-Axis (-500)
+camera.position = { x: 0, y: 0, z: -30 };
+```
+
+The objects' faces are always rendered in the order of which face is furthest from the camera, however it does not take the Z-Position that you give it, I have just hard-coded an arbitary value of -5000, so that there aren't any problems with the differences in postions between different objects, **you do not have to worry about this though**.
+
+You can also change the world zoom
+```
+camera.zoom = 2; //will zoom in by 2 so everything looks twice as big
 ```
 
 Finally to render an object:
@@ -69,3 +75,6 @@ You may also want to clear the page before rendering again, since otherwise ther
 ```
 clearCanvas();
 ```
+
+To simulate perspective and the Z-Axis, I create a unit scale factor, which is basically just a scale factor you can apply to an object which will make it fill up the entire screen, then I divide that by the distance between the object and the camera in the Z-Axis (divide it by 10 to make it more subtle), and then I just scale the object by that.\
+This also gives a sort of parallax effect, since the object's further away will be scaled less, resulting in them moving less.

@@ -73,6 +73,23 @@ class matrix {
         } //scale up
         return returnMatrix;
     }
+    translateMatrix(x, y, z) {
+        for (let i = 0; i != this.width; i += 1) {
+            const column = this.getColumn(i);
+            this.setValue(i, 0, column[0] + x);
+            this.setValue(i, 1, column[1] + y);
+            this.setValue(i, 2, column[2] + z);
+        }
+    }
+    copy() {
+        const copyMatrix = new matrix();
+        for (let i = 0; i != this.width; i += 1) {
+            const column = this.getColumn(i);
+            const columnCopy = JSON.parse(JSON.stringify(column));
+            copyMatrix.addColumn(columnCopy);
+        }
+        return copyMatrix;
+    }
     ;
 }
 const multiplyMatrixs = (m1, m2) => {

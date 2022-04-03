@@ -94,13 +94,7 @@ class Box {
     updatePhysicalMatrix() {
         this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix);
         this.physicalMatrix.scaleUp(this.scale);
-        //this is where we apply the translations
-        for (let i = 0; i != this.physicalMatrix.width; i += 1) {
-            const point = this.physicalMatrix.getColumn(i);
-            this.physicalMatrix.setValue(i, 0, point[0] + this.position.x);
-            this.physicalMatrix.setValue(i, 1, point[1] + this.position.y);
-            this.physicalMatrix.setValue(i, 2, point[2] + this.position.z);
-        }
+        //this will still be around the origin, the positions are set when rendering the object in the camera
     }
     updateMatrices() {
         this.updatePointMatrix();
