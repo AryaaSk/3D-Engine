@@ -1,6 +1,5 @@
 linkCanvas("renderingWindow");
 
-
 const cube = new Box(100, 100, 100);
 cube.rotation = { x: -30, y: -5, z: 0};
 cube.scale = 1;
@@ -50,19 +49,3 @@ document.onkeydown = ($e) => {
     else if (key == "w") { camera.zoom += 0.1; }
     else if (key == "s") { camera.zoom -= 0.1; }
 }
-
-
-/*
-const cube = new Box(100, 100, 100);
-cube.rotation = { x: 0, y: 0, z: 0};
-cube.scale = 1;
-cube.position = { x: 0, y: 0, z: 0 };
-cube.updateMatrices();
-
-const camera = new Camera();
-camera.position.x = 200;
-camera.position.y = 200;
-camera.position.z = -1000;
-
-camera.render(cube);
-*/

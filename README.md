@@ -60,7 +60,7 @@ cube.faceColours = {  //assign a colour to each face (-z, -y, -x, +x, +y, +z)
 Each face has it's own identifier (the key), which is just the direction which it is facing when there is no rotations applied to it. For example the first one is "-z", which is the face which is pointing in the negative-z direction, and it is the first face you see. The "-y" is pointing downwards, etc...\
 You can also set a face to "", which will make it transparent:
 ```
-cube.faceColours["-z"] = "";
+cube.faceColours["-z"] = ""; //makes the front-facing side transparent
 ```
 
 ## The Camera
@@ -104,6 +104,6 @@ This is designed to be a 3D engine, but used for 2D games/applications, since th
 
 Here is a preview of the project included here, to run this yourself simply open the index.html file:
 
-![Preview GIF](https://github.com/AryaaSk/3D-Engine/blob/main/Preview.gif?raw=true)
+![Preview GIF](https://github.com/AryaaSk/3D-Engine/blob/master/Preview.gif?raw=true)
 You can see the parallax effect working since the larger cuboid moves further and faster than the other cube.
 
