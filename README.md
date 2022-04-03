@@ -75,7 +75,7 @@ const camera = new Camera();
 
 You can then position this camera in the scene somewhere
 ```
-camera.position = { x: 0, y: 0, z: -30 };
+camera.position = { x: 0, y: 0, z: -500 };
 ```
 
 The objects' faces are always rendered in the order of which face is furthest from the camera, however it does not take the Z-Position that you give it, I have just hard-coded an arbitary value of -50000, so that there aren't any problems with the differences in postions between different objects, **you do not have to worry about this though**.
@@ -101,3 +101,6 @@ This also gives a sort of parallax effect, since the object's further away will 
 
 ## Usage
 This is designed to be a 3D engine, but used for 2D games/applications, since there is no camera rotation and the object's don't actually move anywhere based on the camera's Z-Position. For example in platformers where you want a 3D parallax background.
+
+Here is a preview of the project included here, to run this yourself simply open the index.html file:
+
