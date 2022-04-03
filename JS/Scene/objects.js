@@ -4,9 +4,10 @@
 class Box {
     constructor(width, height, depth) {
         this.pointMatrix = new matrix(); //Positions of points without any rotation transformations applied to them
+        this.edges = []; //pairs of indexes of vertices which are edges of the shape
         this.diagonals = []; //pairs of indexes of vertices which are diagonals
         this.faces = [];
-        this.edges = []; //pairs of indexes of vertices which are edges of the shape
+        this.faceColours = {};
         this.dimensions = { width: 5, height: 5, depth: 5 };
         this.scale = 1;
         this.position = { x: 0, y: 0, z: 0 };
@@ -36,6 +37,14 @@ class Box {
             { diagonal1: this.diagonals[5], diagonal2: this.diagonals[5 + 6], facingAxis: "+z", center: [0, 0, 0] }
         ];
         //- / + refers to the direction it is pointing in, for example -z means it is pointing towards the camera at default rotations
+        this.faceColours = {
+            "-z": "#ff0000",
+            "-y": "#00ff00",
+            "-x": "#0000ff",
+            "+x": "#ffff00",
+            "+y": "#00ffff",
+            "+z": "#ff00ff",
+        };
         //This is what the default rotation is when all rotations are set to 0
         this.rotationMatrix = new matrix();
         this.rotationMatrix.addColumn([1, 0, 0]); //x (iHat)

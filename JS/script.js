@@ -1,13 +1,22 @@
 "use strict";
+linkCanvas("renderingWindow");
 const cube = new Box(100, 100, 100);
 cube.rotation = { x: -30, y: -5, z: 0 };
 cube.scale = 1;
-cube.position = { x: -200, y: 0, z: 50 };
+cube.position = { x: 0, y: 300, z: 100 };
 cube.updateMatrices();
+cube.faceColours = {
+    "-z": "#d90000",
+    "-y": "#ff0000",
+    "-x": "#ad0000",
+    "+x": "#ad0000",
+    "+y": "#ff0000",
+    "+z": "#d90000",
+};
 const cube2 = new Box(200, 100, 100);
 cube2.rotation = { x: -30, y: -5, z: 0 };
 cube2.scale = 1;
-cube2.position = { x: 200, y: 0, z: 0 };
+cube2.position = { x: 0, y: 0, z: 0 };
 cube2.updateMatrices();
 const camera = new Camera();
 camera.position.x = 0;
@@ -22,16 +31,23 @@ setInterval(() => {
     camera.render(cube2);
 });
 document.onkeydown = ($e) => {
-    if ($e.key == "ArrowLeft") {
+    const key = $e.key.toLowerCase();
+    if (key == "arrowleft") {
         camera.position.x -= 10;
     }
-    else if ($e.key == "ArrowRight") {
+    else if (key == "arrowright") {
         camera.position.x += 10;
     }
-    else if ($e.key == "ArrowUp") {
+    else if (key == "arrowup") {
         camera.position.y += 10;
     }
-    else if ($e.key == "ArrowDown") {
+    else if (key == "arrowdown") {
         camera.position.y -= 10;
+    }
+    else if (key == "w") {
+        camera.zoom += 0.1;
+    }
+    else if (key == "s") {
+        camera.zoom -= 0.1;
     }
 };

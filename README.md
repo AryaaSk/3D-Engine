@@ -1,6 +1,4 @@
-I had to do a lot of research to learn about how to render 3D shapes, into a 2D screen
-
-This project is based off of Matrix Transformations, and using unit vectors to rotate the objects.
+This is just a project I made to learn more about 3D rendering and Matrix transformations, it just allows you to render some boxes (may add more shapes in the future), and move the camera around with perspective and parallax viewing.
 
 ## Importing
 To import download the JS files, then import using script tags and linked to the correct directory: (You should also make sure to import in the correct order)
@@ -13,12 +11,16 @@ To import download the JS files, then import using script tags and linked to the
 <script src="JS/script.js" defer></script>
 ```
 
-Then create a canvas element in the DOM with id="renderingWindow"
+Then create a canvas element in the HTML DOM with an ID, I used "renderingWindow"
 ```
 <canvas id="renderingWindow"></canvas>
 ```
-
 You can apply whatever CSS styles you want to this element, such as width and height
+
+Then in JS/TS, use the linkCanvas(canvasID: string) function with the same ID before doing anything
+```
+linkCanvas("renderingWindow");
+```
 
 ## Creating a box
 The box object has 3 matrixes: PointMatrix, RotationMatrix, and PhysicalMatrix
@@ -44,6 +46,23 @@ And then once you have change the attributes you need to update the Box's Matric
 cube.updateMatrices();
 ```
 
+You can also assign a colour to each face using the faceColours attribute
+```
+cube.faceColours = {  //assign a colour to each face (-z, -y, -x, +x, +y, +z)
+    "-z" : "#ff0000",
+    "-y" : "#00ff00",
+    "-x" : "#0000ff",
+    "+x" : "#ffff00",
+    "+y" : "#00ffff",
+    "+z" : "#ff00ff",
+}
+```
+Each face has it's own identifier (the key), which is just the direction which it is facing when there is no rotations applied to it. For example the first one is "-z", which is the face which is pointing in the negative-z direction, and it is the first face you see. The "-y" is pointing downwards, etc...\
+You can also set a face to "", which will make it transparent:
+```
+cube.faceColours["-z"] = "";
+```
+
 ## The Camera
 The camera is used to render objects.
 
@@ -59,7 +78,7 @@ You can then position this camera in the scene somewhere
 camera.position = { x: 0, y: 0, z: -30 };
 ```
 
-The objects' faces are always rendered in the order of which face is furthest from the camera, however it does not take the Z-Position that you give it, I have just hard-coded an arbitary value of -5000, so that there aren't any problems with the differences in postions between different objects, **you do not have to worry about this though**.
+The objects' faces are always rendered in the order of which face is furthest from the camera, however it does not take the Z-Position that you give it, I have just hard-coded an arbitary value of -50000, so that there aren't any problems with the differences in postions between different objects, **you do not have to worry about this though**.
 
 You can also change the world zoom
 ```

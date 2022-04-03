@@ -36,7 +36,7 @@ class Camera {
         }
         //sort faces based on distance to camera from center (Not entirely accurate, not sure how to fix), so the furthest away get rendered first
         //instead of using the camera's position, I will position the z-axis very far away to simulate an actual person watching
-        const positionPoint = [this.position.x, this.position.y, -5000];
+        const positionPoint = [this.position.x, this.position.y, -50000];
         let sortedFaces = [];
         const facesCopy = JSON.parse(JSON.stringify(box.faces));
         while (facesCopy.length != 0) {
@@ -57,26 +57,8 @@ class Camera {
             const point3 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal1.p2Index);
             const point4 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal2.p2Index);
             const facingAxis = sortedFaces[i].facingAxis;
-            let colour = "";
-            if (facingAxis == "-x") {
-                colour = "#ff0000";
-            }
-            else if (facingAxis == "-y") {
-                colour = "#00ff00";
-            }
-            else if (facingAxis == "-z") {
-                colour = "#0000ff";
-            }
-            else if (facingAxis == "+x") {
-                colour = "#ffff00";
-            }
-            else if (facingAxis == "+y") {
-                colour = "#00ffff";
-            }
-            else if (facingAxis == "+z") {
-                colour = "#ff00ff";
-            }
-            else {
+            let colour = box.faceColours[facingAxis];
+            if (colour == "") {
                 continue;
             }
             drawQuadrilateral(point1, point2, point3, point4, colour);

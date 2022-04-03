@@ -3,10 +3,12 @@
 class Box {
 
     private pointMatrix = new matrix() //Positions of points without any rotation transformations applied to them
-    diagonals: { p1Index: number, p2Index: number }[] = []; //pairs of indexes of vertices which are diagonals
-    faces: { diagonal1: { p1Index: number, p2Index: number }, diagonal2: { p1Index: number, p2Index: number }, facingAxis: string, center: number[] }[] = [];
     edges: { p1Index: number, p2Index: number }[] = []; //pairs of indexes of vertices which are edges of the shape
+    diagonals: { p1Index: number, p2Index: number }[] = []; //pairs of indexes of vertices which are diagonals
 
+    faces: { diagonal1: { p1Index: number, p2Index: number }, diagonal2: { p1Index: number, p2Index: number }, facingAxis: string, center: number[] }[] = [];
+    faceColours: { [k: string] :  string } = {};
+  
     constructor(width: number, height: number, depth: number) {
         
         this.dimensions.width = width;
@@ -28,6 +30,15 @@ class Box {
             { diagonal1: this.diagonals[5], diagonal2: this.diagonals[5 + 6], facingAxis: "+z", center: [0, 0, 0] }
         ]
         //- / + refers to the direction it is pointing in, for example -z means it is pointing towards the camera at default rotations
+
+        this.faceColours = {  //assign a colour to each face (-z, -y, -x, +x, +y, +z)
+            "-z" : "#ff0000",
+            "-y" : "#00ff00",
+            "-x" : "#0000ff",
+            "+x" : "#ffff00",
+            "+y" : "#00ffff",
+            "+z" : "#ff00ff",
+        }
 
         //This is what the default rotation is when all rotations are set to 0
         this.rotationMatrix = new matrix();

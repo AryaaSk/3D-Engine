@@ -121,7 +121,7 @@ const multiplyMatrixs = (m1: matrix, m2: matrix) => {
         columnIndex += 1;
     }
 
-    return resultMatrix
+    return resultMatrix 
 }
 
 
