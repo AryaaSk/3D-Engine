@@ -8,7 +8,7 @@ To import download the JS files, then import using script tags and linked to the
 <script src="JS/canvasUtilities.js" defer></script>
 <script src="JS/utilities.js" defer></script>
 <script src="JS/objects.js" defer></script>
-<script src="JS/camera.js"></script>
+<script src="JS/camera.js" defer></script>
 
 <script src="JS/script.js" defer></script>
 ```
