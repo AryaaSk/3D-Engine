@@ -1,4 +1,6 @@
-**This is not meant to be used for any serious projects**, I just made this to learn more about 3D rendering and Matrix transformations, it just allows you to render some boxes (may add more shapes in the future), and move the camera around with perspective and parallax viewing.
+**This is not meant to be used for any serious projects, later I may try and add Camera Rotation to make it a full 3D Engine**
+
+I just made this to learn more about 3D rendering and Matrix transformations, it just allows you to render some boxes (may add more shapes in the future), and move the camera around with perspective and parallax viewing.
 
 ## Importing
 To import download the JS files, then import using script tags and linked to the correct directory: (You should also make sure to import in the correct order)
