@@ -1,17 +1,9 @@
 class Camera {
     position: {x: number, y: number, z: number} = { x: 0, y: 0, z: 0 };
-    rotation: {x: number, y: number, z: number} = { x: 0, y: 0, z: 0 };
-
+    
     zoom = 1;
 
     render(box: Box, outline?: boolean) {
-
-        /*
-        const iHat = [cos(rY) * cos(rZ), cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ), sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ)];
-        const jHat = [-(cos(rY)) * sin(rZ), cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ), sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ)];
-        const kHat = [sin(rY), -(sin(rX)) * cos(rY), cos(rX) * cos(rY)];
-        */
-
         //The box's physicalMatrix tells us where the box is located in the 3D world
         //You cannot physically move the camera, since the user sees through it through their screen, so you have to move the objects in the opposite direction to the camera
         let cameraObjectMatrix = box.physicalMatrix.copy();
@@ -34,12 +26,6 @@ class Camera {
         const unitScaleFactor = canvasHeight / box.dimensions.height; //this is effectively the scale factor which makes the object fill up the whole screen, or if the camera was position right in front of it
         const objectScaleFactor = unitScaleFactor / (distanceZ / 10);
         cameraObjectMatrix.scaleUp(objectScaleFactor);
-
-
-        //finally we need to make it look like the object is rotated inversly to the camera
-        //TODO: IMPLEMENT OBJECT ROTATION
-
-
 
         cameraObjectMatrix.scaleUp(this.zoom); //finally to zoom into objects we can scale up their physical matrix
 

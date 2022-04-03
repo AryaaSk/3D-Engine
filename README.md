@@ -9,6 +9,7 @@ To import download the JS files, then import using script tags and linked to the
 <script src="JS/utilities.js" defer></script>
 <script src="JS/objects.js" defer></script>
 <script src="JS/camera.js"></script>
+
 <script src="JS/script.js" defer></script>
 ```
 
@@ -78,3 +79,6 @@ clearCanvas();
 
 To simulate perspective and the Z-Axis, I create a unit scale factor, which is basically just a scale factor you can apply to an object which will make it fill up the entire screen, then I divide that by the distance between the object and the camera in the Z-Axis (divide it by 10 to make it more subtle), and then I just scale the object by that.\
 This also gives a sort of parallax effect, since the object's further away will be scaled less, resulting in them moving less.
+
+## Usage
+This is designed to be a 3D engine, but used for 2D games/applications, since there is no camera rotation and the object's don't actually move anywhere based on the camera's Z-Position. For example in platformers where you want a 3D parallax background.
