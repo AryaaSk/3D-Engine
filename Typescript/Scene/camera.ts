@@ -1,7 +1,6 @@
 class Camera {
     position: {x: number, y: number, z: number} = { x: 0, y: 0, z: 0 };
-    rotation: {x: number, y: number, z: number} = { x: 0, y: 0, z: 0 };
-    
+
     zoom = 1;
 
     render(box: Box, outline?: boolean) {
@@ -9,58 +8,17 @@ class Camera {
         //You cannot physically move the camera, since the user sees through it through their screen, so you have to move the objects in the opposite direction to the camera
         let cameraObjectMatrix = box.physicalMatrix.copy();
 
-
-        //rotate object based on difference between it's rotationa and the camera's
-        let rX = this.rotation.x - box.rotation.x;
-        let rY = this.rotation.y - box.rotation.y;
-        let rZ = this.rotation.z - box.rotation.z;
-
-        const inverseRotationMatrix = new matrix()
-        inverseRotationMatrix.addColumn([cos(rY) * cos(rZ), cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ), sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ)]);
-        inverseRotationMatrix.addColumn([-(cos(rY)) * sin(rZ), cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ), sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ)]);
-        inverseRotationMatrix.addColumn([sin(rY), -(sin(rX)) * cos(rY), cos(rX) * cos(rY)]);
-        cameraObjectMatrix = multiplyMatrixs(inverseRotationMatrix, cameraObjectMatrix);
-
-
         //we set the object's position based on the difference between it and the camera
         const distanceX = -(this.position.x - box.position.x);
         const distanceY = -(this.position.y - box.position.y);
         const distanceZ = -(this.position.z - box.position.z);
 
-        //apply translations to matrix
-        for (let i = 0; i != cameraObjectMatrix.width; i += 1)
-        {
-            const point = cameraObjectMatrix.getColumn(i);
-            cameraObjectMatrix.setValue(i, 0, point[0] + distanceX);
-            cameraObjectMatrix.setValue(i, 1, point[1] + distanceY);
-            cameraObjectMatrix.setValue(i, 2, point[2] + distanceZ);
-        }
+        cameraObjectMatrix.translateMatrix(distanceX, distanceY, distanceZ);
 
         //we can simulate the z-axis, by scalling the object down the further away it is (this also creates a parallax effect since the object's further away get moved less)
         const unitScaleFactor = canvasHeight / box.dimensions.height; //this is effectively the scale factor which makes the object fill up the whole screen, or if the camera was position right in front of it
-        const distanceToCamera = distanceBetween([this.position.x, this.position.y, this.position.z], [box.position.x, box.position.y, box.position.z])
-        const objectScaleFactor = unitScaleFactor / (distanceToCamera / 10);
+        const objectScaleFactor = unitScaleFactor / (distanceZ / box.dimensions.depth);
         cameraObjectMatrix.scaleUp(objectScaleFactor);
-
-        //find vector from camera to object
-        const cameraObjectVectorMatrix = new matrix();
-        cameraObjectVectorMatrix.addColumn([distanceX, distanceY, distanceZ]);
-
-        rX = -(this.rotation.x);
-        rY = -(this.rotation.y);
-        rZ = -(this.rotation.z);
-
-        //named GLOBAL as we rotate every object in the scene by these same rotations
-        const globalRotationMatrix = new matrix();
-        const GLOBALiHat = [cos(rY) * cos(rZ), cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ), sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ)];
-        const GLOBALjHat = [-(cos(rY)) * sin(rZ), cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ), sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ)];
-        const GLOBALkHat = [sin(rY), -(sin(rX)) * cos(rY), cos(rX) * cos(rY)];
-        globalRotationMatrix.addColumn(GLOBALiHat);
-        globalRotationMatrix.addColumn(GLOBALjHat);
-        globalRotationMatrix.addColumn(GLOBALkHat);
-
-        const objectTranslation = multiplyMatrixs(globalRotationMatrix, cameraObjectVectorMatrix).getColumn(0);
-        cameraObjectMatrix.translateMatrix(objectTranslation[0], objectTranslation[1], objectTranslation[2]);
 
         cameraObjectMatrix.scaleUp(this.zoom); //finally to zoom into objects we can scale up their physical matrix
  
@@ -78,7 +36,8 @@ class Camera {
         }
  
         //if we use the cameraObjectMatrix, then the camera is actually located at 0, 0, 0, so we will sort out faces based on their distance to the origin
-        const positionPoint = [0, 0, 0];
+        //however I need to use a z-axis of -50000, in order make the differences between object's insignificant
+        const positionPoint = [0, 0, -50000];
         let sortedFaces: { diagonal1: { p1Index: number, p2Index: number }, diagonal2: { p1Index: number, p2Index: number }, facingAxis: string, center: number[] }[] = [];
         const facesCopy = JSON.parse(JSON.stringify(box.faces))
         while (facesCopy.length != 0) {

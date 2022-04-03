@@ -1,4 +1,4 @@
-This is just a project I made to learn more about 3D rendering and Matrix transformations, it just allows you to render some boxes (may add more shapes in the future), and move the camera around with perspective and parallax viewing.
+**This is not meant to be used for any serious projects**, I just made this to learn more about 3D rendering and Matrix transformations, it just allows you to render some boxes (may add more shapes in the future), and move the camera around with perspective and parallax viewing.
 
 ## Importing
 To import download the JS files, then import using script tags and linked to the correct directory: (You should also make sure to import in the correct order)
@@ -100,7 +100,10 @@ To simulate perspective and the Z-Axis, I create a unit scale factor, which is b
 This also gives a sort of parallax effect, since the object's further away will be scaled less, resulting in them moving less.
 
 ## Usage
-This is designed to be a 3D engine, but used for 2D games/applications, since there is no camera rotation and the object's don't actually move anywhere based on the camera's Z-Position. For example in platformers where you want a 3D parallax background.
+This is designed to be a 3D engine, but used for 2D games/applications, since there is no camera rotation and the object's don't actually move anywhere based on the camera's Z-Position. For example in platformers where you want a 3D animated parallax background.
 
 Here is a preview of the project included here, to run this yourself simply open the index.html file:
+
+![Preview GIF](https://github.com/AryaaSk/3D-Engine/blob/main/Preview.gif?raw=true)
+You can see the parallax effect working since the larger cuboid moves further and faster than the other cube.
 
