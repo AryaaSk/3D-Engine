@@ -105,5 +105,6 @@ This is designed to be a 3D engine, but used for 2D games/applications, since th
 Here is a preview of the project included here, to run this yourself simply open the index.html file:
 
 ![Preview GIF](https://github.com/AryaaSk/3D-Engine/blob/master/Preview.gif?raw=true)
+
 You can see the parallax effect working since the larger cuboid moves further and faster than the other cube.
 
