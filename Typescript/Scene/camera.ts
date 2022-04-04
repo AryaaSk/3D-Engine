@@ -13,7 +13,7 @@ class Camera {
         let cameraObjectMatrix = box.physicalMatrix.copy();
 
         cameraObjectMatrix.scaleUp(this.zoom); //scale first to prevent it from affecting other translations, however this means it is not a real zoom, instead just looks like you are englarging objects
-        
+
         cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
 
         const gridMiddle = { x: -(this.position.x), y: -(this.position.y), z: -(this.position.z) };

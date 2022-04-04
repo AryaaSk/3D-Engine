@@ -1,6 +1,4 @@
-**This is not meant to be used for any serious projects, later I may try and add Camera Rotation to make it a full 3D Engine, but then I would also have to add a perspective camera**
-
-I just made this to learn more about 3D rendering and Matrix transformations, it just allows you to render some boxes (may add more shapes in the future), and move the camera around with perspective and parallax viewing.
+**This is not meant to be used for any serious projects, I just made this to learn more about 3D rendering and Matrix transformations**
 
 ## Importing
 To import download the JS files, then import using script tags and linked to the correct directory: (You should also make sure to import in the correct order)
@@ -65,26 +63,33 @@ You can also set a face to "", which will make it transparent:
 cube.faceColours["-z"] = ""; //makes the front-facing side transparent
 ```
 
-## The Camera
+## Camera
 The camera is used to render objects.
 
-To detect which faces are behind the other ones, the camera finds the center of each face, using the diagonals variable which is created on the Box object when creating it. The center is a physical point in the 3D World, then the camera calculates the distance between the center and its own position using Pythagorus' Formula, and renders the ones furthest away first, so that the ones closest will appear to be in front.
-
+To detect which face to render first, it calculates the distance from the center of each face, to the coordinate (0, 0, -50000), if I use the camera's position then the differences in position between objects mean that sometimes the faces are rendered in the wrong order, by using this specific point which is very far on the Z-Axis, it mimics an actual user watching from outside the screen. **(You do not have to worry about this though).**
+ 
 To create a camera object:
 ```
 const camera = new Camera();
 ```
 
-You can then position this camera in the scene somewhere
+You can then position this camera in the scene somewhere *(be aware that changing the Z-Position won't change anything on the screen, since I have not implemented a scale system when an object is further away)*.
 ```
-camera.position = { x: 0, y: 0, z: -500 };
+camera.position.x = 0;
+camera.position.y = 0;
 ```
 
-The objects' faces are always rendered in the order of which face is furthest from the camera, however it does not take the Z-Position that you give it, I have just hard-coded an arbitary value of -50000, so that there aren't any problems with the differences in postions between different objects, **you do not have to worry about this though**.
-
-You can also change the world zoom
+You can rotate the entire world using the worldRotation property:
 ```
-camera.zoom = 2; //will zoom in by 2 so everything looks twice as big
+camera.worldRotation.x = -30;
+camera.worldRotation.y = 30;
+camera.worldRotation.z = 0;
+camera.updateRotationMatrix(); //make sure to call this whenever you update the worldRotation
+```
+
+You can render a grid which shows where your object's are positioned:
+```
+camera.renderGrid();
 ```
 
 Finally to render an object:
@@ -97,16 +102,3 @@ You may also want to clear the page before rendering again, since otherwise ther
 ```
 clearCanvas();
 ```
-
-To simulate perspective and the Z-Axis, I create a unit scale factor, which is basically just a scale factor you can apply to an object which will make it fill up the entire screen, then I divide that by the distance between the object and the camera in the Z-Axis (divide it by 10 to make it more subtle), and then I just scale the object by that.\
-This also gives a sort of parallax effect, since the object's further away will be scaled less, resulting in them moving less.
-
-## Usage
-This is designed to be a 3D engine, but used for 2D games/applications, since there is no camera rotation and the object's don't actually move anywhere based on the camera's Z-Position. For example in platformers where you want a 3D animated parallax background.
-
-Here is a preview of the project included here, to run this yourself simply open the index.html file:
-
-![Preview GIF](https://github.com/AryaaSk/3D-Engine/blob/master/Preview.gif?raw=true)
-
-You can see the parallax effect working since the larger cuboid moves further and faster than the other cube.
-
