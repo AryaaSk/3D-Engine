@@ -79,6 +79,11 @@ camera.position.x = 0;
 camera.position.y = 0;
 ```
 
+You can also change the world zoom:
+```
+camera.zoom = 0.5; //it will zoom out and everything will appear twice as small
+```
+
 You can rotate the entire world using the worldRotation property:
 ```
 camera.worldRotation.x = -30;

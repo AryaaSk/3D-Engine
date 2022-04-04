@@ -63,9 +63,9 @@ document.onkeydown = ($e) => {
         camera.updateRotationMatrix();
     }
     else if (key == "1") {
-        camera.zoom -= 0.1;
+        camera.zoom += 0.1;
     }
     else if (key == "2") {
-        camera.zoom += 0.1;
+        camera.zoom -= 0.1;
     }
 };

@@ -51,6 +51,6 @@ document.onkeydown = ($e) => {
     else if (key == "a") { camera.worldRotation.y -= 10; camera.updateRotationMatrix(); }
     else if (key == "d") { camera.worldRotation.y += 10; camera.updateRotationMatrix(); }
 
-    else if (key == "1") { camera.zoom -= 0.1; }
-    else if (key == "2") { camera.zoom += 0.1; }
+    else if (key == "1") { camera.zoom += 0.1; }
+    else if (key == "2") { camera.zoom -= 0.1; }
 }

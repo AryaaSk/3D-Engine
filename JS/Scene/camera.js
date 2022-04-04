@@ -2,7 +2,7 @@
 class Camera {
     constructor() {
         this.position = { x: 0, y: 0, z: 0 };
-        this.zoom = 2;
+        this.zoom = 1;
         this.worldRotation = { x: 0, y: 0, z: 0 };
         this.worldRotationMatrix = new matrix();
         this.worldRotationMatrix.addColumn([1, 0, 0]);
@@ -111,15 +111,16 @@ class Camera {
         this.worldRotationMatrix.setValue(2, 2, worldkHat[2]);
     }
     renderGrid() {
+        const gridLength = 500 * this.zoom;
         //create 2 points for each axis, then transform them using the worldRotationMatrix, then just plot them
         let startPointMatrix = new matrix();
-        startPointMatrix.addColumn([-500, 0, 0]); //x-axis
-        startPointMatrix.addColumn([0, -500, 0]); //y-axis
-        startPointMatrix.addColumn([0, 0, -500]); //z-axis
+        startPointMatrix.addColumn([-gridLength, 0, 0]); //x-axis
+        startPointMatrix.addColumn([0, -gridLength, 0]); //y-axis
+        startPointMatrix.addColumn([0, 0, -gridLength]); //z-axis
         let endPointMatrix = new matrix();
-        endPointMatrix.addColumn([500, 0, 0]);
-        endPointMatrix.addColumn([0, 500, 0]);
-        endPointMatrix.addColumn([0, 0, 500]);
+        endPointMatrix.addColumn([gridLength, 0, 0]);
+        endPointMatrix.addColumn([0, gridLength, 0]);
+        endPointMatrix.addColumn([0, 0, gridLength]);
         startPointMatrix = multiplyMatrixs(this.worldRotationMatrix, startPointMatrix);
         endPointMatrix = multiplyMatrixs(this.worldRotationMatrix, endPointMatrix);
         //we also want to offset this grid by the camera's position
