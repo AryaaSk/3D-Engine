@@ -38,7 +38,7 @@ cube.scale = 2;
 cube.position = { x: 2, y: 0, z: 0 };
 ```
 
-And then once you have change the attributes you need to update the Box's Matrices using the function:
+If you change the rotation or scale then you need to apply the changes using:
 ```
 cube.updateMatrices();
 ```
