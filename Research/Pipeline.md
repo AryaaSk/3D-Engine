@@ -6,8 +6,7 @@
 
 2. Inside the Box class constructor, it creates a new box, around the origin, using the above dimensions. The box is represented as a matrix called pointMatrix, each column is a vector or point around the origin. You can see the order of the points in the image below\
 ![Box Layout](https://github.com/AryaaSk/3D-Engine/blob/master/Research/BoxLayout.png?raw=true)\
-Each number represents the (index of the corner)+1, the +1 is because I didn't want to start at 0. The red point represents the origin, all the scale and rotation transformatiosn are performed around the origin, and then the object is translated to it's actual position after to prevent inaccurate rotations.
-
+Each number represents the (index of the corner)+1, the +1 is because I didn't want to start at 0. The red point represents the origin, all the scale and rotation transformatiosn are performed around the origin, and then the object is translated to it's actual position after to prevent inaccurate rotations.\
 Since we know where each corner is located in relation to the others, we can hardcode the edges, diagonals and faces, each line containing 2 corners. These are useful later on when we render the shape.
 
 3. Once we have created the pointMatrix, we need to rotate the object with the XYZ rotations the user has given us, to do this we create a RotationMatrix, to calculate this I used the XYZ Rotation Matrix formula:\
@@ -17,3 +16,10 @@ This will give us our Î (iHat), Ĵ (jHat), and k̂ (kHat), unit vectors which r
 4. Once we have our RotationMatrix, we can find the physcial location of the points around the origin by doing **RotationMatrix * PointMatrix**, this tells us the location of all points relative to the origin, and then finally we scale the object by just multiplying each vector (column), by the scale. We store this in a matrix called PhysicalMatrix.
 
 ### Rendering the Object:
+1. When the render() function is called for an object, the function creates a copy of the object's PhysicalMatrix and calls it the CameraObjectMatrix, it then transforms this matrix to get the actual position of the shape's vertices on the 2D screen.
+
+2. The function transforms the object's size and rotation first, and then applies the translation transformations, this is because if you translate it first and then change the size/rotation, then it will use the origin as the point of rotation/enlargment, causing an inaccurate transformation.
+
+3. The transformation steps are in this order:
+    1. Step 1
+    2. Testing the markdown
