@@ -96,7 +96,7 @@ class Box {
         this.rotationMatrix.setValue(1, 0, this.jHat[0]);
         this.rotationMatrix.setValue(1, 1, this.jHat[1]);
         this.rotationMatrix.setValue(1, 2, this.jHat[2]);
-        this.rotationMatrix.setValue(2, 0, this.kHat[0]); //FOR SOME REASON THE KHAT IS ROTATING AROUND THE WRONG AXIS
+        this.rotationMatrix.setValue(2, 0, this.kHat[0]);
         this.rotationMatrix.setValue(2, 1, this.kHat[1]);
         this.rotationMatrix.setValue(2, 2, this.kHat[2]);
     }

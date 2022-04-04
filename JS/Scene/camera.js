@@ -3,21 +3,29 @@ class Camera {
     constructor() {
         this.position = { x: 0, y: 0, z: 0 };
         this.zoom = 1;
+        this.worldRotation = { x: 0, y: 0, z: 0 };
+        this.worldRotationMatrix = new matrix();
+        this.worldRotationMatrix.addColumn([1, 0, 0]);
+        this.worldRotationMatrix.addColumn([0, 1, 0]);
+        this.worldRotationMatrix.addColumn([0, 0, 1]);
+        this.updateRotationMatrix();
     }
     render(box, outline) {
         //The box's physicalMatrix tells us how where the point on the box are located relative to the origin, but we still need to position it
         //You cannot physically move the camera, since the user sees through it through their screen, so you have to move the objects in the opposite direction to the camera
         let cameraObjectMatrix = box.physicalMatrix.copy();
+        cameraObjectMatrix.scaleUp(this.zoom); //scale first to prevent it from affecting other translations
+        cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
         //we set the object's position based on the difference between it and the camera
         const distanceX = -(this.position.x - box.position.x);
         const distanceY = -(this.position.y - box.position.y);
         const distanceZ = -(this.position.z - box.position.z);
         cameraObjectMatrix.translateMatrix(distanceX, distanceY, distanceZ);
-        //we can simulate the z-axis, by scalling the object down the further away it is (this also creates a parallax effect since the object's further away get moved less)
-        const unitScaleFactor = canvasHeight / box.dimensions.height; //this is effectively the scale factor which makes the object fill up the whole screen, or if the camera was position right in front of it
-        const objectScaleFactor = unitScaleFactor / (distanceZ / box.dimensions.depth);
-        cameraObjectMatrix.scaleUp(objectScaleFactor);
-        cameraObjectMatrix.scaleUp(this.zoom); //finally to zoom into objects we can scale up their physical matrix
+        //console.log(distanceX, distanceY, distanceZ)
+        //we can simulate the z-axis, by scalling the object down the further away it is (this also creates a parallax effect since the object's further away get moved less
+        //const objectScale = 1 / distanceZ * 1000;
+        //cameraObjectMatrix.scaleUp(objectScale);
+        //finally to zoom into objects we can scale up their physical matrix
         //calculate the centers of the faces
         for (let i = 0; i != box.faces.length; i += 1) {
             //we can just calculate the midpoint of one of the diagonals, since that is where it should cross
@@ -64,6 +72,54 @@ class Camera {
                 const point2 = cameraObjectMatrix.getColumn(box.edges[i].p2Index);
                 drawLine(point1, point2, "#606060");
             }
+        }
+    }
+    updateRotationMatrix() {
+        const rX = this.worldRotation.x % 360;
+        const rY = this.worldRotation.y % 360;
+        const rZ = this.worldRotation.z % 360;
+        const worldiHat = [1, 0, 0];
+        const worldjHat = [0, 1, 0];
+        const worldkHat = [0, 0, 1];
+        worldiHat[0] = cos(rY) * cos(rZ);
+        worldiHat[1] = cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ);
+        worldiHat[2] = sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ);
+        worldjHat[0] = -(cos(rY)) * sin(rZ);
+        worldjHat[1] = cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ);
+        worldjHat[2] = sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ);
+        worldkHat[0] = sin(rY);
+        worldkHat[1] = -(sin(rX)) * cos(rY);
+        worldkHat[2] = cos(rX) * cos(rY);
+        this.worldRotationMatrix.setValue(0, 0, worldiHat[0]);
+        this.worldRotationMatrix.setValue(0, 1, worldiHat[1]);
+        this.worldRotationMatrix.setValue(0, 2, worldiHat[2]);
+        this.worldRotationMatrix.setValue(1, 0, worldjHat[0]);
+        this.worldRotationMatrix.setValue(1, 1, worldjHat[1]);
+        this.worldRotationMatrix.setValue(1, 2, worldjHat[2]);
+        this.worldRotationMatrix.setValue(2, 0, worldkHat[0]);
+        this.worldRotationMatrix.setValue(2, 1, worldkHat[1]);
+        this.worldRotationMatrix.setValue(2, 2, worldkHat[2]);
+        this.worldRotationMatrix.printMatrix();
+    }
+    renderGrid() {
+        //create 2 points for each axis, then transform them using the worldRotationMatrix, then just plot them
+        let startPointMatrix = new matrix();
+        startPointMatrix.addColumn([-500, 0, 0]); //x-axis
+        startPointMatrix.addColumn([0, -500, 0]); //y-axis
+        startPointMatrix.addColumn([0, 0, -500]); //z-axis
+        let endPointMatrix = new matrix();
+        endPointMatrix.addColumn([500, 0, 0]);
+        endPointMatrix.addColumn([0, 500, 0]);
+        endPointMatrix.addColumn([0, 0, 500]);
+        startPointMatrix = multiplyMatrixs(this.worldRotationMatrix, startPointMatrix);
+        endPointMatrix = multiplyMatrixs(this.worldRotationMatrix, endPointMatrix);
+        //we also want to offset this grid by the camera's position
+        startPointMatrix.translateMatrix(-this.position.x, -this.position.y, -this.position.z);
+        endPointMatrix.translateMatrix(-this.position.x, -this.position.y, -this.position.z);
+        for (let i = 0; i != startPointMatrix.width; i += 1) {
+            const point1 = startPointMatrix.getColumn(i);
+            const point2 = endPointMatrix.getColumn(i);
+            drawLine(point1, point2, "#000000");
         }
     }
     ;
