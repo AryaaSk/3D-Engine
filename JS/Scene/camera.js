@@ -15,7 +15,7 @@ class Camera {
         //The box's physicalMatrix tells us how where the point on the box are located relative to the origin, but we still need to position it
         //You cannot physically move the camera, since the user sees through it through their screen, so you have to move the objects in the opposite direction to the camera
         let cameraObjectMatrix = box.physicalMatrix.copy();
-        cameraObjectMatrix.scaleUp(this.zoom); //scale first to prevent it from affecting other translations, however this means it is not a real zoom, instead just looks like you are englarging objects
+        cameraObjectMatrix.scaleUp(this.zoom); //scale first to prevent it from affecting other translations
         cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
         const gridMiddle = { x: -(this.position.x), y: -(this.position.y), z: 0 };
         //we set the object's position based on the difference between it and the grid (which is calculated with the camera)

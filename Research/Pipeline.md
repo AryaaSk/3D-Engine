@@ -26,7 +26,7 @@ This will give us our Î (iHat), Ĵ (jHat), and k̂ (kHat), unit vectors which r
 
     2. **Rotate for world rotation (when the user changes camera.rotation)**
 
-    3.  **Translate based on world rotation**:\
+    3.  **Translate based on world rotation and zoom**:\
     Function calculates where the origin is located, but in the absolute 3D world, if the camera's position is (50, 100), then the origin would be located at (-50, -100), I save this value as gridMiddle.\
     Since the object's position is relative to the origin, it can also been seen as a vector from the origin, so the object's position in the absolute 3D scene is just **gridMiddle + object.position**.\
     \
