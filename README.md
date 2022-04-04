@@ -1,14 +1,11 @@
 **This is not meant to be used for any serious projects, I just made this to learn more about 3D rendering and Matrix transformations**
 
 ## Importing
-To import download the JS files, then import using script tags and linked to the correct directory: (You should also make sure to import in the correct order)
+To import the library, just download the aryaa3D.js file, and link it in your HTML with a script tag *(Make sure to do this before using it in another JS file)*.
 ```
-<script src="JS/canvasUtilities.js" defer></script>
-<script src="JS/utilities.js" defer></script>
-<script src="JS/objects.js" defer></script>
-<script src="JS/camera.js" defer></script>
+<script src="aryaa3D.js"></script>
 
-<script src="JS/script.js" defer></script>
+<script src="yourownjsfile.js" defer></script> <!-- You should add a defer tag on your own file, since you will need to wait for the canvas element to load into the DOM -->
 ```
 
 Then create a canvas element in the HTML DOM with an ID, I used "renderingWindow"
@@ -107,3 +104,7 @@ You may also want to clear the page before rendering again, since otherwise ther
 ```
 clearCanvas();
 ```
+
+Here is a preview of the project in this repo (to run this just download the repo and open the index.html file)
+
+![Preview Gif](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/3DEngineDemo.gif?raw=true)
