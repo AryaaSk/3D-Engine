@@ -21,7 +21,6 @@ cube2.updateMatrices();
 const camera = new Camera();
 camera.position.x = 0;
 camera.position.y = 0;
-camera.position.z = -50;
 camera.worldRotation.x = -30;
 camera.worldRotation.y = 30;
 camera.worldRotation.z = 0;

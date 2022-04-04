@@ -1,7 +1,7 @@
 "use strict";
 class Camera {
     constructor() {
-        this.position = { x: 0, y: 0, z: 0 };
+        this.position = { x: 0, y: 0 };
         this.zoom = 1;
         this.worldRotation = { x: 0, y: 0, z: 0 };
         this.worldRotationMatrix = new matrix();
@@ -17,7 +17,7 @@ class Camera {
         let cameraObjectMatrix = box.physicalMatrix.copy();
         cameraObjectMatrix.scaleUp(this.zoom); //scale first to prevent it from affecting other translations, however this means it is not a real zoom, instead just looks like you are englarging objects
         cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
-        const gridMiddle = { x: -(this.position.x), y: -(this.position.y), z: -(this.position.z) };
+        const gridMiddle = { x: -(this.position.x), y: -(this.position.y), z: 0 };
         //we set the object's position based on the difference between it and the grid (which is calculated with the camera)
         //the position would be the gridMiddle + object's position, but we need to get the translation from the origin (that is where the object would be located now), these are the positions in the absolute 3D World, so they can also be considered translations from origin
         const objectPositionX = gridMiddle.x + box.position.x;
@@ -124,8 +124,8 @@ class Camera {
         startPointMatrix = multiplyMatrixs(this.worldRotationMatrix, startPointMatrix);
         endPointMatrix = multiplyMatrixs(this.worldRotationMatrix, endPointMatrix);
         //we also want to offset this grid by the camera's position
-        startPointMatrix.translateMatrix(-this.position.x, -this.position.y, -this.position.z);
-        endPointMatrix.translateMatrix(-this.position.x, -this.position.y, -this.position.z);
+        startPointMatrix.translateMatrix(-this.position.x, -this.position.y, 0);
+        endPointMatrix.translateMatrix(-this.position.x, -this.position.y, 0);
         /*
         const point1 = startPointMatrix.getColumn(0);
         const point2 = endPointMatrix.getColumn(0);

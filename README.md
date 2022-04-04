@@ -73,7 +73,7 @@ To create a camera object:
 const camera = new Camera();
 ```
 
-You can then position this camera in the scene somewhere *(be aware that changing the Z-Position won't change anything on the screen, since I have not implemented a scale system when an object is further away)*.
+You can then position this camera in the scene somewhere *(This doesn't change the 3D position, it is literally the 2D position from where you view the world, which is why there is no Z coordinate)*.
 ```
 camera.position.x = 0;
 camera.position.y = 0;
