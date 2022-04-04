@@ -1,5 +1,5 @@
 **This is not meant to be used for any serious projects, I just made this to learn more about 3D rendering and Matrix transformations**\
-If you want to know how it works go here: https://github.com/AryaaSk/3D-Engine/blob/master/Research/Pipeline.md
+If you want to know how it works go [here](Research/Pipeline.md)
 
 ## Importing
 To import the library, just download the aryaa3D.js file, and link it in your HTML with a script tag *(Make sure to do this before using it in another JS file)*.
@@ -92,7 +92,7 @@ Finally to render an object:
 ```
 camera.render(cube);
 ```
-You can also pass in an optional boolean parameter *outline*, which will show the outline of the object, however this will also show the edges which should originally be hidden.
+You can also pass in an optional boolean parameter **outline**, which will show the outline of the object, however this will also show the edges which should originally be hidden.
 
 You may also want to clear the page before rendering again, since otherwise there will be a copy created
 ```
