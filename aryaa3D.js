@@ -1,5 +1,7 @@
 "use strict";
 
+console.log("test message");
+
 const dpi = window.devicePixelRatio;
 let canvas = undefined;
 let c = undefined;
