@@ -2,7 +2,7 @@
 class Camera {
     constructor() {
         this.position = { x: 0, y: 0, z: 0 };
-        this.zoom = 1;
+        this.zoom = 1; //disabled for now
         this.worldRotation = { x: 0, y: 0, z: 0 };
         this.worldRotationMatrix = new matrix();
         this.worldRotationMatrix.addColumn([1, 0, 0]);
@@ -11,21 +11,30 @@ class Camera {
         this.updateRotationMatrix();
     }
     render(box, outline) {
+        //CALCULATING OBJECT'S POSITION ON THE 2D SCREEN:
         //The box's physicalMatrix tells us how where the point on the box are located relative to the origin, but we still need to position it
         //You cannot physically move the camera, since the user sees through it through their screen, so you have to move the objects in the opposite direction to the camera
         let cameraObjectMatrix = box.physicalMatrix.copy();
-        cameraObjectMatrix.scaleUp(this.zoom); //scale first to prevent it from affecting other translations
+        cameraObjectMatrix.scaleUp(this.zoom); //scale first to prevent it from affecting other translations, however this means it is not a real zoom, instead just looks like you are englarging objects
         cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
-        //we set the object's position based on the difference between it and the camera
-        const distanceX = -(this.position.x - box.position.x);
-        const distanceY = -(this.position.y - box.position.y);
-        const distanceZ = -(this.position.z - box.position.z);
-        cameraObjectMatrix.translateMatrix(distanceX, distanceY, distanceZ);
-        //console.log(distanceX, distanceY, distanceZ)
-        //we can simulate the z-axis, by scalling the object down the further away it is (this also creates a parallax effect since the object's further away get moved less
-        //const objectScale = 1 / distanceZ * 1000;
-        //cameraObjectMatrix.scaleUp(objectScale);
-        //finally to zoom into objects we can scale up their physical matrix
+        const gridMiddle = { x: -(this.position.x), y: -(this.position.y), z: -(this.position.z) };
+        //we set the object's position based on the difference between it and the grid (which is calculated with the camera)
+        //the position would be the gridMiddle + object's position, but we need to get the translation from the origin (that is where the object would be located now), these are the positions in the absolute 3D World, so they can also be considered translations from origin
+        const objectPositionX = gridMiddle.x + box.position.x;
+        const objectPositionY = gridMiddle.y + box.position.y;
+        const objectPositionZ = gridMiddle.z + box.position.z;
+        //however since those are the positions in the 3D, we need to find the vector of gridMiddle -> Object, transform that with the rotation matrix, and then translate it by that instead
+        const distanceX = objectPositionX - gridMiddle.x;
+        const distanceY = objectPositionY - gridMiddle.y;
+        const distanceZ = objectPositionZ - gridMiddle.z;
+        let gridMiddleObjectVectorMatrix = new matrix();
+        gridMiddleObjectVectorMatrix.addColumn([distanceX, distanceY, distanceZ]);
+        gridMiddleObjectVectorMatrix = multiplyMatrixs(this.worldRotationMatrix, gridMiddleObjectVectorMatrix);
+        //now we have the translation vector from the gridMiddle, but we want it from the origin of the screen, so we just need to translate it by the gridMiddle
+        gridMiddleObjectVectorMatrix.translateMatrix(gridMiddle.x, gridMiddle.y, gridMiddle.z);
+        const translationVector = gridMiddleObjectVectorMatrix.getColumn(0);
+        cameraObjectMatrix.translateMatrix(translationVector[0], translationVector[1], translationVector[2]);
+        //ACTUALLY RENDERING THE OBJECT:
         //calculate the centers of the faces
         for (let i = 0; i != box.faces.length; i += 1) {
             //we can just calculate the midpoint of one of the diagonals, since that is where it should cross
@@ -99,7 +108,6 @@ class Camera {
         this.worldRotationMatrix.setValue(2, 0, worldkHat[0]);
         this.worldRotationMatrix.setValue(2, 1, worldkHat[1]);
         this.worldRotationMatrix.setValue(2, 2, worldkHat[2]);
-        this.worldRotationMatrix.printMatrix();
     }
     renderGrid() {
         //create 2 points for each axis, then transform them using the worldRotationMatrix, then just plot them
@@ -116,6 +124,14 @@ class Camera {
         //we also want to offset this grid by the camera's position
         startPointMatrix.translateMatrix(-this.position.x, -this.position.y, -this.position.z);
         endPointMatrix.translateMatrix(-this.position.x, -this.position.y, -this.position.z);
+        /*
+        const point1 = startPointMatrix.getColumn(0);
+        const point2 = endPointMatrix.getColumn(0);
+        const avX = (point1[0] + point2[0]) / 2;
+        const avY = (point1[1] + point2[1]) / 2;
+        const avZ = (point1[2] + point2[2]) / 2;
+        const gridMiddle = { x: avX, y: avY, z: avZ }; //this is the middle of the grid
+        */
         for (let i = 0; i != startPointMatrix.width; i += 1) {
             const point1 = startPointMatrix.getColumn(i);
             const point2 = endPointMatrix.getColumn(i);
