@@ -1,4 +1,5 @@
-**This is not meant to be used for any serious projects, I just made this to learn more about 3D rendering and Matrix transformations**
+**This is not meant to be used for any serious projects, I just made this to learn more about 3D rendering and Matrix transformations**\
+If you want to know how it works go here: https://github.com/AryaaSk/3D-Engine/blob/master/Research/Pipeline.md
 
 ## Importing
 To import the library, just download the aryaa3D.js file, and link it in your HTML with a script tag *(Make sure to do this before using it in another JS file)*.
@@ -20,11 +21,6 @@ linkCanvas("renderingWindow");
 ```
 
 ## Creating a box
-The box object has 3 matrixes: PointMatrix, RotationMatrix, and PhysicalMatrix
-- The PointMatrix contains the points around the origin (0, 0), and doesn't have any transformations applied to it, such as rotation, scale or position
-- The RotationMatrix contains the Unit Vectors: iHat, jHat, and kHat, which are basically the X-Axis, Y-Axis, and Z-Axis respectively. When you rotate a shape, you actually just change these unit vectors, the way I calculate the RotationMatrix is using Euler's XYZ Rotation Matrix Formula, refer to *Research/xyzrotationmatrix.jpeg* for more infomation.
-- The PhysicalMatrix contains the actual points where the shape is in the 3D World, it has the transformations rotation and scale applied to it. To calculate this matrix you do RotationMatrix * PointMatrix, then you scale up every vector by the scale. The position is added in the camera, since it needs to render based on the object's position to the camera.
-
 To create a box the user passes in 3 arguments: width, height: depth, as seen below:
 ```
 const cube = new Box(100, 100, 100);
@@ -62,8 +58,6 @@ cube.faceColours["-z"] = ""; //makes the front-facing side transparent
 
 ## Camera
 The camera is used to render objects.
-
-To detect which face to render first, it calculates the distance from the center of each face, to the coordinate (0, 0, -50000), if I use the camera's position then the differences in position between objects mean that sometimes the faces are rendered in the wrong order, by using this specific point which is very far on the Z-Axis, it mimics an actual user watching from outside the screen. **(You do not have to worry about this though).**
  
 To create a camera object:
 ```

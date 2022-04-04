@@ -7,7 +7,8 @@
 2. Inside the Box class constructor, it creates a new box, around the origin, using the above dimensions. The box is represented as a matrix called pointMatrix, each column is a vector or point around the origin. You can see the order of the points in the image below\
 ![Box Layout](https://github.com/AryaaSk/3D-Engine/blob/master/Research/BoxLayout.png?raw=true)\
 Each number represents the (index of the corner)+1, the +1 is because I didn't want to start at 0. The red point represents the origin, all the scale and rotation transformatiosn are performed around the origin, and then the object is translated to it's actual position after to prevent inaccurate rotations.\
-Since we know where each corner is located in relation to the others, we can hardcode the edges, diagonals and faces, each line containing 2 corners. These are useful later on when we render the shape.
+
+* Since we know where each corner is located in relation to the others, we can hardcode the edges, diagonals and faces, each line containing 2 corners. These are useful later on when we render the shape.
 
 3. Once we have created the pointMatrix, we need to rotate the object with the XYZ rotations the user has given us, to do this we create a RotationMatrix, to calculate this I used the XYZ Rotation Matrix formula:\
 ![Box Layout](https://github.com/AryaaSk/3D-Engine/blob/master/Research/xyzrotationmatrix.jpeg?raw=true)\
@@ -42,7 +43,7 @@ This will give us our Î (iHat), Ĵ (jHat), and k̂ (kHat), unit vectors which r
 2. We need to determine the order in which to draw the faces, otherwise we would get something like this:
     ![Wrong Face Order](https://github.com/AryaaSk/3D-Engine/blob/master/Research/WrongFaceOrder.png?raw=true)\
 
-    1. First it calculates the center of each face, we know where the faces are located because we can hardcode the corners which construct each face, because we have a specific order of points, refer to 2nd point in Creating the Object for more info. To calculate the center you just use 1 of the diagonals, add together both points (vectors) and then divide by 2.
+    1. First it calculates the center of each face, we know where the faces are located because we can hardcode the corners which construct each face, because we have a specific order of points, refer to the Creating the Object section for more info. To calculate the center you just use 1 of the diagonals, add together both points (vectors) and then divide by 2.
 
     2. Once you have the centers of the faces, it calculates the distance of each center to the point (0, 0, -50000), the reason I used this point was because it negates the differences between individual object's positions, which would be an issue if I used the camera's position. Then just sort based on the distance between both points.
 
