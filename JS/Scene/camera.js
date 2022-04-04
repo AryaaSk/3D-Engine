@@ -2,7 +2,7 @@
 class Camera {
     constructor() {
         this.position = { x: 0, y: 0, z: 0 };
-        this.zoom = 1; //disabled for now
+        this.zoom = 2;
         this.worldRotation = { x: 0, y: 0, z: 0 };
         this.worldRotationMatrix = new matrix();
         this.worldRotationMatrix.addColumn([1, 0, 0]);
@@ -30,6 +30,7 @@ class Camera {
         let gridMiddleObjectVectorMatrix = new matrix();
         gridMiddleObjectVectorMatrix.addColumn([distanceX, distanceY, distanceZ]);
         gridMiddleObjectVectorMatrix = multiplyMatrixs(this.worldRotationMatrix, gridMiddleObjectVectorMatrix);
+        gridMiddleObjectVectorMatrix.scaleUp(this.zoom); //need to add zoom before we translate it to avoid the shape from rotating around the wrong point
         //now we have the translation vector from the gridMiddle, but we want it from the origin of the screen, so we just need to translate it by the gridMiddle
         gridMiddleObjectVectorMatrix.translateMatrix(gridMiddle.x, gridMiddle.y, gridMiddle.z);
         const translationVector = gridMiddleObjectVectorMatrix.getColumn(0);

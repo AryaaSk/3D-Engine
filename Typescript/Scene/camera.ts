@@ -1,6 +1,6 @@
 class Camera {
     position: {x: number, y: number, z: number} = { x: 0, y: 0, z: 0 };
-    private zoom = 1; //disabled for now
+    zoom = 2;
 
     worldRotation: {x: number, y: number, z: number} = { x: 0, y: 0, z: 0 };
     worldRotationMatrix = new matrix();
@@ -30,6 +30,7 @@ class Camera {
         let gridMiddleObjectVectorMatrix = new matrix();
         gridMiddleObjectVectorMatrix.addColumn([distanceX, distanceY, distanceZ]);
         gridMiddleObjectVectorMatrix = multiplyMatrixs(this.worldRotationMatrix, gridMiddleObjectVectorMatrix);
+        gridMiddleObjectVectorMatrix.scaleUp(this.zoom); //need to add zoom before we translate it to avoid the shape from rotating around the wrong point
         
         //now we have the translation vector from the gridMiddle, but we want it from the origin of the screen, so we just need to translate it by the gridMiddle
         gridMiddleObjectVectorMatrix.translateMatrix(gridMiddle.x, gridMiddle.y, gridMiddle.z);

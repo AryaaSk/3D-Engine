@@ -24,6 +24,7 @@ cube2.updateMatrices();
 const camera = new Camera();
 camera.position.x = 0;
 camera.position.y = 0;
+camera.position.z = -50;
 
 camera.worldRotation.x = -30;
 camera.worldRotation.y = 30;
@@ -33,9 +34,9 @@ camera.updateRotationMatrix();
 
 setInterval(() => {
     clearCanvas()
+    camera.renderGrid();
     camera.render(cube2);
     camera.render(cube);
-    camera.renderGrid();
 })
 
 document.onkeydown = ($e) => {
@@ -49,4 +50,7 @@ document.onkeydown = ($e) => {
     else if (key == "s") { camera.worldRotation.x += 10; camera.updateRotationMatrix(); }
     else if (key == "a") { camera.worldRotation.y -= 10; camera.updateRotationMatrix(); }
     else if (key == "d") { camera.worldRotation.y += 10; camera.updateRotationMatrix(); }
+
+    else if (key == "1") { camera.zoom -= 0.1; }
+    else if (key == "2") { camera.zoom += 0.1; }
 }
