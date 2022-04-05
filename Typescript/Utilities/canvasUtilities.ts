@@ -5,7 +5,7 @@ let c: any = undefined;
 let canvasWidth = 0; 
 let canvasHeight = 0;
 const linkCanvas = (canvasID: string) => {
-    canvas = <HTMLCanvasElement>document.getElementById('renderingWindow');
+    canvas = <HTMLCanvasElement>document.getElementById(canvasID);
     c = canvas.getContext('2d')!;
 
     canvasHeight = document.getElementById(canvasID)!.getBoundingClientRect().height; //Fix blury lines
