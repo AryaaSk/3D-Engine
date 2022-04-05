@@ -1,6 +1,4 @@
 "use strict";
-
-
 const dpi = window.devicePixelRatio;
 let canvas = undefined;
 let c = undefined;
@@ -81,8 +79,7 @@ const clearCanvas = () => {
     }
     c.clearRect(0, 0, canvas.width, canvas.height);
 };
-
-
+"use strict";
 //MATRIX FUNCTIONS
 class matrix {
     constructor() {
@@ -214,8 +211,9 @@ const distanceBetween = (p1, p2) => {
     const distance = Math.sqrt(Math.pow(bottomDiagonal, 2) + Math.pow((p2[1] - p1[1]), 2));
     return distance;
 };
-
-
+"use strict";
+//All shapes are subclasses of class Shape, because an object is just a collection of it's points
+//When the camera renders the object is just needs its Physical Matrix (points relative to the origin), so the subclasses are purely for constructing the shape
 class Shape {
     constructor() {
         //Construction    
@@ -234,21 +232,10 @@ class Shape {
     }
     updateRotationMatrix() {
         //XYZ Euler rotation, Source: https://support.zemax.com/hc/en-us/articles/1500005576822-Rotation-Matrix-and-Tilt-About-X-Y-Z-in-OpticStudio
-        const rX = this.rotation.x % 360;
-        const rY = this.rotation.y % 360;
-        const rZ = this.rotation.z % 360;
-        const iHat = [1, 0, 0];
-        const jHat = [0, 1, 0];
-        const kHat = [0, 0, 1];
-        iHat[0] = cos(rY) * cos(rZ); //x-axis (iHat)
-        iHat[1] = cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ);
-        iHat[2] = sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ);
-        jHat[0] = -(cos(rY)) * sin(rZ); //y-axis (jHat)
-        jHat[1] = cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ);
-        jHat[2] = sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ);
-        kHat[0] = sin(rY); //z-axis (kHat)
-        kHat[1] = -(sin(rX)) * cos(rY);
-        kHat[2] = cos(rX) * cos(rY);
+        const [rX, rY, rZ] = [(this.rotation.x % 360), (this.rotation.y % 360), (this.rotation.z % 360)];
+        const iHat = [cos(rY) * cos(rZ), cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ), sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ)]; //x-axis (iHat)
+        const jHat = [-(cos(rY)) * sin(rZ), cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ), sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ)]; //y-axis (jHat)
+        const kHat = [sin(rY), -(sin(rX)) * cos(rY), cos(rX) * cos(rY)]; //z-axis (kHat)
         //Set the unit vectors onto the singular rotation matrix
         this.rotationMatrix = new matrix();
         this.rotationMatrix.addColumn(iHat);
@@ -269,36 +256,26 @@ class Box extends Shape {
     //after populating pointMatrix, we need to update the edges, and faceIndexes
     constructor(width, height, depth) {
         super();
-        const centeringX = -(width / 2);
-        const centeringY = -(height / 2);
-        const centeringZ = -(depth / 2);
         this.pointMatrix = new matrix();
-        this.pointMatrix.addColumn([0 + centeringX, 0 + centeringY, 0 + centeringZ]);
-        this.pointMatrix.addColumn([width + centeringX, 0 + centeringY, 0 + centeringZ]);
-        this.pointMatrix.addColumn([width + centeringX, height + centeringY, 0 + centeringZ]);
-        this.pointMatrix.addColumn([0 + centeringX, height + centeringY, 0 + centeringZ]);
-        this.pointMatrix.addColumn([0 + centeringX, 0 + centeringY, depth + centeringZ]);
-        this.pointMatrix.addColumn([width + centeringX, 0 + centeringY, depth + centeringZ]);
-        this.pointMatrix.addColumn([width + centeringX, height + centeringY, depth + centeringZ]);
-        this.pointMatrix.addColumn([0 + centeringX, height + centeringY, depth + centeringZ]);
+        this.pointMatrix.addColumn([0, 0, 0]);
+        this.pointMatrix.addColumn([width, 0, 0]);
+        this.pointMatrix.addColumn([width, height, 0]);
+        this.pointMatrix.addColumn([0, height, 0]);
+        this.pointMatrix.addColumn([0, 0, depth]);
+        this.pointMatrix.addColumn([width, 0, depth]);
+        this.pointMatrix.addColumn([width, height, depth]);
+        this.pointMatrix.addColumn([0, height, depth]);
+        const [centeringX, centeringY, centeringZ] = [-(width / 2), -(height / 2), -(depth / 2)];
+        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
         this.setEdgesFaces();
         this.updateMatrices();
     }
     setEdgesFaces() {
         //hardcoded values since the points of the shape won't move in relation to each other
         this.edgeIndexes = [
-            [0, 1],
-            [1, 2],
-            [2, 3],
-            [3, 0],
-            [0, 4],
-            [1, 5],
-            [2, 6],
-            [3, 7],
-            [4, 5],
-            [5, 6],
-            [6, 7],
-            [7, 4],
+            [0, 1], [1, 2], [2, 3], [3, 0],
+            [0, 4], [1, 5], [2, 6], [3, 7],
+            [4, 5], [5, 6], [6, 7], [7, 4]
         ];
         this.faces = [
             { pointIndexes: [0, 1, 2, 3], colour: "#ff0000" },
@@ -313,27 +290,21 @@ class Box extends Shape {
 class SquareBasedPyramid extends Shape {
     constructor(bottomSideLength, height) {
         super();
-        const centeringX = -(bottomSideLength / 2);
-        const centeringY = -(height / 2);
-        const centeringZ = -(bottomSideLength / 2);
-        this.pointMatrix.addColumn([0 + centeringX, 0 + centeringY, 0 + centeringZ]);
-        this.pointMatrix.addColumn([bottomSideLength + centeringX, 0 + centeringY, 0 + centeringZ]);
-        this.pointMatrix.addColumn([bottomSideLength + centeringX, 0 + centeringY, bottomSideLength + centeringZ]);
-        this.pointMatrix.addColumn([0 + centeringX, 0 + centeringY, bottomSideLength + centeringZ]);
-        this.pointMatrix.addColumn([bottomSideLength / 2 + centeringX, height + centeringY, bottomSideLength / 2 + centeringZ]);
+        this.pointMatrix = new matrix();
+        this.pointMatrix.addColumn([0, 0, 0]);
+        this.pointMatrix.addColumn([bottomSideLength, 0, 0]);
+        this.pointMatrix.addColumn([bottomSideLength, 0, bottomSideLength]);
+        this.pointMatrix.addColumn([0, 0, bottomSideLength]);
+        this.pointMatrix.addColumn([bottomSideLength / 2, height, bottomSideLength / 2]);
+        const [centeringX, centeringY, centeringZ] = [-(bottomSideLength / 2), -(height / 2), -(bottomSideLength / 2)];
+        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
         this.setEdgesFaces();
         this.updateMatrices();
     }
     setEdgesFaces() {
         this.edgeIndexes = [
-            [0, 1],
-            [1, 2],
-            [2, 3],
-            [3, 0],
-            [0, 4],
-            [1, 4],
-            [2, 4],
-            [3, 4],
+            [0, 1], [1, 2], [2, 3], [3, 0],
+            [0, 4], [1, 4], [2, 4], [3, 4],
         ];
         this.faces = [
             { pointIndexes: [0, 1, 2, 3], colour: "#ff0000" },
@@ -344,25 +315,51 @@ class SquareBasedPyramid extends Shape {
         ];
     }
 }
-
-
+class TriangularPrism extends Shape {
+    constructor(width, height, depth) {
+        super();
+        this.pointMatrix = new matrix();
+        this.pointMatrix.addColumn([0, 0, 0]);
+        this.pointMatrix.addColumn([width, 0, 0]);
+        this.pointMatrix.addColumn([width / 2, height, 0]);
+        this.pointMatrix.addColumn([0, 0, depth]);
+        this.pointMatrix.addColumn([width, 0, depth]);
+        this.pointMatrix.addColumn([width / 2, height, depth]);
+        const [centeringX, centeringY, centeringZ] = [-(width / 2), -(height / 2), -(depth / 2)];
+        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
+        this.setEdgesFaces();
+        this.updateMatrices();
+    }
+    setEdgesFaces() {
+        this.edgeIndexes = [
+            [0, 1], [1, 2], [2, 0],
+            [0, 3], [1, 4], [2, 5],
+            [3, 4], [4, 5], [5, 3]
+        ];
+        this.faces = [
+            { pointIndexes: [0, 1, 2], colour: "#ff0000" },
+            { pointIndexes: [0, 2, 5, 3], colour: "#00ff00" },
+            { pointIndexes: [0, 1, 4, 3], colour: "#0000ff" },
+            { pointIndexes: [1, 2, 5, 4], colour: "#ffff00" },
+            { pointIndexes: [3, 4, 5], colour: "#00ffff" }
+        ];
+    }
+}
+"use strict";
 class Camera {
     constructor() {
         this.position = { x: 0, y: 0 };
         this.zoom = 1;
         this.worldRotation = { x: 0, y: 0, z: 0 };
         this.worldRotationMatrix = new matrix();
-        this.worldRotationMatrix.addColumn([1, 0, 0]);
-        this.worldRotationMatrix.addColumn([0, 1, 0]);
-        this.worldRotationMatrix.addColumn([0, 0, 1]);
         this.updateRotationMatrix();
     }
     render(objects) {
         const objectData = [];
         for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
+            //transform the object's physicalMatrix to how the camera would see it:
             const object = objects[objectIndex];
             let cameraObjectMatrix = object.physicalMatrix.copy();
-            //transform the object's physicalMatrix to how the camera would see it:
             cameraObjectMatrix.scaleUp(this.zoom); //scale from zoom
             cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
             //translate object relative to grid origin, since the object's position is relative to the origin, it can also be considered as a vector from the origin
@@ -378,34 +375,20 @@ class Camera {
             const ultimateTranslation = screenOriginObjectVector.getColumn(0); //screenOriginObjectVector contains the originObjectTranslation inside it
             cameraObjectMatrix.translateMatrix(ultimateTranslation[0], ultimateTranslation[1], ultimateTranslation[2]);
             //work out center of shape by finding average of all points
-            let totalX = 0;
-            let totalY = 0;
-            let totalZ = 0;
+            let [totalX, totalY, totalZ] = [0, 0, 0];
             for (let i = 0; i != cameraObjectMatrix.width; i += 1) {
                 const point = cameraObjectMatrix.getColumn(i);
                 totalX += point[0];
                 totalY += point[1];
                 totalZ += point[2];
             }
-            const averageX = totalX / cameraObjectMatrix.width;
-            const averageY = totalY / cameraObjectMatrix.width;
-            const averageZ = totalZ / cameraObjectMatrix.width;
+            const [averageX, averageY, averageZ] = [totalX / cameraObjectMatrix.width, totalY / cameraObjectMatrix.width, totalZ / cameraObjectMatrix.width];
             const center = [averageX, averageY, averageZ];
             objectData.push({ object: object, screenPoints: cameraObjectMatrix, center: center });
         }
         //sort objects based on distance to the position point:
         const positionPoint = [0, 0, -50000];
-        const sortedObjects = [];
-        while (objectData.length != 0) {
-            let furthestDistanceIndex = 0;
-            for (let i = 0; i != objectData.length; i += 1) {
-                if (distanceBetween(positionPoint, objectData[i].center) > distanceBetween(positionPoint, objectData[furthestDistanceIndex].center)) {
-                    furthestDistanceIndex = i;
-                }
-            }
-            sortedObjects.push(objectData[furthestDistanceIndex]);
-            objectData.splice(furthestDistanceIndex, 1);
-        }
+        const sortedObjects = this.sortFurthestDistanceTo(objectData, "center", positionPoint);
         for (let objectIndex = 0; objectIndex != sortedObjects.length; objectIndex += 1) {
             const object = sortedObjects[objectIndex].object;
             const screenPoints = sortedObjects[objectIndex].screenPoints;
@@ -418,32 +401,17 @@ class Camera {
                     points.push(screenPoints.getColumn(object.faces[i].pointIndexes[a]));
                 }
                 //find center by getting average of all points
-                let totalX = 0;
-                let totalY = 0;
-                let totalZ = 0;
+                let [totalX, totalY, totalZ] = [0, 0, 0];
                 for (let i = 0; i != points.length; i += 1) {
                     totalX += points[i][0];
                     totalY += points[i][1];
                     totalZ += points[i][2];
                 }
-                const averageX = totalX / points.length;
-                const averageY = totalY / points.length;
-                const averageZ = totalZ / points.length;
+                const [averageX, averageY, averageZ] = [totalX / points.length, totalY / points.length, totalZ / points.length];
                 const center = [averageX, averageY, averageZ];
                 objectFaces.push({ points: points, center: center, colour: object.faces[i].colour });
             }
-            //sort based on distance from center to (0, 0, -50000)
-            let sortedFaces = [];
-            while (objectFaces.length != 0) {
-                let furthestDistanceIndex = 0;
-                for (let i = 0; i != objectFaces.length; i += 1) {
-                    if (distanceBetween(positionPoint, objectFaces[i].center) > distanceBetween(positionPoint, objectFaces[furthestDistanceIndex].center)) {
-                        furthestDistanceIndex = i;
-                    }
-                }
-                sortedFaces.push(objectFaces[furthestDistanceIndex]);
-                objectFaces.splice(furthestDistanceIndex, 1);
-            }
+            const sortedFaces = this.sortFurthestDistanceTo(objectFaces, "center", positionPoint); //sort based on distance from center to (0, 0, -50000)
             //draw the faces as a quadrilateral, later I will change the drawQuadrilateral function to a drawShape function, which can take as many points as it needs
             for (let i = 0; i != sortedFaces.length; i += 1) {
                 const facePoints = sortedFaces[i].points;
@@ -463,31 +431,30 @@ class Camera {
             }
         }
     }
+    sortFurthestDistanceTo(list, positionKey, positionPoint) {
+        const sortedList = [];
+        const listCopy = list;
+        while (listCopy.length != 0) {
+            let furthestDistanceIndex = 0;
+            for (let i = 0; i != listCopy.length; i += 1) {
+                if (distanceBetween(positionPoint, listCopy[i][positionKey]) > distanceBetween(positionPoint, listCopy[furthestDistanceIndex][positionKey])) {
+                    furthestDistanceIndex = i;
+                }
+            }
+            sortedList.push(listCopy[furthestDistanceIndex]);
+            listCopy.splice(furthestDistanceIndex, 1);
+        }
+        return sortedList;
+    }
     updateRotationMatrix() {
-        const rX = (this.worldRotation.x % 360);
-        const rY = (this.worldRotation.y % 360);
-        const rZ = (this.worldRotation.z % 360);
-        const worldiHat = [1, 0, 0];
-        const worldjHat = [0, 1, 0];
-        const worldkHat = [0, 0, 1];
-        worldiHat[0] = cos(rY) * cos(rZ);
-        worldiHat[1] = cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ);
-        worldiHat[2] = sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ);
-        worldjHat[0] = -(cos(rY)) * sin(rZ);
-        worldjHat[1] = cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ);
-        worldjHat[2] = sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ);
-        worldkHat[0] = sin(rY);
-        worldkHat[1] = -(sin(rX)) * cos(rY);
-        worldkHat[2] = cos(rX) * cos(rY);
-        this.worldRotationMatrix.setValue(0, 0, worldiHat[0]);
-        this.worldRotationMatrix.setValue(0, 1, worldiHat[1]);
-        this.worldRotationMatrix.setValue(0, 2, worldiHat[2]);
-        this.worldRotationMatrix.setValue(1, 0, worldjHat[0]);
-        this.worldRotationMatrix.setValue(1, 1, worldjHat[1]);
-        this.worldRotationMatrix.setValue(1, 2, worldjHat[2]);
-        this.worldRotationMatrix.setValue(2, 0, worldkHat[0]);
-        this.worldRotationMatrix.setValue(2, 1, worldkHat[1]);
-        this.worldRotationMatrix.setValue(2, 2, worldkHat[2]);
+        const [rX, rY, rZ] = [(this.worldRotation.x % 360), (this.worldRotation.y % 360), (this.worldRotation.z % 360)];
+        const worldiHat = [cos(rY) * cos(rZ), cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ), sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ)];
+        const worldjHat = [-(cos(rY)) * sin(rZ), cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ), sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ)];
+        const worldkHat = [sin(rY), -(sin(rX)) * cos(rY), cos(rX) * cos(rY)];
+        this.worldRotationMatrix = new matrix();
+        this.worldRotationMatrix.addColumn(worldiHat);
+        this.worldRotationMatrix.addColumn(worldjHat);
+        this.worldRotationMatrix.addColumn(worldkHat);
     }
     renderGrid() {
         const gridLength = 500 * this.zoom;
@@ -511,7 +478,8 @@ class Camera {
         const zoomTranslationVector = absoluteOriginObjectVector.getColumn(0);
         startPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
         endPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
-        for (let i = 0; i != startPointMatrix.width; i += 1) {
+        for (let i = 0; i != startPointMatrix.width; i += 1) //draw grid lines in
+         {
             const point1 = startPointMatrix.getColumn(i);
             const point2 = endPointMatrix.getColumn(i);
             drawLine(point1, point2, "#000000");
@@ -519,4 +487,3 @@ class Camera {
     }
     ;
 }
-

@@ -6,7 +6,7 @@ camera.worldRotation.y = 20;
 camera.updateRotationMatrix();
 const cube = new Box(100, 100, 100);
 cube.scale = 1;
-cube.position.x = 50;
+cube.position.x = 300;
 cube.faces[5].colour = ""; //back face is transparent
 cube.updateMatrices();
 const pyramid = new SquareBasedPyramid(50, 100);
@@ -14,10 +14,15 @@ pyramid.position.x = -150;
 pyramid.scale = 2;
 pyramid.outline = true;
 pyramid.updateMatrices();
+const triangularPrism = new TriangularPrism(100, 100, 400);
+triangularPrism.outline = true;
 setInterval(() => {
+    cube.rotation.y += 1;
+    cube.rotation.z += 1;
+    cube.updateMatrices();
     clearCanvas();
     camera.renderGrid();
-    camera.render([cube, pyramid]);
+    camera.render([cube, pyramid, triangularPrism]);
     plotPoint([0, 0], "#000000"); //a visual marker of where it will zoom into
 }, 16);
 document.onkeydown = ($e) => {

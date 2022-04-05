@@ -21,7 +21,7 @@ linkCanvas("renderingWindow");
 ```
 
 ## Creating an Object
-I have made 2 inbuilt objects: a box and a square based pyramid, however it is very easy to create more, read the [Development Readme](DevelopmentREADME.md) for more information.\
+I have not made a lot of inbuilt objects, however it is very easy to create more, read the [Development Readme](DevelopmentREADME.md) for more information.\
 In this example I will create a box, the only thing you would have to change for other objects is the dimensions you pass in when creating them
 
 To create a box the user passes in 3 arguments, width, height and depth (for a pyramid it is just the bottomSideLength and height):
