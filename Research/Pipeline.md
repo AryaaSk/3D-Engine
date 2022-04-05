@@ -1,5 +1,6 @@
 # The Rendering Pipeline
 ## How an object is created and then drawn onto the screen
+*A constant theme of this is the order of operations, which is very important. For example if you translate an object and then rotate it, since I am using the Euler Rotation Matrix formula which rotates around the origin, the shape would be in a different position compared to if you rotated first and then translated.*
 
 ### Creating the Object:
 1. First the user creates a new object (I will use a box example), and gives it width, height and depth values.
@@ -50,7 +51,7 @@ This will give us our Î (iHat), Ĵ (jHat), and k̂ (kHat), unit vectors which r
 
     2. Once you have the centers of the faces, it calculates the distance of each center to the point (0, 0, -50000), the reason I used this point was because it negates the differences between individual object's positions, which would be an issue if I used the camera's position. Then just sort based on the distance between both points.
 
-3. Once you have the order just draw each face as a quadrilateral, draw the furthest ones first. You know which points to use because we hardcoded the index's of the corners in the object's PhysicalMatrix and therefore the CameraObjectMatrix.\
+3. Once you have the order just draw each face as a shape (for a box it is a quadrilateral), draw the furthest ones first. You know which points to use because we hardcoded the index's of the corners in the object's PhysicalMatrix and therefore the CameraObjectMatrix.\
 The reason this works is because although you are rotating and translating the shape, the corners don't actually move in relation to each other
 
 4. If the user wanted to also show border lines then we just use the edges indexes, which are also hardcoded when creating the object, again for the same reason as the diagonals and faces. Then just draw the lines using the points in the CameraObjectMatrix and ignore the Z-Axis.

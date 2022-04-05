@@ -7,13 +7,13 @@ camera.updateRotationMatrix();
 const cube = new Box(100, 100, 100);
 cube.scale = 1;
 cube.position.x = 50;
-cube.updateMatrices();
 cube.faces[5].colour = ""; //back face is transparent
+cube.updateMatrices();
 const pyramid = new SquareBasedPyramid(50, 100);
 pyramid.position.x = -150;
 pyramid.scale = 2;
-pyramid.updateMatrices();
 pyramid.outline = true;
+pyramid.updateMatrices();
 setInterval(() => {
     clearCanvas();
     camera.renderGrid();
