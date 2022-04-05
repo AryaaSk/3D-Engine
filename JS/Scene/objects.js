@@ -8,6 +8,7 @@ class Box {
         this.diagonals = []; //pairs of indexes of vertices which are diagonals
         this.faces = [];
         this.faceColours = {};
+        this.outline = false;
         this.dimensions = { width: 5, height: 5, depth: 5 };
         this.scale = 1;
         this.position = { x: 0, y: 0, z: 0 };

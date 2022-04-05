@@ -8,6 +8,8 @@ class Box {
 
     faces: { diagonal1: { p1Index: number, p2Index: number }, diagonal2: { p1Index: number, p2Index: number }, facingAxis: string, center: number[] }[] = [];
     faceColours: { [k: string] :  string } = {};
+
+    outline: boolean = false;
   
     constructor(width: number, height: number, depth: number) {
         

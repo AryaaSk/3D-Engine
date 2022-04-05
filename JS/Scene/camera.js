@@ -10,77 +10,103 @@ class Camera {
         this.worldRotationMatrix.addColumn([0, 0, 1]);
         this.updateRotationMatrix();
     }
-    render(box, outline) {
-        //CALCULATING OBJECT'S POSITION ON THE 2D SCREEN:
-        //The box's physicalMatrix tells us how where the point on the box are located relative to the origin, but we still need to position it
-        //You cannot physically move the camera, since the user sees through it through their screen, so you have to move the objects in the opposite direction to the camera
-        let cameraObjectMatrix = box.physicalMatrix.copy();
-        cameraObjectMatrix.scaleUp(this.zoom); //scale first to prevent it from affecting other translations
-        cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
-        //I wasn't able to implement 3D camera position, so it's just 2D
-        const gridOrigin = { x: -this.position.x, y: -this.position.y, z: 0 };
-        //translate object relative to grid origin:
-        //since the object's position is relative to the origin, it can also be considered as a vector from the origin
-        const distanceX = box.position.x;
-        const distanceY = box.position.y;
-        const distanceZ = box.position.z;
-        let gridMiddleObjectVectorMatrix = new matrix();
-        gridMiddleObjectVectorMatrix.addColumn([distanceX, distanceY, distanceZ]);
-        gridMiddleObjectVectorMatrix = multiplyMatrixs(this.worldRotationMatrix, gridMiddleObjectVectorMatrix);
-        const translationVector = gridMiddleObjectVectorMatrix.getColumn(0);
-        //finally we will move the object in the correct position based on zoom
-        //calculate vector from actual screen origin (0, 0, 0), to the shape
-        const absoluteOriginObjectVector = new matrix();
-        absoluteOriginObjectVector.addColumn([gridOrigin.x + translationVector[0], gridOrigin.y + translationVector[1], gridOrigin.z + translationVector[2]]);
-        absoluteOriginObjectVector.scaleUp(this.zoom);
-        const zoomTranslationVector = absoluteOriginObjectVector.getColumn(0); //now we have the new coordinates of the object, but we need to find the difference between this and the old one
-        cameraObjectMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
-        //ACTUALLY RENDERING THE OBJECT:
-        //calculate the centers of the faces
-        for (let i = 0; i != box.faces.length; i += 1) {
-            //we can just calculate the midpoint of one of the diagonals, since that is where it should cross
-            const point1 = cameraObjectMatrix.getColumn(box.faces[i].diagonal1.p1Index);
-            const point2 = cameraObjectMatrix.getColumn(box.faces[i].diagonal1.p2Index);
-            const averageX = (point1[0] + point2[0]) / 2;
-            const averageY = (point1[1] + point2[1]) / 2;
-            const averageZ = (point1[2] + point2[2]) / 2;
-            box.faces[i].center = [averageX, averageY, averageZ];
+    render(objects) {
+        const objectData = []; //a list of the box object's physical matrix as seen by the camera and their center point
+        //CALCULATING OBJECTS' POSITION ON THE 2D SCREEN:
+        for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
+            const object = objects[objectIndex];
+            //The box's physicalMatrix tells us how where the point on the box are located relative to the origin, but we still need to position it
+            //You cannot physically move the camera, since the user sees through it through their screen, so you have to move the objects in the opposite direction to the camera
+            let cameraObjectMatrix = object.physicalMatrix.copy();
+            cameraObjectMatrix.scaleUp(this.zoom); //scale first to prevent it from affecting other translations
+            cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
+            //I wasn't able to implement 3D camera position, so it's just 2D
+            const gridOrigin = { x: -this.position.x, y: -this.position.y, z: 0 };
+            //translate object relative to grid origin:
+            //since the object's position is relative to the origin, it can also be considered as a vector from the origin
+            const distanceX = object.position.x;
+            const distanceY = object.position.y;
+            const distanceZ = object.position.z;
+            let gridMiddleObjectVectorMatrix = new matrix();
+            gridMiddleObjectVectorMatrix.addColumn([distanceX, distanceY, distanceZ]);
+            gridMiddleObjectVectorMatrix = multiplyMatrixs(this.worldRotationMatrix, gridMiddleObjectVectorMatrix);
+            const translationVector = gridMiddleObjectVectorMatrix.getColumn(0);
+            //finally we will move the object in the correct position based on zoom
+            //calculate vector from actual screen origin (0, 0, 0), to the shape
+            const absoluteOriginObjectVector = new matrix();
+            absoluteOriginObjectVector.addColumn([gridOrigin.x + translationVector[0], gridOrigin.y + translationVector[1], gridOrigin.z + translationVector[2]]);
+            absoluteOriginObjectVector.scaleUp(this.zoom);
+            const zoomTranslationVector = absoluteOriginObjectVector.getColumn(0); //now we have the new coordinates of the object, but we need to find the difference between this and the old one
+            cameraObjectMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
+            //finally we find the center point, which is just the middle of the diagonal between point 1 and point7 add this to the objectData list
+            const point1 = cameraObjectMatrix.getColumn(0);
+            const point7 = cameraObjectMatrix.getColumn(6);
+            const centerPoint = [(point1[0] + point7[0]) / 2, (point1[1] + point7[1]) / 2, (point1[2] + point7[2]) / 2];
+            objectData.push({ object: object, cameraObjectMatrix: cameraObjectMatrix, center: centerPoint });
         }
-        //if we use the cameraObjectMatrix, then the camera is actually located at 0, 0, 0, so we will sort out faces based on their distance to the origin
-        //however I need to use a z-axis of -50000, in order make the differences between object's insignificant
+        //now sort objectData based on distance to the position point (furthest first)
         const positionPoint = [0, 0, -50000];
-        let sortedFaces = [];
-        const facesCopy = JSON.parse(JSON.stringify(box.faces));
-        while (facesCopy.length != 0) {
+        let sortedObjects = [];
+        while (objectData.length != 0) {
             let furthestDistanceIndex = 0;
-            for (let i = 0; i != facesCopy.length; i += 1) {
-                if (distanceBetween(positionPoint, facesCopy[i].center) > distanceBetween(positionPoint, facesCopy[furthestDistanceIndex].center)) {
+            for (let i = 0; i != objectData.length; i += 1) {
+                if (distanceBetween(positionPoint, objectData[i].center) > distanceBetween(positionPoint, objectData[furthestDistanceIndex].center)) {
                     furthestDistanceIndex = i;
                 }
             }
-            sortedFaces.push(facesCopy[furthestDistanceIndex]);
-            facesCopy.splice(furthestDistanceIndex, 1);
+            sortedObjects.push(objectData[furthestDistanceIndex]);
+            objectData.splice(furthestDistanceIndex, 1);
         }
-        //TODO: To minimize overlapping of faces, I can calculate which faces are facing the camera, then just hide the ones which arent
-        //and finally we can draw the faces with the box's faces object
-        for (let i = 0; i != sortedFaces.length; i += 1) {
-            const point1 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal1.p1Index);
-            const point2 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal2.p1Index);
-            const point3 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal1.p2Index);
-            const point4 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal2.p2Index);
-            const facingAxis = sortedFaces[i].facingAxis;
-            let colour = box.faceColours[facingAxis];
-            if (colour == "") {
-                continue;
+        //now render objects from sortedObjects to render the furthest ones first
+        //ACTUALLY RENDERING THE OBJECTS:
+        for (let objectIndex = 0; objectIndex != sortedObjects.length; objectIndex += 1) {
+            const object = sortedObjects[objectIndex].object;
+            const cameraObjectMatrix = sortedObjects[objectIndex].cameraObjectMatrix;
+            //calculate the centers of the faces
+            for (let i = 0; i != object.faces.length; i += 1) {
+                //we can just calculate the midpoint of one of the diagonals, since that is where it should cross
+                const point1 = cameraObjectMatrix.getColumn(object.faces[i].diagonal1.p1Index);
+                const point2 = cameraObjectMatrix.getColumn(object.faces[i].diagonal1.p2Index);
+                const averageX = (point1[0] + point2[0]) / 2;
+                const averageY = (point1[1] + point2[1]) / 2;
+                const averageZ = (point1[2] + point2[2]) / 2;
+                object.faces[i].center = [averageX, averageY, averageZ];
             }
-            drawQuadrilateral(point1, point2, point3, point4, colour);
-        }
-        if (outline == true) {
-            //use the object's edges, with the physicalMatrix, to draw the edges of the box
-            for (let i = 0; i != box.edges.length; i += 1) {
-                const point1 = cameraObjectMatrix.getColumn(box.edges[i].p1Index);
-                const point2 = cameraObjectMatrix.getColumn(box.edges[i].p2Index);
-                drawLine(point1, point2, "#606060");
+            //if we use the cameraObjectMatrix, then the camera is actually located at 0, 0, 0, so we will sort out faces based on their distance to the origin
+            //however I need to use a z-axis of -50000, in order make the differences between object's insignificant
+            let sortedFaces = [];
+            const facesCopy = JSON.parse(JSON.stringify(object.faces));
+            while (facesCopy.length != 0) {
+                let furthestDistanceIndex = 0;
+                for (let i = 0; i != facesCopy.length; i += 1) {
+                    if (distanceBetween(positionPoint, facesCopy[i].center) > distanceBetween(positionPoint, facesCopy[furthestDistanceIndex].center)) {
+                        furthestDistanceIndex = i;
+                    }
+                }
+                sortedFaces.push(facesCopy[furthestDistanceIndex]);
+                facesCopy.splice(furthestDistanceIndex, 1);
+            }
+            //TODO: To minimize overlapping of faces, I can calculate which faces are facing the camera, then just hide the ones which arent
+            //and finally we can draw the faces with the box's faces object
+            for (let i = 0; i != sortedFaces.length; i += 1) {
+                const point1 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal1.p1Index);
+                const point2 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal2.p1Index);
+                const point3 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal1.p2Index);
+                const point4 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal2.p2Index);
+                const facingAxis = sortedFaces[i].facingAxis;
+                let colour = object.faceColours[facingAxis];
+                if (colour == "") {
+                    continue;
+                }
+                drawQuadrilateral(point1, point2, point3, point4, colour);
+            }
+            if (object.outline == true) {
+                //use the object's edges, with the physicalMatrix, to draw the edges of the box
+                for (let i = 0; i != object.edges.length; i += 1) {
+                    const point1 = cameraObjectMatrix.getColumn(object.edges[i].p1Index);
+                    const point2 = cameraObjectMatrix.getColumn(object.edges[i].p2Index);
+                    drawLine(point1, point2, "#606060");
+                }
             }
         }
     }
@@ -111,7 +137,6 @@ class Camera {
         this.worldRotationMatrix.setValue(2, 2, worldkHat[2]);
     }
     renderGrid() {
-        //WILL NEED TO UPDATE THIS CODE TO MOVE THE SAME WAY OBJECTS MOVE IN RELATION TO CAMERA
         const gridLength = 500 * this.zoom;
         //create 2 points for each axis, then transform them using the worldRotationMatrix, then just plot them
         let startPointMatrix = new matrix();

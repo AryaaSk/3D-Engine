@@ -39,6 +39,8 @@ This will give us our Î (iHat), Ĵ (jHat), and k̂ (kHat), unit vectors which r
 
 ### Rendering the Object (Actually drawing things on the screen):
 
+- A list of objects is passed into the camera.render() function, I loop through that list and calculate all the transformations above, then once I have done that I calculate the center of the object in the Absolute 3D World, then just sort the objects based on distance to (0, 0, -50000), *similar to how I sort the faces below*, and I just render each object individually in order of furthest first, using the steps below:
+
 1. Now we have the CameraObjectMatrix which has the points of the object in the correct position in the Absolute 3D World, we just need to draw the physical points, lines and quadrilaterals onto the canvas:
 
 2. We need to determine the order in which to draw the faces, otherwise we would get something like this:

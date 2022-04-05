@@ -56,6 +56,11 @@ You can also set a face to "", which will make it transparent:
 cube.faceColours["-z"] = ""; //makes the front-facing side transparent
 ```
 
+Finally if you want to show the outline you can set the outline property to true, however this will also show the edges which should originally be hidden.
+```
+cube.outline = true;
+```
+
 ## Camera
 The camera is used to render objects.
  
@@ -88,11 +93,13 @@ You can render a grid which shows where your object's are positioned:
 camera.renderGrid();
 ```
 
-Finally to render an object:
+Finally to actually render the object to the screen use: (if you have multiple objects make sure to pass them all in the same function call)
 ```
-camera.render(cube);
+camera.render([cube]);
+
+//If you have multiple objects:
+camera.render([cube, cube2, cube3]);
 ```
-You can also pass in an optional boolean parameter **outline**, which will show the outline of the object, however this will also show the edges which should originally be hidden.
 
 You may also want to clear the page before rendering again, since otherwise there will be a copy created
 ```
