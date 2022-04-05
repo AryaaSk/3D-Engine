@@ -1,5 +1,6 @@
 "use strict";
 
+
 const dpi = window.devicePixelRatio;
 let canvas = undefined;
 let c = undefined;
@@ -55,17 +56,21 @@ const drawLine = (p1, p2, colour) => {
     c.lineTo(gridX(p2[0] * dpi), gridY(p2[1] * dpi));
     c.stroke();
 };
-const drawQuadrilateral = (p1, p2, p3, p4, colour) => {
+const drawShape = (points, colour) => {
     if (c == undefined) {
         console.error("Cannot draw, canvas is not linked, please use the linkCanvas(canvasID) before rendering any shapes");
         return;
     }
+    if (points.length < 3) {
+        console.error("Cannot draw shape, need at least 3 points to draw a shape");
+        return;
+    }
     c.fillStyle = colour;
     c.beginPath();
-    c.moveTo(gridX(p1[0] * dpi), gridY(p1[1] * dpi));
-    c.lineTo(gridX(p2[0] * dpi), gridY(p2[1] * dpi));
-    c.lineTo(gridX(p3[0] * dpi), gridY(p3[1] * dpi));
-    c.lineTo(gridX(p4[0] * dpi), gridY(p4[1] * dpi));
+    c.moveTo(gridX(points[0][0] * dpi), gridY(points[0][1] * dpi));
+    for (let pointsIndex = 1; pointsIndex != points.length; pointsIndex += 1) {
+        c.lineTo(gridX(points[pointsIndex][0] * dpi), gridY(points[pointsIndex][1] * dpi));
+    }
     c.closePath();
     c.fill();
 };
@@ -81,11 +86,6 @@ const clearCanvas = () => {
 //MATRIX FUNCTIONS
 class matrix {
     constructor() {
-        /* The data will be stored like on the left, on the right is how the actual matrix will look if you wrote it in mathmatics
-       [[1, 0],          [ [1   [0   [0
-        [0, 1]      =       0],  1],  0] ]
-        [0, 0]]
-        */
         this.data = []; /* DO NOT SET THIS EXPLICITLY, USE THE FUNCTIONS */
         this.width = 0; //num of columns
         this.height = 0; //num of rows
@@ -205,9 +205,7 @@ const multiplyMatrixs = (m1, m2) => {
     }
     return resultMatrix;
 };
-const toRadians = (angle) => {
-    return angle * (Math.PI / 180);
-};
+const toRadians = (angle) => { return angle * (Math.PI / 180); };
 const sin = (num) => { return Math.sin(toRadians(num)); };
 const cos = (num) => { return Math.cos(toRadians(num)); };
 const distanceBetween = (p1, p2) => {
@@ -218,69 +216,62 @@ const distanceBetween = (p1, p2) => {
 };
 
 
-//WHEN DOING OTHER SHAPES I FOUND THIS QUESTIONS: https://math.stackexchange.com/questions/3635017/calculate-edge-and-plane-of-a-box-given-its-vertices
-//RESEARCH ABOUT PAIRWISE DOT PRODUCTS, IT MAY HELP WHEN DEALING WITH THINGS LIKE PRISMS AND OTHER SHAPES
-class Box {
-    constructor(width, height, depth) {
-        this.pointMatrix = new matrix(); //Positions of points without any rotation transformations applied to them
-        this.edges = []; //pairs of indexes of vertices which are edges of the shape
-        this.diagonals = []; //pairs of indexes of vertices which are diagonals
-        this.faces = [];
-        this.faceColours = {};
-        this.outline = false;
-        this.dimensions = { width: 5, height: 5, depth: 5 };
-        this.scale = 1;
-        this.position = { x: 0, y: 0, z: 0 };
-        //we need to define our transformation/rotation matrix, iHat = x axis, jHat = y axis, kHat = z axis, these are vectors
-        //      x, y  (Physical grid)
-        this.iHat = [1, 0, 0];
-        this.jHat = [0, 1, 0];
-        this.kHat = [0, 0, 1];
-        this.rotation = { x: 0, y: 0, z: 0 };
-        this.rotationMatrix = new matrix(); //multiply this by the pointMatrix to get the actual positions of the points on the pseudo grid (physical points)
-        this.physicalMatrix = new matrix(); //the physical points that we plot on the screen
-        this.dimensions.width = width;
-        this.dimensions.height = height;
-        this.dimensions.depth = depth;
-        //You are given the dimensions of the box, so we don't need to individually calculate the edges and planes
-        //we can just put the vertices of the box in a specific order so that we know which pairs are diagonals and which pairs are edges
-        //since it is a box we can be sure that there will always be 12 edges, 8 vertices, and 6 planes
-        this.edges = [{ p1Index: 0, p2Index: 1 }, { p1Index: 1, p2Index: 2 }, { p1Index: 2, p2Index: 3 }, { p1Index: 3, p2Index: 0 }, { p1Index: 0, p2Index: 4 }, { p1Index: 1, p2Index: 5 }, { p1Index: 2, p2Index: 6 }, { p1Index: 3, p2Index: 7 }, { p1Index: 4, p2Index: 5 }, { p1Index: 5, p2Index: 6 }, { p1Index: 6, p2Index: 7 }, { p1Index: 7, p2Index: 4 }];
-        this.diagonals = [{ p1Index: 0, p2Index: 2 }, { p1Index: 0, p2Index: 5 }, { p1Index: 0, p2Index: 7 }, { p1Index: 6, p2Index: 1 }, { p1Index: 6, p2Index: 3 }, { p1Index: 6, p2Index: 4 }];
-        this.diagonals.push({ p1Index: 1, p2Index: 3 }, { p1Index: 1, p2Index: 4 }, { p1Index: 3, p2Index: 4 }, { p1Index: 2, p2Index: 5 }, { p1Index: 2, p2Index: 7 }, { p1Index: 5, p2Index: 7 });
-        this.faces = [
-            { diagonal1: this.diagonals[0], diagonal2: this.diagonals[0 + 6], facingAxis: "-z", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[1], diagonal2: this.diagonals[1 + 6], facingAxis: "-y", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[2], diagonal2: this.diagonals[2 + 6], facingAxis: "-x", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[3], diagonal2: this.diagonals[3 + 6], facingAxis: "+x", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[4], diagonal2: this.diagonals[4 + 6], facingAxis: "+y", center: [0, 0, 0] },
-            { diagonal1: this.diagonals[5], diagonal2: this.diagonals[5 + 6], facingAxis: "+z", center: [0, 0, 0] }
-        ];
-        //- / + refers to the direction it is pointing in, for example -z means it is pointing towards the camera at default rotations
-        this.faceColours = {
-            "-z": "#ff0000",
-            "-y": "#00ff00",
-            "-x": "#0000ff",
-            "+x": "#ffff00",
-            "+y": "#00ffff",
-            "+z": "#ff00ff",
-        };
-        //This is what the default rotation is when all rotations are set to 0
+class Shape {
+    constructor() {
+        //Construction    
+        this.pointMatrix = new matrix(); //pointMatrix is constructed in the subclasses
+        //Rotation
         this.rotationMatrix = new matrix();
-        this.rotationMatrix.addColumn([1, 0, 0]); //x (iHat)
-        this.rotationMatrix.addColumn([0, 1, 0]); //y (jHat)
-        this.rotationMatrix.addColumn([0, 0, 1]); //z (kHat)
-        this.updateMatrices();
+        this.rotation = { x: 0, y: 0, z: 0 };
+        //Physical (as if the shape was being rendered around the origin)
+        this.physicalMatrix = new matrix();
+        this.scale = 1;
+        //Rendering
+        this.position = { x: 0, y: 0, z: 0 };
+        this.edgeIndexes = [];
+        this.outline = false;
+        this.faces = []; //stores the indexes of the columns (points) in the physicalMatrix
     }
-    updatePointMatrix() {
-        //update the point matrix here
-        const width = this.dimensions.width;
-        const height = this.dimensions.height;
-        const depth = this.dimensions.depth;
-        //Populate the pointMatrix, offsets are so that the shape rotates around it's center rather than the first point
+    updateRotationMatrix() {
+        //XYZ Euler rotation, Source: https://support.zemax.com/hc/en-us/articles/1500005576822-Rotation-Matrix-and-Tilt-About-X-Y-Z-in-OpticStudio
+        const rX = this.rotation.x % 360;
+        const rY = this.rotation.y % 360;
+        const rZ = this.rotation.z % 360;
+        const iHat = [1, 0, 0];
+        const jHat = [0, 1, 0];
+        const kHat = [0, 0, 1];
+        iHat[0] = cos(rY) * cos(rZ); //x-axis (iHat)
+        iHat[1] = cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ);
+        iHat[2] = sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ);
+        jHat[0] = -(cos(rY)) * sin(rZ); //y-axis (jHat)
+        jHat[1] = cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ);
+        jHat[2] = sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ);
+        kHat[0] = sin(rY); //z-axis (kHat)
+        kHat[1] = -(sin(rX)) * cos(rY);
+        kHat[2] = cos(rX) * cos(rY);
+        //Set the unit vectors onto the singular rotation matrix
+        this.rotationMatrix = new matrix();
+        this.rotationMatrix.addColumn(iHat);
+        this.rotationMatrix.addColumn(jHat);
+        this.rotationMatrix.addColumn(kHat);
+    }
+    updatePhysicalMatrix() {
+        this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix);
+        this.physicalMatrix.scaleUp(this.scale);
+    }
+    updateMatrices() {
+        this.updateRotationMatrix();
+        this.updatePhysicalMatrix();
+    }
+}
+class Box extends Shape {
+    //populate the pointMatrix, once we have done that we just call updateRotationMatrix() and updatePhysicalMatrix()
+    //after populating pointMatrix, we need to update the edges, and faceIndexes
+    constructor(width, height, depth) {
+        super();
         const centeringX = -(width / 2);
         const centeringY = -(height / 2);
-        const centeringZ = -(depth / 2); //this doesn't really matter since the z-axis can't get rendered anyway
+        const centeringZ = -(depth / 2);
         this.pointMatrix = new matrix();
         this.pointMatrix.addColumn([0 + centeringX, 0 + centeringY, 0 + centeringZ]);
         this.pointMatrix.addColumn([width + centeringX, 0 + centeringY, 0 + centeringZ]);
@@ -290,45 +281,67 @@ class Box {
         this.pointMatrix.addColumn([width + centeringX, 0 + centeringY, depth + centeringZ]);
         this.pointMatrix.addColumn([width + centeringX, height + centeringY, depth + centeringZ]);
         this.pointMatrix.addColumn([0 + centeringX, height + centeringY, depth + centeringZ]);
+        this.setEdgesFaces();
+        this.updateMatrices();
     }
-    updateRotationMatrix() {
-        const rX = this.rotation.x % 360;
-        const rY = this.rotation.y % 360;
-        const rZ = this.rotation.z % 360;
-        //XYZ Euler rotation
-        //Source: https://support.zemax.com/hc/en-us/articles/1500005576822-Rotation-Matrix-and-Tilt-About-X-Y-Z-in-OpticStudio
-        //x-axis (iHat)
-        this.iHat[0] = cos(rY) * cos(rZ);
-        this.iHat[1] = cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ);
-        this.iHat[2] = sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ);
-        //y-axis (jHat)
-        this.jHat[0] = -(cos(rY)) * sin(rZ);
-        this.jHat[1] = cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ);
-        this.jHat[2] = sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ);
-        //z-axis (kHat)
-        this.kHat[0] = sin(rY);
-        this.kHat[1] = -(sin(rX)) * cos(rY);
-        this.kHat[2] = cos(rX) * cos(rY);
-        //Set the unit vectors onto the singular rotation matrix
-        this.rotationMatrix.setValue(0, 0, this.iHat[0]);
-        this.rotationMatrix.setValue(0, 1, this.iHat[1]);
-        this.rotationMatrix.setValue(0, 2, this.iHat[2]);
-        this.rotationMatrix.setValue(1, 0, this.jHat[0]);
-        this.rotationMatrix.setValue(1, 1, this.jHat[1]);
-        this.rotationMatrix.setValue(1, 2, this.jHat[2]);
-        this.rotationMatrix.setValue(2, 0, this.kHat[0]);
-        this.rotationMatrix.setValue(2, 1, this.kHat[1]);
-        this.rotationMatrix.setValue(2, 2, this.kHat[2]);
+    setEdgesFaces() {
+        //hardcoded values since the points of the shape won't move in relation to each other
+        this.edgeIndexes = [
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 0],
+            [0, 4],
+            [1, 5],
+            [2, 6],
+            [3, 7],
+            [4, 5],
+            [5, 6],
+            [6, 7],
+            [7, 4],
+        ];
+        this.faces = [
+            { pointIndexes: [0, 1, 2, 3], colour: "#ff0000" },
+            { pointIndexes: [1, 2, 6, 5], colour: "#00ff00" },
+            { pointIndexes: [2, 3, 7, 6], colour: "#0000ff" },
+            { pointIndexes: [0, 1, 5, 4], colour: "#ffff00" },
+            { pointIndexes: [0, 3, 7, 4], colour: "#00ffff" },
+            { pointIndexes: [4, 5, 6, 7], colour: "#ff00ff" },
+        ];
     }
-    updatePhysicalMatrix() {
-        this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix);
-        this.physicalMatrix.scaleUp(this.scale);
-        //this will still be around the origin, the positions are set when rendering the object in the camera
+}
+class SquareBasedPyramid extends Shape {
+    constructor(bottomSideLength, height) {
+        super();
+        const centeringX = -(bottomSideLength / 2);
+        const centeringY = -(height / 2);
+        const centeringZ = -(bottomSideLength / 2);
+        this.pointMatrix.addColumn([0 + centeringX, 0 + centeringY, 0 + centeringZ]);
+        this.pointMatrix.addColumn([bottomSideLength + centeringX, 0 + centeringY, 0 + centeringZ]);
+        this.pointMatrix.addColumn([bottomSideLength + centeringX, 0 + centeringY, bottomSideLength + centeringZ]);
+        this.pointMatrix.addColumn([0 + centeringX, 0 + centeringY, bottomSideLength + centeringZ]);
+        this.pointMatrix.addColumn([bottomSideLength / 2 + centeringX, height + centeringY, bottomSideLength / 2 + centeringZ]);
+        this.setEdgesFaces();
+        this.updateMatrices();
     }
-    updateMatrices() {
-        this.updatePointMatrix();
-        this.updateRotationMatrix();
-        this.updatePhysicalMatrix();
+    setEdgesFaces() {
+        this.edgeIndexes = [
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 0],
+            [0, 4],
+            [1, 4],
+            [2, 4],
+            [3, 4],
+        ];
+        this.faces = [
+            { pointIndexes: [0, 1, 2, 3], colour: "#ff0000" },
+            { pointIndexes: [0, 1, 4], colour: "#00ff00" },
+            { pointIndexes: [1, 2, 4], colour: "#0000ff" },
+            { pointIndexes: [2, 3, 4], colour: "#ffff00" },
+            { pointIndexes: [0, 3, 4], colour: "#00ffff" },
+        ];
     }
 }
 
@@ -345,42 +358,44 @@ class Camera {
         this.updateRotationMatrix();
     }
     render(objects) {
-        const objectData = []; //a list of the box object's physical matrix as seen by the camera and their center point
-        //CALCULATING OBJECTS' POSITION ON THE 2D SCREEN:
+        const objectData = [];
         for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
             const object = objects[objectIndex];
-            //The box's physicalMatrix tells us how where the point on the box are located relative to the origin, but we still need to position it
-            //You cannot physically move the camera, since the user sees through it through their screen, so you have to move the objects in the opposite direction to the camera
             let cameraObjectMatrix = object.physicalMatrix.copy();
-            cameraObjectMatrix.scaleUp(this.zoom); //scale first to prevent it from affecting other translations
+            //transform the object's physicalMatrix to how the camera would see it:
+            cameraObjectMatrix.scaleUp(this.zoom); //scale from zoom
             cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
-            //I wasn't able to implement 3D camera position, so it's just 2D
+            //translate object relative to grid origin, since the object's position is relative to the origin, it can also be considered as a vector from the origin
             const gridOrigin = { x: -this.position.x, y: -this.position.y, z: 0 };
-            //translate object relative to grid origin:
-            //since the object's position is relative to the origin, it can also be considered as a vector from the origin
-            const distanceX = object.position.x;
-            const distanceY = object.position.y;
-            const distanceZ = object.position.z;
-            let gridMiddleObjectVectorMatrix = new matrix();
-            gridMiddleObjectVectorMatrix.addColumn([distanceX, distanceY, distanceZ]);
-            gridMiddleObjectVectorMatrix = multiplyMatrixs(this.worldRotationMatrix, gridMiddleObjectVectorMatrix);
-            const translationVector = gridMiddleObjectVectorMatrix.getColumn(0);
-            //finally we will move the object in the correct position based on zoom
-            //calculate vector from actual screen origin (0, 0, 0), to the shape
-            const absoluteOriginObjectVector = new matrix();
-            absoluteOriginObjectVector.addColumn([gridOrigin.x + translationVector[0], gridOrigin.y + translationVector[1], gridOrigin.z + translationVector[2]]);
-            absoluteOriginObjectVector.scaleUp(this.zoom);
-            const zoomTranslationVector = absoluteOriginObjectVector.getColumn(0); //now we have the new coordinates of the object, but we need to find the difference between this and the old one
-            cameraObjectMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
-            //finally we find the center point, which is just the middle of the diagonal between point 1 and point7 add this to the objectData list
-            const point1 = cameraObjectMatrix.getColumn(0);
-            const point7 = cameraObjectMatrix.getColumn(6);
-            const centerPoint = [(point1[0] + point7[0]) / 2, (point1[1] + point7[1]) / 2, (point1[2] + point7[2]) / 2];
-            objectData.push({ object: object, cameraObjectMatrix: cameraObjectMatrix, center: centerPoint });
+            let originObjectVector = new matrix();
+            originObjectVector.addColumn([object.position.x, object.position.y, object.position.z]);
+            originObjectVector = multiplyMatrixs(this.worldRotationMatrix, originObjectVector);
+            const originObjectTranslation = originObjectVector.getColumn(0);
+            //move the object in the correct position based on zoom, calculate vector from screen origin (0, 0, 0), to object
+            const screenOriginObjectVector = new matrix();
+            screenOriginObjectVector.addColumn([gridOrigin.x + originObjectTranslation[0], gridOrigin.y + originObjectTranslation[1], gridOrigin.z + originObjectTranslation[2]]);
+            screenOriginObjectVector.scaleUp(this.zoom);
+            const ultimateTranslation = screenOriginObjectVector.getColumn(0); //screenOriginObjectVector contains the originObjectTranslation inside it
+            cameraObjectMatrix.translateMatrix(ultimateTranslation[0], ultimateTranslation[1], ultimateTranslation[2]);
+            //work out center of shape by finding average of all points
+            let totalX = 0;
+            let totalY = 0;
+            let totalZ = 0;
+            for (let i = 0; i != cameraObjectMatrix.width; i += 1) {
+                const point = cameraObjectMatrix.getColumn(i);
+                totalX += point[0];
+                totalY += point[1];
+                totalZ += point[2];
+            }
+            const averageX = totalX / cameraObjectMatrix.width;
+            const averageY = totalY / cameraObjectMatrix.width;
+            const averageZ = totalZ / cameraObjectMatrix.width;
+            const center = [averageX, averageY, averageZ];
+            objectData.push({ object: object, screenPoints: cameraObjectMatrix, center: center });
         }
-        //now sort objectData based on distance to the position point (furthest first)
+        //sort objects based on distance to the position point:
         const positionPoint = [0, 0, -50000];
-        let sortedObjects = [];
+        const sortedObjects = [];
         while (objectData.length != 0) {
             let furthestDistanceIndex = 0;
             for (let i = 0; i != objectData.length; i += 1) {
@@ -391,55 +406,59 @@ class Camera {
             sortedObjects.push(objectData[furthestDistanceIndex]);
             objectData.splice(furthestDistanceIndex, 1);
         }
-        //now render objects from sortedObjects to render the furthest ones first
-        //ACTUALLY RENDERING THE OBJECTS:
         for (let objectIndex = 0; objectIndex != sortedObjects.length; objectIndex += 1) {
             const object = sortedObjects[objectIndex].object;
-            const cameraObjectMatrix = sortedObjects[objectIndex].cameraObjectMatrix;
-            //calculate the centers of the faces
+            const screenPoints = sortedObjects[objectIndex].screenPoints;
+            //draw faces of shape in correct order, by finding the center and sorting based on distance to the position point
+            let objectFaces = [];
+            //populate the array
             for (let i = 0; i != object.faces.length; i += 1) {
-                //we can just calculate the midpoint of one of the diagonals, since that is where it should cross
-                const point1 = cameraObjectMatrix.getColumn(object.faces[i].diagonal1.p1Index);
-                const point2 = cameraObjectMatrix.getColumn(object.faces[i].diagonal1.p2Index);
-                const averageX = (point1[0] + point2[0]) / 2;
-                const averageY = (point1[1] + point2[1]) / 2;
-                const averageZ = (point1[2] + point2[2]) / 2;
-                object.faces[i].center = [averageX, averageY, averageZ];
+                let points = [];
+                for (let a = 0; a != object.faces[i].pointIndexes.length; a += 1) {
+                    points.push(screenPoints.getColumn(object.faces[i].pointIndexes[a]));
+                }
+                //find center by getting average of all points
+                let totalX = 0;
+                let totalY = 0;
+                let totalZ = 0;
+                for (let i = 0; i != points.length; i += 1) {
+                    totalX += points[i][0];
+                    totalY += points[i][1];
+                    totalZ += points[i][2];
+                }
+                const averageX = totalX / points.length;
+                const averageY = totalY / points.length;
+                const averageZ = totalZ / points.length;
+                const center = [averageX, averageY, averageZ];
+                objectFaces.push({ points: points, center: center, colour: object.faces[i].colour });
             }
-            //if we use the cameraObjectMatrix, then the camera is actually located at 0, 0, 0, so we will sort out faces based on their distance to the origin
-            //however I need to use a z-axis of -50000, in order make the differences between object's insignificant
+            //sort based on distance from center to (0, 0, -50000)
             let sortedFaces = [];
-            const facesCopy = JSON.parse(JSON.stringify(object.faces));
-            while (facesCopy.length != 0) {
+            while (objectFaces.length != 0) {
                 let furthestDistanceIndex = 0;
-                for (let i = 0; i != facesCopy.length; i += 1) {
-                    if (distanceBetween(positionPoint, facesCopy[i].center) > distanceBetween(positionPoint, facesCopy[furthestDistanceIndex].center)) {
+                for (let i = 0; i != objectFaces.length; i += 1) {
+                    if (distanceBetween(positionPoint, objectFaces[i].center) > distanceBetween(positionPoint, objectFaces[furthestDistanceIndex].center)) {
                         furthestDistanceIndex = i;
                     }
                 }
-                sortedFaces.push(facesCopy[furthestDistanceIndex]);
-                facesCopy.splice(furthestDistanceIndex, 1);
+                sortedFaces.push(objectFaces[furthestDistanceIndex]);
+                objectFaces.splice(furthestDistanceIndex, 1);
             }
-            //TODO: To minimize overlapping of faces, I can calculate which faces are facing the camera, then just hide the ones which arent
-            //and finally we can draw the faces with the box's faces object
+            //draw the faces as a quadrilateral, later I will change the drawQuadrilateral function to a drawShape function, which can take as many points as it needs
             for (let i = 0; i != sortedFaces.length; i += 1) {
-                const point1 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal1.p1Index);
-                const point2 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal2.p1Index);
-                const point3 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal1.p2Index);
-                const point4 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal2.p2Index);
-                const facingAxis = sortedFaces[i].facingAxis;
-                let colour = object.faceColours[facingAxis];
+                const facePoints = sortedFaces[i].points;
+                let colour = sortedFaces[i].colour;
                 if (colour == "") {
                     continue;
-                }
-                drawQuadrilateral(point1, point2, point3, point4, colour);
+                } //transparent face
+                drawShape(facePoints, colour);
             }
+            //draw the edges if outline is true
             if (object.outline == true) {
-                //use the object's edges, with the physicalMatrix, to draw the edges of the box
-                for (let i = 0; i != object.edges.length; i += 1) {
-                    const point1 = cameraObjectMatrix.getColumn(object.edges[i].p1Index);
-                    const point2 = cameraObjectMatrix.getColumn(object.edges[i].p2Index);
-                    drawLine(point1, point2, "#606060");
+                for (let i = 0; i != object.edgeIndexes.length; i += 1) {
+                    const point1 = screenPoints.getColumn(object.edgeIndexes[i][0]);
+                    const point2 = screenPoints.getColumn(object.edgeIndexes[i][1]);
+                    drawLine(point1, point2, "#000000");
                 }
             }
         }
@@ -500,3 +519,4 @@ class Camera {
     }
     ;
 }
+

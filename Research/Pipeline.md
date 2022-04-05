@@ -57,4 +57,5 @@ The reason this works is because although you are rotating and translating the s
 
 *The Absolute 3D World refers to a point's position on the actual screen, but if you consider the screen as 3D, you just can't see the Z-Axis. This means when I actually draw the point on the screen I just ignore the Z position, and just use the X and Y position*
 
+**This was created before when the box was the only object available, however the main concept is still the same, except I don't calculate the centers of the objects and faces with a diagonal anymore (I don't use diagonals anymore), instead I just calculate the average of the points of the object/face, and that is my center. I also created a drawShape() function to replace drawQuadrilateral() for shapes where the sides can also be triangles, e.g. a square-based pyramid.**
 

@@ -21,7 +21,43 @@ linkCanvas("renderingWindow");
 ```
 
 ## Creating an Object
-Right I have made 2 inbuilt objects: a box and a square based pyramid, however it is very easy to create more, read the [Development Readme](DevelopmentREADME.md) for more information
+I have made 2 inbuilt objects: a box and a square based pyramid, however it is very easy to create more, read the [Development Readme](DevelopmentREADME.md) for more information.\
+In this example I will create a box, the only thing you would have to change for other objects is the dimensions you pass in when creating them
+
+To create a box the user passes in 3 arguments, width, height and depth (for a pyramid it is just the bottomSideLength and height):
+```
+const cube = new Box(100, 100, 100);
+const pyramid = new SquareBasedPyramid(50, 100); //this is how you make a pyramid
+```
+
+You can transform the box using its rotation, scale and position attributes:
+```
+cube.rotation = { x: -20, y: -20, z: 0};
+cube.scale = 2;
+cube.position = { x: 200, y: 0, z: 0 };
+```
+
+If you change the rotation or scale then you need to apply the changes using:
+```
+cube.updateMatrices();
+```
+
+You can also change the appearance of the object using the faces property
+```
+cube.faces[0].colour = "#ff0000";
+```
+The faces each have their own index, 0 is the front-facing face, you may have to try a few to find the face you want to change. Here you changed the front-facing face to red;
+
+You can also make a face transparent:
+```
+cube.faces[5].colour = "#ff0000";
+```
+Here you changed the back-facing face to transparent, so you can see through it and see the other faces.
+
+Finally if you want to show the outline you can set the outline property to true, however this will also show the edges which should originally be hidden.
+```
+cube.outline = true;
+```
 
 ## Camera
 The camera is used to render objects.
