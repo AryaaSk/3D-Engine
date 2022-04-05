@@ -31,7 +31,12 @@ camera.worldRotation.z = 0;
 camera.updateRotationMatrix();
 
 setInterval(() => {
-    clearCanvas()
+
+    cube.rotation.x += 1;
+    cube.rotation.y += 1;
+    cube.updateMatrices();
+
+    clearCanvas();
     camera.renderGrid();
     camera.render(cube2);
     camera.render(cube);

@@ -26,6 +26,9 @@ camera.worldRotation.y = 0;
 camera.worldRotation.z = 0;
 camera.updateRotationMatrix();
 setInterval(() => {
+    cube.rotation.x += 1;
+    cube.rotation.y += 1;
+    cube.updateMatrices();
     clearCanvas();
     camera.renderGrid();
     camera.render(cube2);
