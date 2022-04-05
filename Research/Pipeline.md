@@ -26,15 +26,16 @@ This will give us our Î (iHat), Ĵ (jHat), and k̂ (kHat), unit vectors which r
 
     2. **Rotate for world rotation (when the user changes camera.rotation)**
 
-    3.  **Translate based on world rotation and zoom**:\
-    Function calculates where the origin is located, but in the absolute 3D world, if the camera's position is (50, 100), then the origin would be located at (-50, -100), I save this value as gridMiddle.\
-    Since the object's position is relative to the origin, it can also been seen as a vector from the origin, so the object's position in the absolute 3D scene is just **gridMiddle + object.position**.\
-    \
-    We have the object's position, but we actually need the vector from the origin so I just do **object.position - gridMiddle**, which just cancels out to **object.position**, *We don't really need to use gridMiddle for this, it is just an abstraction to make it easier to understand*.\
-    Once we have the vector from the gridMiddle (origin) -> object.position, we apply the worldRotationMatrix (which is calculated using the same formula as the RotationMatrix from the object), and now we have the new vector from the **gridMiddle -> object.position**.\
-    Finally we have this vector, we multiply it by the camera's zoom to make the space between object's larger with larger zoom, and then we just translate the object's position by this vector, which is the same as setting it since the object's position would have been relative to the origin before.
+    3. **Translate bassed on camera position**:\
+    It calculates the vector from the (screen origin) -> (virtual origin), the virtual origin is the position of the grid's origin, it is not the same as the actual origin as the grid origin will move when the camera moves. It is just the inverse of the camera's position, and I save as **gridOrigin**. Then I just translate the object with this.
 
-*The Absolute 3D World refers to a point's position on the actual screen, but if you consider the screen as 3D, you just can't see the Z-Axis. This means when I actually draw the point on the screen I just ignore the Z position, and just use the X and Y position*
+    4. **Translate based on world rotation**:\
+    The function calculates the vector from gridOrigin -> object.position, which is actually just its position because the position is saved relative the origin. Then it multiplies the RotationMatrix by this vector, and finally translates the object by this new vector relative to the gridOrigin.
+
+    5. **Translate based on zoom**:/
+    Calculates the absolute vector from (0, 0, 0) on actual screen, to the object's position. Then it multiplies this vector by the zoom, then just positions the object at this vector from the screen
+
+*When I coded it, I did not translate it after each step, I calculated the translation, and added the next one each time. This is so I can skip the step of finding the difference between the current vector and the next one, and then I just apply the final translation at the end*
 
 ### Rendering the Object (Actually drawing things on the screen):
 
@@ -51,5 +52,7 @@ This will give us our Î (iHat), Ĵ (jHat), and k̂ (kHat), unit vectors which r
 The reason this works is because although you are rotating and translating the shape, the corners don't actually move in relation to each other
 
 4. If the user wanted to also show border lines then we just use the edges indexes, which are also hardcoded when creating the object, again for the same reason as the diagonals and faces. Then just draw the lines using the points in the CameraObjectMatrix and ignore the Z-Axis.
+
+*The Absolute 3D World refers to a point's position on the actual screen, but if you consider the screen as 3D, you just can't see the Z-Axis. This means when I actually draw the point on the screen I just ignore the Z position, and just use the X and Y position*
 
 

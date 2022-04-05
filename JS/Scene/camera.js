@@ -17,24 +17,24 @@ class Camera {
         let cameraObjectMatrix = box.physicalMatrix.copy();
         cameraObjectMatrix.scaleUp(this.zoom); //scale first to prevent it from affecting other translations
         cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
-        const gridMiddle = { x: -(this.position.x), y: -(this.position.y), z: 0 };
-        //we set the object's position based on the difference between it and the grid (which is calculated with the camera)
-        //the position would be the gridMiddle + object's position, but we need to get the translation from the origin (that is where the object would be located now), these are the positions in the absolute 3D World, so they can also be considered translations from origin
-        const objectPositionX = gridMiddle.x + box.position.x;
-        const objectPositionY = gridMiddle.y + box.position.y;
-        const objectPositionZ = gridMiddle.z + box.position.z;
-        //however since those are the positions in the 3D, we need to find the vector of gridMiddle -> Object, transform that with the rotation matrix, and then translate it by that instead
-        const distanceX = objectPositionX - gridMiddle.x;
-        const distanceY = objectPositionY - gridMiddle.y;
-        const distanceZ = objectPositionZ - gridMiddle.z;
+        //I wasn't able to implement 3D camera position, so it's just 2D
+        const gridOrigin = { x: -this.position.x, y: -this.position.y, z: 0 };
+        //translate object relative to grid origin:
+        //since the object's position is relative to the origin, it can also be considered as a vector from the origin
+        const distanceX = box.position.x;
+        const distanceY = box.position.y;
+        const distanceZ = box.position.z;
         let gridMiddleObjectVectorMatrix = new matrix();
         gridMiddleObjectVectorMatrix.addColumn([distanceX, distanceY, distanceZ]);
         gridMiddleObjectVectorMatrix = multiplyMatrixs(this.worldRotationMatrix, gridMiddleObjectVectorMatrix);
-        gridMiddleObjectVectorMatrix.scaleUp(this.zoom); //need to add zoom before we translate it to avoid the shape from rotating around the wrong point
-        //now we have the translation vector from the gridMiddle, but we want it from the origin of the screen, so we just need to translate it by the gridMiddle
-        gridMiddleObjectVectorMatrix.translateMatrix(gridMiddle.x, gridMiddle.y, gridMiddle.z);
         const translationVector = gridMiddleObjectVectorMatrix.getColumn(0);
-        cameraObjectMatrix.translateMatrix(translationVector[0], translationVector[1], translationVector[2]);
+        //finally we will move the object in the correct position based on zoom
+        //calculate vector from actual screen origin (0, 0, 0), to the shape
+        const absoluteOriginObjectVector = new matrix();
+        absoluteOriginObjectVector.addColumn([gridOrigin.x + translationVector[0], gridOrigin.y + translationVector[1], gridOrigin.z + translationVector[2]]);
+        absoluteOriginObjectVector.scaleUp(this.zoom);
+        const zoomTranslationVector = absoluteOriginObjectVector.getColumn(0); //now we have the new coordinates of the object, but we need to find the difference between this and the old one
+        cameraObjectMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
         //ACTUALLY RENDERING THE OBJECT:
         //calculate the centers of the faces
         for (let i = 0; i != box.faces.length; i += 1) {
@@ -85,9 +85,9 @@ class Camera {
         }
     }
     updateRotationMatrix() {
-        const rX = this.worldRotation.x % 360;
-        const rY = this.worldRotation.y % 360;
-        const rZ = this.worldRotation.z % 360;
+        const rX = (this.worldRotation.x % 360);
+        const rY = (this.worldRotation.y % 360);
+        const rZ = (this.worldRotation.z % 360);
         const worldiHat = [1, 0, 0];
         const worldjHat = [0, 1, 0];
         const worldkHat = [0, 0, 1];
@@ -111,6 +111,7 @@ class Camera {
         this.worldRotationMatrix.setValue(2, 2, worldkHat[2]);
     }
     renderGrid() {
+        //WILL NEED TO UPDATE THIS CODE TO MOVE THE SAME WAY OBJECTS MOVE IN RELATION TO CAMERA
         const gridLength = 500 * this.zoom;
         //create 2 points for each axis, then transform them using the worldRotationMatrix, then just plot them
         let startPointMatrix = new matrix();
@@ -123,17 +124,15 @@ class Camera {
         endPointMatrix.addColumn([0, 0, gridLength]);
         startPointMatrix = multiplyMatrixs(this.worldRotationMatrix, startPointMatrix);
         endPointMatrix = multiplyMatrixs(this.worldRotationMatrix, endPointMatrix);
-        //we also want to offset this grid by the camera's position
-        startPointMatrix.translateMatrix(-this.position.x, -this.position.y, 0);
-        endPointMatrix.translateMatrix(-this.position.x, -this.position.y, 0);
-        /*
-        const point1 = startPointMatrix.getColumn(0);
-        const point2 = endPointMatrix.getColumn(0);
-        const avX = (point1[0] + point2[0]) / 2;
-        const avY = (point1[1] + point2[1]) / 2;
-        const avZ = (point1[2] + point2[2]) / 2;
-        const gridMiddle = { x: avX, y: avY, z: avZ }; //this is the middle of the grid
-        */
+        //we also want to offset this grid by the camera's position, and also the zoom
+        const gridOrigin = { x: -this.position.x, y: -this.position.y, z: 0 };
+        //move grid based on zoom
+        const absoluteOriginObjectVector = new matrix();
+        absoluteOriginObjectVector.addColumn([gridOrigin.x, gridOrigin.y, gridOrigin.z]);
+        absoluteOriginObjectVector.scaleUp(this.zoom);
+        const zoomTranslationVector = absoluteOriginObjectVector.getColumn(0);
+        startPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
+        endPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
         for (let i = 0; i != startPointMatrix.width; i += 1) {
             const point1 = startPointMatrix.getColumn(i);
             const point2 = endPointMatrix.getColumn(i);

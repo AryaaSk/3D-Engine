@@ -25,17 +25,18 @@ const camera = new Camera();
 camera.position.x = 0;
 camera.position.y = 0;
 
-camera.worldRotation.x = -30;
-camera.worldRotation.y = 30;
+camera.worldRotation.x = 0;
+camera.worldRotation.y = 0;
 camera.worldRotation.z = 0;
 camera.updateRotationMatrix();
-
 
 setInterval(() => {
     clearCanvas()
     camera.renderGrid();
     camera.render(cube2);
     camera.render(cube);
+
+    plotPoint([0, 0], "#000000"); //a visual marker of where it will zoom into
 })
 
 document.onkeydown = ($e) => {
