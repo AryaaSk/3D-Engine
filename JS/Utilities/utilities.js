@@ -2,11 +2,6 @@
 //MATRIX FUNCTIONS
 class matrix {
     constructor() {
-        /* The data will be stored like on the left, on the right is how the actual matrix will look if you wrote it in mathmatics
-       [[1, 0],          [ [1   [0   [0
-        [0, 1]      =       0],  1],  0] ]
-        [0, 0]]
-        */
         this.data = []; /* DO NOT SET THIS EXPLICITLY, USE THE FUNCTIONS */
         this.width = 0; //num of columns
         this.height = 0; //num of rows
@@ -126,9 +121,7 @@ const multiplyMatrixs = (m1, m2) => {
     }
     return resultMatrix;
 };
-const toRadians = (angle) => {
-    return angle * (Math.PI / 180);
-};
+const toRadians = (angle) => { return angle * (Math.PI / 180); };
 const sin = (num) => { return Math.sin(toRadians(num)); };
 const cos = (num) => { return Math.cos(toRadians(num)); };
 const distanceBetween = (p1, p2) => {

@@ -11,19 +11,17 @@ class Camera {
         this.updateRotationMatrix();
     }
     render(objects) {
-        const objectData = []; //a list of the box object's physical matrix as seen by the camera and their center point
+        const objectData = [];
         //CALCULATING OBJECTS' POSITION ON THE 2D SCREEN:
         for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
             const object = objects[objectIndex];
-            //The box's physicalMatrix tells us how where the point on the box are located relative to the origin, but we still need to position it
             //You cannot physically move the camera, since the user sees through it through their screen, so you have to move the objects in the opposite direction to the camera
             let cameraObjectMatrix = object.physicalMatrix.copy();
             cameraObjectMatrix.scaleUp(this.zoom); //scale first to prevent it from affecting other translations
             cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
             //I wasn't able to implement 3D camera position, so it's just 2D
             const gridOrigin = { x: -this.position.x, y: -this.position.y, z: 0 };
-            //translate object relative to grid origin:
-            //since the object's position is relative to the origin, it can also be considered as a vector from the origin
+            //translate object relative to grid origin, since the object's position is relative to the origin, it can also be considered as a vector from the origin
             const distanceX = object.position.x;
             const distanceY = object.position.y;
             const distanceZ = object.position.z;
@@ -87,7 +85,7 @@ class Camera {
                 facesCopy.splice(furthestDistanceIndex, 1);
             }
             //TODO: To minimize overlapping of faces, I can calculate which faces are facing the camera, then just hide the ones which arent
-            //and finally we can draw the faces with the box's faces object
+            //and finally we can draw the faces with the object's faces object
             for (let i = 0; i != sortedFaces.length; i += 1) {
                 const point1 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal1.p1Index);
                 const point2 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal2.p1Index);
@@ -101,7 +99,7 @@ class Camera {
                 drawQuadrilateral(point1, point2, point3, point4, colour);
             }
             if (object.outline == true) {
-                //use the object's edges, with the physicalMatrix, to draw the edges of the box
+                //use the object's edges, with the physicalMatrix, to draw the edges of the object
                 for (let i = 0; i != object.edges.length; i += 1) {
                     const point1 = cameraObjectMatrix.getColumn(object.edges[i].p1Index);
                     const point2 = cameraObjectMatrix.getColumn(object.edges[i].p2Index);

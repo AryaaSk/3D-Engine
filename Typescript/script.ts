@@ -32,6 +32,10 @@ cube3.faceColours = {
     "+z" : "#5a16e0",
 };
 
+cube3.dimensions.width = 200;
+cube3.updatePointMatrix();
+
+
 const camera = new Camera();
 camera.position.x = 0;
 camera.position.y = 0;

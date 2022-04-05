@@ -1,10 +1,5 @@
 //MATRIX FUNCTIONS
 class matrix {
-    /* The data will be stored like on the left, on the right is how the actual matrix will look if you wrote it in mathmatics
-   [[1, 0],          [ [1   [0   [0
-    [0, 1]      =       0],  1],  0] ]
-    [0, 0]]                
-    */
     private data: number[][] = []; /* DO NOT SET THIS EXPLICITLY, USE THE FUNCTIONS */
     width: number = 0; //num of columns
     height: number = 0; //num of rows
@@ -125,12 +120,9 @@ const multiplyMatrixs = (m1: matrix, m2: matrix) => {
 }
 
 
-const toRadians = (angle: number) => {
-    return angle * (Math.PI / 180);
-}
+const toRadians = (angle: number) => { return angle * (Math.PI / 180); }
 const sin = (num: number) => { return Math.sin(toRadians(num)) }
 const cos = (num: number) => { return Math.cos(toRadians(num)) }
-
 
 const distanceBetween = (p1: number[], p2: number[]) => {
     //first use pythagoruses thoerm to get the bottom diagonal
