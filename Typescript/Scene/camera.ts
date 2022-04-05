@@ -5,52 +5,52 @@ class Camera {
     worldRotation: {x: number, y: number, z: number} = { x: 0, y: 0, z: 0 };
     worldRotationMatrix = new matrix();
 
-    render(objects: Shape[]) {
+    render(objects: Shape[]) {  
 
-        const objectData: { object: Shape, cameraObjectMatrix: matrix, center: number[] }[] = [];
-
-        //CALCULATING OBJECTS' POSITION ON THE 2D SCREEN:
+        const objectData: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
         for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1)
         {
             const object = objects[objectIndex];
-
-            //You cannot physically move the camera, since the user sees through it through their screen, so you have to move the objects in the opposite direction to the camera
             let cameraObjectMatrix = object.physicalMatrix.copy();
 
-            cameraObjectMatrix.scaleUp(this.zoom); //scale first to prevent it from affecting other translations
-
+            //transform the object's physicalMatrix to how the camera would see it:
+            cameraObjectMatrix.scaleUp(this.zoom); //scale from zoom
             cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
 
-            //I wasn't able to implement 3D camera position, so it's just 2D
-            const gridOrigin = { x: -this.position.x, y: -this.position.y, z: 0 };
-
             //translate object relative to grid origin, since the object's position is relative to the origin, it can also be considered as a vector from the origin
-            const distanceX = object.position.x;
-            const distanceY = object.position.y;
-            const distanceZ = object.position.z;
-            let gridMiddleObjectVectorMatrix = new matrix();
-            gridMiddleObjectVectorMatrix.addColumn([distanceX, distanceY, distanceZ]);
-            gridMiddleObjectVectorMatrix = multiplyMatrixs(this.worldRotationMatrix, gridMiddleObjectVectorMatrix);
-            const translationVector = gridMiddleObjectVectorMatrix.getColumn(0);
+            const gridOrigin = { x: -this.position.x, y: -this.position.y, z: 0 };
+            let originObjectVector = new matrix();
+            originObjectVector.addColumn([object.position.x, object.position.y, object.position.z]);
+            originObjectVector = multiplyMatrixs(this.worldRotationMatrix, originObjectVector);
+            const originObjectTranslation = originObjectVector.getColumn(0);
 
-            //finally we will move the object in the correct position based on zoom
-            //calculate vector from actual screen origin (0, 0, 0), to the shape
-            const absoluteOriginObjectVector = new matrix();
-            absoluteOriginObjectVector.addColumn([gridOrigin.x + translationVector[0], gridOrigin.y + translationVector[1], gridOrigin.z + translationVector[2]]);
-            absoluteOriginObjectVector.scaleUp(this.zoom);
-            const zoomTranslationVector = absoluteOriginObjectVector.getColumn(0) //now we have the new coordinates of the object, but we need to find the difference between this and the old one
-            cameraObjectMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
-            
-            //finally we find the center point, which is just the middle of the diagonal between point 1 and point7 add this to the objectData list
-            const point1 = cameraObjectMatrix.getColumn(0);
-            const point7 = cameraObjectMatrix.getColumn(6);
-            const centerPoint = [(point1[0] + point7[0]) / 2, (point1[1] + point7[1]) / 2, (point1[2] + point7[2]) / 2]
-            objectData.push({object: object, cameraObjectMatrix: cameraObjectMatrix, center: centerPoint});
+            //move the object in the correct position based on zoom, calculate vector from screen origin (0, 0, 0), to object
+            const screenOriginObjectVector = new matrix();
+            screenOriginObjectVector.addColumn([gridOrigin.x + originObjectTranslation[0], gridOrigin.y + originObjectTranslation[1], gridOrigin.z + originObjectTranslation[2]]);
+            screenOriginObjectVector.scaleUp(this.zoom);
+
+            const ultimateTranslation = screenOriginObjectVector.getColumn(0); //screenOriginObjectVector contains the originObjectTranslation inside it
+            cameraObjectMatrix.translateMatrix(ultimateTranslation[0], ultimateTranslation[1], ultimateTranslation[2]);
+
+            //work out center of shape by finding average of all points
+            let totalX = 0;
+            let totalY = 0;
+            let totalZ = 0;
+            for (let i = 0; i != cameraObjectMatrix.width; i += 1) {
+                const point = cameraObjectMatrix.getColumn(i);
+                totalX += point[0]; totalY += point[1]; totalZ += point[2];
+            }
+            const averageX = totalX / cameraObjectMatrix.width;
+            const averageY = totalY / cameraObjectMatrix.width;
+            const averageZ = totalZ / cameraObjectMatrix.width;
+            const center = [averageX, averageY, averageZ];
+
+            objectData.push( { object: object, screenPoints: cameraObjectMatrix, center: center} )
         }
 
-        //now sort objectData based on distance to the position point (furthest first)
+        //sort objects based on distance to the position point:
         const positionPoint = [0, 0, -50000];
-        let sortedObjects: { object: Shape, cameraObjectMatrix: matrix, center: number[] }[] = [];
+        const sortedObjects: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
         while (objectData.length != 0)
         {
             let furthestDistanceIndex = 0;
@@ -64,64 +64,67 @@ class Camera {
         }
 
 
-        //now render objects from sortedObjects to render the furthest ones first
-        //ACTUALLY RENDERING THE OBJECTS:
-        for (let objectIndex = 0; objectIndex != sortedObjects.length; objectIndex += 1)
+        for (let objectIndex = 0; objectIndex != sortedObjects.length; objectIndex += 1 )
         {
             const object = sortedObjects[objectIndex].object;
-            const cameraObjectMatrix = sortedObjects[objectIndex].cameraObjectMatrix;
+            const screenPoints = sortedObjects[objectIndex].screenPoints
 
-            //calculate the centers of the faces
+            //draw faces of shape in correct order, by finding the center and sorting based on distance to the position point
+            let objectFaces: { points: number[][], center: number[], colour: string }[] = [];
+
+            //populate the array
             for (let i = 0; i != object.faces.length; i += 1)
             {
-                //we can just calculate the midpoint of one of the diagonals, since that is where it should cross
-                const point1 = cameraObjectMatrix.getColumn(object.faces[i].diagonal1.p1Index);
-                const point2 = cameraObjectMatrix.getColumn(object.faces[i].diagonal1.p2Index);
+                let points: number[][] = [];
+                for (let a = 0; a != object.faces[i].pointIndexes.length; a += 1)
+                { points.push(screenPoints.getColumn(object.faces[i].pointIndexes[a])); }
 
-                const averageX = (point1[0] + point2[0]) / 2;
-                const averageY = (point1[1] + point2[1]) / 2;
-                const averageZ = (point1[2] + point2[2]) / 2;
-                object.faces[i].center = [averageX, averageY, averageZ];
-            }
-    
-            //if we use the cameraObjectMatrix, then the camera is actually located at 0, 0, 0, so we will sort out faces based on their distance to the origin
-            //however I need to use a z-axis of -50000, in order make the differences between object's insignificant
-            let sortedFaces: { diagonal1: { p1Index: number, p2Index: number }, diagonal2: { p1Index: number, p2Index: number }, facingAxis: string, center: number[] }[] = [];
-            const facesCopy = JSON.parse(JSON.stringify(object.faces))
-            while (facesCopy.length != 0) {
-                let furthestDistanceIndex = 0;
-                for (let i = 0; i != facesCopy.length; i += 1) {
-                    if (distanceBetween(positionPoint, facesCopy[i].center) > distanceBetween(positionPoint, facesCopy[furthestDistanceIndex].center)) { furthestDistanceIndex = i; }
-                }
-                sortedFaces.push(facesCopy[furthestDistanceIndex]);
-                facesCopy.splice(furthestDistanceIndex, 1);
+                //find center by getting average of all points
+                let totalX = 0;
+                let totalY = 0;
+                let totalZ = 0;
+                for (let i = 0; i != points.length; i += 1) { totalX += points[i][0]; totalY += points[i][1]; totalZ += points[i][2]; }
+                const averageX = totalX / points.length;
+                const averageY = totalY / points.length;
+                const averageZ = totalZ / points.length;
+
+                const center = [averageX, averageY, averageZ];
+                objectFaces.push( { points: points, center: center, colour: object.faces[i].colour } );
             }
 
-            //TODO: To minimize overlapping of faces, I can calculate which faces are facing the camera, then just hide the ones which arent
-
-            //and finally we can draw the faces with the object's faces object
-            for (let i = 0; i != sortedFaces.length; i += 1) {
-                const point1 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal1.p1Index);
-                const point2 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal2.p1Index);
-                const point3 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal1.p2Index);
-                const point4 = cameraObjectMatrix.getColumn(sortedFaces[i].diagonal2.p2Index);
-
-                const facingAxis = sortedFaces[i].facingAxis;
-                let colour = object.faceColours[facingAxis];
-                if (colour == "") { continue; }
-
-                drawQuadrilateral(point1, point2, point3, point4, colour);
-            }
-            if (object.outline == true)
+            //sort based on distance from center to (0, 0, -50000)
+            let sortedFaces: { points: number[][], center: number[], colour: string }[] = [];
+            while (objectFaces.length != 0)
             {
-                //use the object's edges, with the physicalMatrix, to draw the edges of the object
-                for (let i = 0; i != object.edges.length; i += 1) {
-                    const point1 = cameraObjectMatrix.getColumn(object.edges[i].p1Index);
-                    const point2 = cameraObjectMatrix.getColumn(object.edges[i].p2Index);
-                    drawLine(point1, point2, "#606060");
+                let furthestDistanceIndex = 0;
+                for (let i = 0; i != objectFaces.length; i += 1)
+                {
+                    if (distanceBetween(positionPoint, objectFaces[i].center) > distanceBetween(positionPoint, objectFaces[furthestDistanceIndex].center))
+                    { furthestDistanceIndex = i; }
+                }
+                sortedFaces.push(objectFaces[furthestDistanceIndex]);
+                objectFaces.splice(furthestDistanceIndex, 1);
+            }
+
+            //draw the faces as a quadrilateral, later I will change the drawQuadrilateral function to a drawShape function, which can take as many points as it needs
+            for (let i = 0; i != sortedFaces.length; i += 1)
+            {
+                const facePoints = sortedFaces[i].points;
+                let colour = sortedFaces[i].colour;
+                if (colour == "") { continue; } //transparent face
+
+                drawShape(facePoints, colour);
+            }
+
+            //draw the edges if outline is true
+            if (object.outline == true) {
+                for (let i = 0; i != object.edgeIndexes.length; i += 1)
+                {
+                    const point1 = screenPoints.getColumn(object.edgeIndexes[i][0]);
+                    const point2 = screenPoints.getColumn(object.edgeIndexes[i][1]);
+                    drawLine(point1, point2, "#000000")
                 }
             }
-            
         }
     }
 

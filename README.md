@@ -20,46 +20,8 @@ Then in JS/TS, use the linkCanvas(canvasID: string) function with the same ID be
 linkCanvas("renderingWindow");
 ```
 
-## Creating a box
-To create a box the user passes in 3 arguments: width, height: depth, as seen below:
-```
-const cube = new Box(100, 100, 100);
-```
-Then in the Box's constructor, it creates points with these dimensions, and positions them around the origin.
-
-You can transform the box using its rotation, scale and position attributes:
-```
-cube.rotation = { x: -20, y: -20, z: 0};
-cube.scale = 2;
-cube.position = { x: 2, y: 0, z: 0 };
-```
-
-If you change the rotation or scale then you need to apply the changes using:
-```
-cube.updateMatrices();
-```
-
-You can also assign a colour to each face using the faceColours attribute
-```
-cube.faceColours = {  //assign a colour to each face (-z, -y, -x, +x, +y, +z)
-    "-z" : "#ff0000",
-    "-y" : "#00ff00",
-    "-x" : "#0000ff",
-    "+x" : "#ffff00",
-    "+y" : "#00ffff",
-    "+z" : "#ff00ff",
-}
-```
-Each face has it's own identifier (the key), which is just the direction which it is facing when there is no rotations applied to it. For example the first one is "-z", which is the face which is pointing in the negative-z direction, and it is the first face you see. The "-y" is pointing downwards, etc...\
-You can also set a face to "", which will make it transparent:
-```
-cube.faceColours["-z"] = ""; //makes the front-facing side transparent
-```
-
-Finally if you want to show the outline you can set the outline property to true, however this will also show the edges which should originally be hidden.
-```
-cube.outline = true;
-```
+## Creating an Object
+Right I have made 2 inbuilt objects: a box and a square based pyramid, however it is very easy to create more, read the [Development Readme](DevelopmentREADME.md) for more information
 
 ## Camera
 The camera is used to render objects.

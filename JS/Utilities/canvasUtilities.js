@@ -54,17 +54,21 @@ const drawLine = (p1, p2, colour) => {
     c.lineTo(gridX(p2[0] * dpi), gridY(p2[1] * dpi));
     c.stroke();
 };
-const drawQuadrilateral = (p1, p2, p3, p4, colour) => {
+const drawShape = (points, colour) => {
     if (c == undefined) {
         console.error("Cannot draw, canvas is not linked, please use the linkCanvas(canvasID) before rendering any shapes");
         return;
     }
+    if (points.length < 3) {
+        console.error("Cannot draw shape, need at least 3 points to draw a shape");
+        return;
+    }
     c.fillStyle = colour;
     c.beginPath();
-    c.moveTo(gridX(p1[0] * dpi), gridY(p1[1] * dpi));
-    c.lineTo(gridX(p2[0] * dpi), gridY(p2[1] * dpi));
-    c.lineTo(gridX(p3[0] * dpi), gridY(p3[1] * dpi));
-    c.lineTo(gridX(p4[0] * dpi), gridY(p4[1] * dpi));
+    c.moveTo(gridX(points[0][0] * dpi), gridY(points[0][1] * dpi));
+    for (let pointsIndex = 1; pointsIndex != points.length; pointsIndex += 1) {
+        c.lineTo(gridX(points[pointsIndex][0] * dpi), gridY(points[pointsIndex][1] * dpi));
+    }
     c.closePath();
     c.fill();
 };
