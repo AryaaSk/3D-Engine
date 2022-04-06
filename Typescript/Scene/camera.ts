@@ -24,9 +24,9 @@ class Camera {
             originObjectVector = multiplyMatrixs(this.worldRotationMatrix, originObjectVector);
             const originObjectTranslation = originObjectVector.getColumn(0);
 
-            //move the object in the correct position based on zoom, calculate vector from screen origin (0, 0, 0), to object
+            //move the object in the correct position based on zoom, calculate vector from zoom point (0, 0, 0), to object
             const screenOriginObjectVector = new matrix();
-            screenOriginObjectVector.addColumn([gridOrigin.x + originObjectTranslation[0], gridOrigin.y + originObjectTranslation[1], gridOrigin.z + originObjectTranslation[2]]);
+            screenOriginObjectVector.addColumn([(gridOrigin.x + originObjectTranslation[0]), (gridOrigin.y + originObjectTranslation[1]), (gridOrigin.z + originObjectTranslation[2])]);
             screenOriginObjectVector.scaleUp(this.zoom);
 
             const ultimateTranslation = screenOriginObjectVector.getColumn(0); //screenOriginObjectVector contains the originObjectTranslation inside it

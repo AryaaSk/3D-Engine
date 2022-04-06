@@ -33,19 +33,42 @@ setInterval(() => { //animation loop
     plotPoint([0, 0], "#000000"); //a visual marker of where it will zoom into
 }, 16);
 
+
+//CONTROLS:
+let mouseDown = false;
+let altDown = false;
+let previousX = 0;
+let previousY = 0;
+document.onmousedown = ($e) => { mouseDown = true; previousX = $e.clientX; previousY = $e.clientY; }
+document.onmouseup = () => { mouseDown = false; }
+document.onmousemove = ($e) => {
+    if (mouseDown == false) { return; }
+
+    let [differenceX, differenceY] = [$e.clientX - previousX, $e.clientY - previousY];
+    if (altDown == true) {
+        camera.position.x -= differenceX / camera.zoom;
+        camera.position.y += differenceY / camera.zoom;
+    }
+    else {
+        const absX = Math.abs(camera.worldRotation.x) % 360
+        if (absX > 90 && absX < 270)  { differenceX *= -1; }
+        camera.worldRotation.x -= differenceY / 5;
+        camera.worldRotation.y -= differenceX / 5;
+        camera.updateRotationMatrix();
+    }
+    [previousX, previousY] = [$e.clientX, $e.clientY];
+}
 document.onkeydown = ($e) => {
     const key = $e.key.toLowerCase();
-    if (key == "arrowleft") { camera.position.x -= 20; }
-    else if (key == "arrowright") { camera.position.x += 20; }
-    else if (key == "arrowup") { camera.position.y += 20; }
-    else if (key == "arrowdown") { camera.position.y -= 20; }
-
-    else if (key == "w") { camera.worldRotation.x -= 10; camera.updateRotationMatrix(); }
-    else if (key == "s") { camera.worldRotation.x += 10; camera.updateRotationMatrix(); }
-    else if (key == "a") { camera.worldRotation.y -= 10; camera.updateRotationMatrix(); }
-    else if (key == "d") { camera.worldRotation.y += 10; camera.updateRotationMatrix(); }
-
-    else if (key == "1") { camera.zoom += 0.1; }
-    else if (key == "2") { camera.zoom -= 0.1; }
+    if (key == "alt") { altDown = true; }
+}
+document.onkeyup = ($e) => {
+    const key = $e.key.toLowerCase();
+    if (key == "alt") { altDown = false; }
 }
 
+//Zooming in/out
+document.onwheel = ($e: any) => {
+    if (camera.zoom < 0) { camera.zoom = $e.wheelDeltaY / 1000; }
+    camera.zoom -= $e.wheelDeltaY / 1000;
+}

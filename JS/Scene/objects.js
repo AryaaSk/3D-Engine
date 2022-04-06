@@ -16,6 +16,7 @@ class Shape {
         this.edgeIndexes = [];
         this.outline = false;
         this.faces = []; //stores the indexes of the columns (points) in the physicalMatrix
+        this.showFaces = false;
     }
     updateRotationMatrix() {
         //XYZ Euler rotation, Source: https://support.zemax.com/hc/en-us/articles/1500005576822-Rotation-Matrix-and-Tilt-About-X-Y-Z-in-OpticStudio

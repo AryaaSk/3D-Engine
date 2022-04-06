@@ -36,6 +36,7 @@ class Shape
     edgeIndexes: number[][] = [];
     outline: boolean = false;
     faces: { pointIndexes: number[], colour: string }[]  = []; //stores the indexes of the columns (points) in the physicalMatrix
+    showFaces: boolean = false;
 
     updateMatrices() {
         this.updateRotationMatrix();
