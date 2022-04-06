@@ -55,24 +55,26 @@ class Camera {
                 }
                 //find center by getting average of all points
                 let [totalX, totalY, totalZ] = [0, 0, 0];
-                for (let i = 0; i != points.length; i += 1) {
-                    totalX += points[i][0];
-                    totalY += points[i][1];
-                    totalZ += points[i][2];
+                for (let a = 0; a != points.length; a += 1) {
+                    totalX += points[a][0];
+                    totalY += points[a][1];
+                    totalZ += points[a][2];
                 }
                 const [averageX, averageY, averageZ] = [totalX / points.length, totalY / points.length, totalZ / points.length];
                 const center = [averageX, averageY, averageZ];
-                objectFaces.push({ points: points, center: center, colour: object.faces[i].colour });
+                objectFaces.push({ points: points, center: center, colour: object.faces[i].colour, faceIndex: i });
             }
             const sortedFaces = this.sortFurthestDistanceTo(objectFaces, "center", positionPoint); //sort based on distance from center to (0, 0, -50000)
             //draw the faces as a quadrilateral, later I will change the drawQuadrilateral function to a drawShape function, which can take as many points as it needs
             for (let i = 0; i != sortedFaces.length; i += 1) {
                 const facePoints = sortedFaces[i].points;
                 let colour = sortedFaces[i].colour;
-                if (colour == "") {
-                    continue;
-                } //transparent face
-                drawShape(facePoints, colour, object.outline);
+                if (colour != "") {
+                    drawShape(facePoints, colour, object.outline);
+                } //if face is transparent then just don't render it
+                if (object.showFaceIndexes == true) {
+                    plotPoint(sortedFaces[i].center, "#000000", String(sortedFaces[i].faceIndex));
+                }
             }
         }
     }

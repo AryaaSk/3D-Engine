@@ -13,10 +13,9 @@ class Shape {
         this.scale = 1;
         //Rendering
         this.position = { x: 0, y: 0, z: 0 };
-        this.edgeIndexes = [];
         this.outline = false;
         this.faces = []; //stores the indexes of the columns (points) in the physicalMatrix
-        this.showFaces = false;
+        this.showFaceIndexes = false;
     }
     updateRotationMatrix() {
         //XYZ Euler rotation, Source: https://support.zemax.com/hc/en-us/articles/1500005576822-Rotation-Matrix-and-Tilt-About-X-Y-Z-in-OpticStudio
@@ -55,16 +54,11 @@ class Box extends Shape {
         this.pointMatrix.addColumn([0, height, depth]);
         const [centeringX, centeringY, centeringZ] = [-(width / 2), -(height / 2), -(depth / 2)];
         this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
-        this.setEdgesFaces();
+        this.setFaces();
         this.updateMatrices();
     }
-    setEdgesFaces() {
+    setFaces() {
         //hardcoded values since the points of the shape won't move in relation to each other
-        this.edgeIndexes = [
-            [0, 1], [1, 2], [2, 3], [3, 0],
-            [0, 4], [1, 5], [2, 6], [3, 7],
-            [4, 5], [5, 6], [6, 7], [7, 4]
-        ];
         this.faces = [
             { pointIndexes: [0, 1, 2, 3], colour: "#ff0000" },
             { pointIndexes: [1, 2, 6, 5], colour: "#00ff00" },
@@ -86,14 +80,10 @@ class SquareBasedPyramid extends Shape {
         this.pointMatrix.addColumn([bottomSideLength / 2, height, bottomSideLength / 2]);
         const [centeringX, centeringY, centeringZ] = [-(bottomSideLength / 2), -(height / 2), -(bottomSideLength / 2)];
         this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
-        this.setEdgesFaces();
+        this.setFaces();
         this.updateMatrices();
     }
-    setEdgesFaces() {
-        this.edgeIndexes = [
-            [0, 1], [1, 2], [2, 3], [3, 0],
-            [0, 4], [1, 4], [2, 4], [3, 4],
-        ];
+    setFaces() {
         this.faces = [
             { pointIndexes: [0, 1, 2, 3], colour: "#ff0000" },
             { pointIndexes: [0, 1, 4], colour: "#00ff00" },
@@ -115,15 +105,10 @@ class TriangularPrism extends Shape {
         this.pointMatrix.addColumn([width / 2, height, depth]);
         const [centeringX, centeringY, centeringZ] = [-(width / 2), -(height / 2), -(depth / 2)];
         this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
-        this.setEdgesFaces();
+        this.setFaces();
         this.updateMatrices();
     }
-    setEdgesFaces() {
-        this.edgeIndexes = [
-            [0, 1], [1, 2], [2, 0],
-            [0, 3], [1, 4], [2, 5],
-            [3, 4], [4, 5], [5, 3]
-        ];
+    setFaces() {
         this.faces = [
             { pointIndexes: [0, 1, 2], colour: "#ff0000" },
             { pointIndexes: [0, 2, 5, 3], colour: "#00ff00" },

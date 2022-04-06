@@ -42,11 +42,11 @@ If you change the rotation or scale then you need to apply the changes using:
 cube.updateMatrices();
 ```
 
-You can also change the appearance of the object using the faces property
+You can also change the appearance of the object using the faces property. Each faces each have their own index, if you are not sure which index is what face, you can set the showFaceIndexes property to true, and then you will be able to see which index is which face, making it easy to set the correct colour to the correct face:
 ```
+cube.showFaceIndexes = true;
 cube.faces[0].colour = "#ff0000";
 ```
-The faces each have their own index, 0 is the front-facing face, you may have to try a few to find the face you want to change. Here you changed the front-facing face to red;
 
 You can also make a face transparent:
 ```

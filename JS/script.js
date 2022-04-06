@@ -9,6 +9,7 @@ cube.scale = 1;
 cube.position.x = 300;
 cube.faces[5].colour = ""; //back face is transparent
 cube.updateMatrices();
+cube.showFaceIndexes = true;
 const pyramid = new SquareBasedPyramid(50, 100);
 pyramid.position.x = -150;
 pyramid.scale = 2;

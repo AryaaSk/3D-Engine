@@ -54,7 +54,7 @@ class Camera {
             const screenPoints = sortedObjects[objectIndex].screenPoints
 
             //draw faces of shape in correct order, by finding the center and sorting based on distance to the position point
-            let objectFaces: { points: number[][], center: number[], colour: string }[] = [];
+            let objectFaces: { points: number[][], center: number[], colour: string, faceIndex: number }[] = [];
 
             //populate the array
             for (let i = 0; i != object.faces.length; i += 1)
@@ -65,10 +65,10 @@ class Camera {
 
                 //find center by getting average of all points
                 let [totalX, totalY, totalZ] = [0, 0, 0];
-                for (let i = 0; i != points.length; i += 1) { totalX += points[i][0]; totalY += points[i][1]; totalZ += points[i][2]; }
+                for (let a = 0; a != points.length; a += 1) { totalX += points[a][0]; totalY += points[a][1]; totalZ += points[a][2]; }
                 const [averageX, averageY, averageZ] = [totalX / points.length, totalY / points.length, totalZ / points.length]
                 const center = [averageX, averageY, averageZ];
-                objectFaces.push( { points: points, center: center, colour: object.faces[i].colour } );
+                objectFaces.push( { points: points, center: center, colour: object.faces[i].colour, faceIndex: i } );
             }
 
             const sortedFaces = this.sortFurthestDistanceTo(objectFaces, "center", positionPoint); //sort based on distance from center to (0, 0, -50000)
@@ -78,8 +78,11 @@ class Camera {
             {
                 const facePoints = sortedFaces[i].points;
                 let colour = sortedFaces[i].colour;
-                if (colour == "") { continue; } //transparent face
-                drawShape(facePoints, colour, object.outline);
+                if (colour != "") { drawShape(facePoints, colour, object.outline); } //if face is transparent then just don't render it
+                
+
+                if (object.showFaceIndexes == true)
+                { plotPoint(sortedFaces[i].center, "#000000", String(sortedFaces[i].faceIndex)); }
             }
         }
     }

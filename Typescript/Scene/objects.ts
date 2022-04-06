@@ -33,10 +33,9 @@ class Shape
 
     //Rendering
     position: {x: number, y: number, z: number} = {x: 0, y: 0, z: 0};
-    edgeIndexes: number[][] = [];
     outline: boolean = false;
     faces: { pointIndexes: number[], colour: string }[]  = []; //stores the indexes of the columns (points) in the physicalMatrix
-    showFaces: boolean = false;
+    showFaceIndexes: boolean = false;
 
     updateMatrices() {
         this.updateRotationMatrix();
@@ -66,18 +65,12 @@ class Box extends Shape
         const [centeringX, centeringY, centeringZ] = [-(width / 2), -(height / 2), -(depth / 2)];
         this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
 
-        this.setEdgesFaces();
+        this.setFaces();
         this.updateMatrices();
     }
-    private setEdgesFaces()
+    private setFaces()
     {
         //hardcoded values since the points of the shape won't move in relation to each other
-        this.edgeIndexes = [
-            [0, 1], [1, 2], [2, 3], [3, 0],
-            [0, 4], [1, 5], [2, 6], [3, 7],
-            [4, 5], [5, 6], [6, 7], [7, 4]
-        ];
-
         this.faces = [
             { pointIndexes: [0, 1, 2, 3], colour: "#ff0000" },
             { pointIndexes: [1, 2, 6, 5], colour: "#00ff00" },
@@ -106,16 +99,11 @@ class SquareBasedPyramid extends Shape
         const [centeringX, centeringY, centeringZ] = [-(bottomSideLength / 2), -(height / 2), -(bottomSideLength / 2)];
         this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
 
-        this.setEdgesFaces();
+        this.setFaces();
         this.updateMatrices();
     }
-    private setEdgesFaces()
+    private setFaces()
     {
-        this.edgeIndexes = [
-            [0, 1], [1, 2], [2, 3], [3, 0],
-            [0, 4], [1, 4], [2, 4], [3, 4],
-        ];
-
         this.faces = [
             { pointIndexes: [0, 1, 2, 3], colour: "#ff0000" },
 
@@ -144,18 +132,11 @@ class TriangularPrism extends Shape
         const [centeringX, centeringY, centeringZ] = [-(width / 2), -(height / 2), -(depth / 2)];
         this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
 
-        this.setEdgesFaces();
+        this.setFaces();
         this.updateMatrices();
     }
-
-    private setEdgesFaces()
+    private setFaces()
     {
-        this.edgeIndexes = [
-            [0, 1], [1, 2], [2, 0],
-            [0, 3], [1, 4], [2, 5],
-            [3, 4], [4, 5], [5, 3]
-        ];
-
         this.faces = [
             { pointIndexes: [0, 1, 2], colour: "#ff0000" },
 
