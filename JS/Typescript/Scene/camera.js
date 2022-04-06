@@ -126,5 +126,55 @@ class Camera {
             drawLine(point1, point2, "#000000");
         }
     }
+    enableMovementControls(canvasID, rotation, movement, zoom) {
+        let mouseDown = false;
+        let altDown = false;
+        let previousX = 0;
+        let previousY = 0;
+        document.getElementById(canvasID).onmousedown = ($e) => { mouseDown = true; previousX = $e.clientX; previousY = $e.clientY; };
+        document.getElementById(canvasID).onmouseup = () => { mouseDown = false; };
+        document.getElementById(canvasID).onmousemove = ($e) => {
+            if (mouseDown == false) {
+                return;
+            }
+            let [differenceX, differenceY] = [$e.clientX - previousX, $e.clientY - previousY];
+            if (altDown == true && movement == true) {
+                this.position.x -= differenceX / this.zoom;
+                this.position.y += differenceY / this.zoom;
+            }
+            else if (rotation == true) {
+                const absX = Math.abs(this.worldRotation.x) % 360;
+                if (absX > 90 && absX < 270) {
+                    differenceX *= -1;
+                }
+                this.worldRotation.x -= differenceY / 5;
+                this.worldRotation.y -= differenceX / 5;
+                this.updateRotationMatrix();
+            }
+            [previousX, previousY] = [$e.clientX, $e.clientY];
+        };
+        document.onkeydown = ($e) => {
+            const key = $e.key.toLowerCase();
+            if (key == "alt") {
+                altDown = true;
+            }
+        };
+        document.onkeyup = ($e) => {
+            const key = $e.key.toLowerCase();
+            if (key == "alt") {
+                altDown = false;
+            }
+        };
+        //Zooming in/out
+        document.getElementById(canvasID).onwheel = ($e) => {
+            if (zoom == false) {
+                return;
+            }
+            if (this.zoom < 0) {
+                this.zoom = $e.wheelDeltaY / 1000;
+            }
+            this.zoom -= $e.wheelDeltaY / 1000;
+        };
+    }
     ;
 }

@@ -104,6 +104,11 @@ You may also want to clear the page before rendering again, since otherwise ther
 clearCanvas();
 ```
 
-Here is a preview of the project in this repo (to run this just download the repo and open the index.html file)
+You can also just enable the inbuilt movement controls, which allow the user to drag the mouse around to rotate the world, hold Alt and drag to move the camera's position, and scroll up/down to zoom in/out. **However if you use these then you will also have to handle the animation loop, since if you don't keep rendering the frames then you won't see any change on the screen**
+```
+camera.enableMovementControls(canvasID: string, rotation: boolean, movement: boolean, zoom: boolean);
+```
+
+Here is a preview of the project in this repo (Example/index.html)
 
 ![Preview Gif](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/3DEngineDemo.gif?raw=true)
