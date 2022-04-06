@@ -78,7 +78,7 @@ class Camera {
             {
                 const facePoints = sortedFaces[i].points;
                 let colour = sortedFaces[i].colour;
-                if (colour != "") { drawShape(facePoints, colour, object.outline); } //if face is transparent then just don't render it
+                if (colour != "") { drawShape(facePoints, colour, object.showOutline); } //if face is transparent then just don't render it
                 
 
                 if (object.showFaceIndexes == true)
@@ -118,7 +118,7 @@ class Camera {
 
     renderGrid()
     {
-        const gridLength = 500 * this.zoom;
+        const gridLength = 1000 * this.zoom;
 
         //create 2 points for each axis, then transform them using the worldRotationMatrix, then just plot them
         let startPointMatrix = new matrix();

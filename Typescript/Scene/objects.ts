@@ -33,7 +33,7 @@ class Shape
 
     //Rendering
     position: {x: number, y: number, z: number} = {x: 0, y: 0, z: 0};
-    outline: boolean = false;
+    showOutline: boolean = false;
     faces: { pointIndexes: number[], colour: string }[]  = []; //stores the indexes of the columns (points) in the physicalMatrix
     showFaceIndexes: boolean = false;
 
@@ -145,6 +145,51 @@ class TriangularPrism extends Shape
             { pointIndexes: [1, 2, 5, 4], colour: "#ffff00" },
 
             { pointIndexes: [3, 4, 5], colour: "#00ffff" }
+        ]
+    }
+}
+
+class ElongatedOctahedron extends Shape
+{
+    constructor (width: number, height: number, depth: number)
+    {
+        super();
+        this.pointMatrix = new matrix();
+
+        this.pointMatrix.addColumn([0, 0, 0]); //bottom point
+        this.pointMatrix.addColumn([-width / 2, height / 3, 0]); //first pyramid
+        this.pointMatrix.addColumn([0, height / 3, depth / 2]);
+        this.pointMatrix.addColumn([width / 2, height / 3, 0]);
+        this.pointMatrix.addColumn([0, height / 3, -depth / 2]);
+        this.pointMatrix.addColumn([-width / 2, height / 3 * 2, 0]); //cuboid in center
+        this.pointMatrix.addColumn([0, height / 3 * 2, depth / 2]);
+        this.pointMatrix.addColumn([width / 2, height / 3 * 2, 0]);
+        this.pointMatrix.addColumn([0, height / 3 * 2, -depth / 2]);
+        this.pointMatrix.addColumn([0, height, 0]); //top point
+
+        const [centeringX, centeringY, centeringZ] = [0, -(height / 2), 0];
+        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
+
+        this.setFaces();
+        this.updateMatrices();
+    }
+    private setFaces()
+    {
+        this.faces = [
+            { pointIndexes: [0, 1, 2], colour: "#ffffff" },
+            { pointIndexes: [0, 2, 3], colour: "#c4c4c4" },
+            { pointIndexes: [0, 3, 4], colour: "#ffffff" },
+            { pointIndexes: [0, 4, 1], colour: "#c4c4c4" },
+
+            { pointIndexes: [1, 5, 6, 2], colour: "#c4c4c4" },
+            { pointIndexes: [2, 6, 7, 3], colour: "#ffffff" },
+            { pointIndexes: [3, 7, 8, 4], colour: "#c4c4c4" },
+            { pointIndexes: [4, 8, 5, 1], colour: "#ffffff" },
+
+            { pointIndexes: [9, 5, 6], colour: "#ffffff" },
+            { pointIndexes: [9, 6, 7], colour: "#c4c4c4" },
+            { pointIndexes: [9, 7, 8], colour: "#ffffff" },
+            { pointIndexes: [9, 8, 5], colour: "#c4c4c4" }
         ]
     }
 }

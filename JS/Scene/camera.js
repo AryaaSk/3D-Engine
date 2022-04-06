@@ -70,7 +70,7 @@ class Camera {
                 const facePoints = sortedFaces[i].points;
                 let colour = sortedFaces[i].colour;
                 if (colour != "") {
-                    drawShape(facePoints, colour, object.outline);
+                    drawShape(facePoints, colour, object.showOutline);
                 } //if face is transparent then just don't render it
                 if (object.showFaceIndexes == true) {
                     plotPoint(sortedFaces[i].center, "#000000", String(sortedFaces[i].faceIndex));
@@ -104,7 +104,7 @@ class Camera {
         this.worldRotationMatrix.addColumn(worldkHat);
     }
     renderGrid() {
-        const gridLength = 500 * this.zoom;
+        const gridLength = 1000 * this.zoom;
         //create 2 points for each axis, then transform them using the worldRotationMatrix, then just plot them
         let startPointMatrix = new matrix();
         startPointMatrix.addColumn([-gridLength, 0, 0]); //x-axis

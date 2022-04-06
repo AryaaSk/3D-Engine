@@ -56,7 +56,7 @@ Here you changed the back-facing face to transparent, so you can see through it 
 
 Finally if you want to show the outline:
 ```
-cube.outline = true;
+cube.showOutline = true;
 ```
 
 ## Camera
