@@ -54,7 +54,7 @@ const drawLine = (p1, p2, colour) => {
     c.lineTo(gridX(p2[0] * dpi), gridY(p2[1] * dpi));
     c.stroke();
 };
-const drawShape = (points, colour) => {
+const drawShape = (points, colour, outline) => {
     if (c == undefined) {
         console.error("Cannot draw, canvas is not linked, please use the linkCanvas(canvasID) before rendering any shapes");
         return;
@@ -71,6 +71,12 @@ const drawShape = (points, colour) => {
     }
     c.closePath();
     c.fill();
+    if (outline == true) {
+        for (let i = 1; i != points.length; i += 1) {
+            drawLine(points[i - 1], points[i], "#000000");
+        }
+        drawLine(points[points.length - 1], points[0], "000000"); //to cover the line from last point to first point
+    }
 };
 const clearCanvas = () => {
     if (c == undefined) {
@@ -226,9 +232,9 @@ class Shape {
         this.scale = 1;
         //Rendering
         this.position = { x: 0, y: 0, z: 0 };
-        this.edgeIndexes = [];
         this.outline = false;
         this.faces = []; //stores the indexes of the columns (points) in the physicalMatrix
+        this.showFaceIndexes = false;
     }
     updateRotationMatrix() {
         //XYZ Euler rotation, Source: https://support.zemax.com/hc/en-us/articles/1500005576822-Rotation-Matrix-and-Tilt-About-X-Y-Z-in-OpticStudio
@@ -267,16 +273,11 @@ class Box extends Shape {
         this.pointMatrix.addColumn([0, height, depth]);
         const [centeringX, centeringY, centeringZ] = [-(width / 2), -(height / 2), -(depth / 2)];
         this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
-        this.setEdgesFaces();
+        this.setFaces();
         this.updateMatrices();
     }
-    setEdgesFaces() {
+    setFaces() {
         //hardcoded values since the points of the shape won't move in relation to each other
-        this.edgeIndexes = [
-            [0, 1], [1, 2], [2, 3], [3, 0],
-            [0, 4], [1, 5], [2, 6], [3, 7],
-            [4, 5], [5, 6], [6, 7], [7, 4]
-        ];
         this.faces = [
             { pointIndexes: [0, 1, 2, 3], colour: "#ff0000" },
             { pointIndexes: [1, 2, 6, 5], colour: "#00ff00" },
@@ -298,14 +299,10 @@ class SquareBasedPyramid extends Shape {
         this.pointMatrix.addColumn([bottomSideLength / 2, height, bottomSideLength / 2]);
         const [centeringX, centeringY, centeringZ] = [-(bottomSideLength / 2), -(height / 2), -(bottomSideLength / 2)];
         this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
-        this.setEdgesFaces();
+        this.setFaces();
         this.updateMatrices();
     }
-    setEdgesFaces() {
-        this.edgeIndexes = [
-            [0, 1], [1, 2], [2, 3], [3, 0],
-            [0, 4], [1, 4], [2, 4], [3, 4],
-        ];
+    setFaces() {
         this.faces = [
             { pointIndexes: [0, 1, 2, 3], colour: "#ff0000" },
             { pointIndexes: [0, 1, 4], colour: "#00ff00" },
@@ -327,15 +324,10 @@ class TriangularPrism extends Shape {
         this.pointMatrix.addColumn([width / 2, height, depth]);
         const [centeringX, centeringY, centeringZ] = [-(width / 2), -(height / 2), -(depth / 2)];
         this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
-        this.setEdgesFaces();
+        this.setFaces();
         this.updateMatrices();
     }
-    setEdgesFaces() {
-        this.edgeIndexes = [
-            [0, 1], [1, 2], [2, 0],
-            [0, 3], [1, 4], [2, 5],
-            [3, 4], [4, 5], [5, 3]
-        ];
+    setFaces() {
         this.faces = [
             { pointIndexes: [0, 1, 2], colour: "#ff0000" },
             { pointIndexes: [0, 2, 5, 3], colour: "#00ff00" },
@@ -368,9 +360,9 @@ class Camera {
             originObjectVector.addColumn([object.position.x, object.position.y, object.position.z]);
             originObjectVector = multiplyMatrixs(this.worldRotationMatrix, originObjectVector);
             const originObjectTranslation = originObjectVector.getColumn(0);
-            //move the object in the correct position based on zoom, calculate vector from screen origin (0, 0, 0), to object
+            //move the object in the correct position based on zoom, calculate vector from zoom point (0, 0, 0), to object
             const screenOriginObjectVector = new matrix();
-            screenOriginObjectVector.addColumn([gridOrigin.x + originObjectTranslation[0], gridOrigin.y + originObjectTranslation[1], gridOrigin.z + originObjectTranslation[2]]);
+            screenOriginObjectVector.addColumn([(gridOrigin.x + originObjectTranslation[0]), (gridOrigin.y + originObjectTranslation[1]), (gridOrigin.z + originObjectTranslation[2])]);
             screenOriginObjectVector.scaleUp(this.zoom);
             const ultimateTranslation = screenOriginObjectVector.getColumn(0); //screenOriginObjectVector contains the originObjectTranslation inside it
             cameraObjectMatrix.translateMatrix(ultimateTranslation[0], ultimateTranslation[1], ultimateTranslation[2]);
@@ -402,31 +394,25 @@ class Camera {
                 }
                 //find center by getting average of all points
                 let [totalX, totalY, totalZ] = [0, 0, 0];
-                for (let i = 0; i != points.length; i += 1) {
-                    totalX += points[i][0];
-                    totalY += points[i][1];
-                    totalZ += points[i][2];
+                for (let a = 0; a != points.length; a += 1) {
+                    totalX += points[a][0];
+                    totalY += points[a][1];
+                    totalZ += points[a][2];
                 }
                 const [averageX, averageY, averageZ] = [totalX / points.length, totalY / points.length, totalZ / points.length];
                 const center = [averageX, averageY, averageZ];
-                objectFaces.push({ points: points, center: center, colour: object.faces[i].colour });
+                objectFaces.push({ points: points, center: center, colour: object.faces[i].colour, faceIndex: i });
             }
             const sortedFaces = this.sortFurthestDistanceTo(objectFaces, "center", positionPoint); //sort based on distance from center to (0, 0, -50000)
             //draw the faces as a quadrilateral, later I will change the drawQuadrilateral function to a drawShape function, which can take as many points as it needs
             for (let i = 0; i != sortedFaces.length; i += 1) {
                 const facePoints = sortedFaces[i].points;
                 let colour = sortedFaces[i].colour;
-                if (colour == "") {
-                    continue;
-                } //transparent face
-                drawShape(facePoints, colour);
-            }
-            //draw the edges if outline is true
-            if (object.outline == true) {
-                for (let i = 0; i != object.edgeIndexes.length; i += 1) {
-                    const point1 = screenPoints.getColumn(object.edgeIndexes[i][0]);
-                    const point2 = screenPoints.getColumn(object.edgeIndexes[i][1]);
-                    drawLine(point1, point2, "#000000");
+                if (colour != "") {
+                    drawShape(facePoints, colour, object.outline);
+                } //if face is transparent then just don't render it
+                if (object.showFaceIndexes == true) {
+                    plotPoint(sortedFaces[i].center, "#000000", String(sortedFaces[i].faceIndex));
                 }
             }
         }
