@@ -1,5 +1,4 @@
-const dpi = window.devicePixelRatio;
-
+let dpi = 1; //window.devicePixelRatio; //it is too laggy when dpi >1
 let canvas: any = undefined;
 let c: any = undefined;
 let canvasWidth = 0; 

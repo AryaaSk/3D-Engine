@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var dpi = window.devicePixelRatio;
+var dpi = 1; //window.devicePixelRatio; //it is too laggy when dpi >1
 var canvas = undefined;
 var c = undefined;
 var canvasWidth = 0;

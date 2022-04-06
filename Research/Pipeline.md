@@ -9,7 +9,7 @@
 ![Box Layout](https://github.com/AryaaSk/3D-Engine/blob/master/Research/BoxLayout.png?raw=true)\
 Each number represents the (index of the corner)+1, the +1 is because I didn't want to start at 0. The red point represents the origin, all the scale and rotation transformatiosn are performed around the origin, and then the object is translated to it's actual position after to prevent inaccurate rotations.\
 
-* Since we know where each corner is located in relation to the others, we can hardcode the edges, diagonals and faces, each line containing 2 corners. These are useful later on when we render the shape.
+* Since we know where each corner is located in relation to the others, we can hardcode the faces and therefore the edges, each face is comprised of 4 vertexes (in a cube). These are useful later on when we render the shape.
 
 3. Once we have created the pointMatrix, we need to rotate the object with the XYZ rotations the user has given us, to do this we create a RotationMatrix, to calculate this I used the XYZ Rotation Matrix formula:\
 ![Box Layout](https://github.com/AryaaSk/3D-Engine/blob/master/Research/xyzrotationmatrix.jpeg?raw=true)\
@@ -47,14 +47,14 @@ This will give us our Î (iHat), Ĵ (jHat), and k̂ (kHat), unit vectors which r
 2. We need to determine the order in which to draw the faces, otherwise we would get something like this:
     ![Wrong Face Order](https://github.com/AryaaSk/3D-Engine/blob/master/Research/WrongFaceOrder.png?raw=true)\
 
-    1. First it calculates the center of each face, we know where the faces are located because we can hardcode the corners which construct each face, because we have a specific order of points, refer to the Creating the Object section for more info. To calculate the center you just use 1 of the diagonals, add together both points (vectors) and then divide by 2.
+    1. First it calculates the center of each face, we know where the faces are located because we can hardcode the corners which construct each face, because we have a specific order of points, refer to the Creating the Object section for more info. To calculate the center you just find the average of all 4 points of the face (in a cube).
 
     2. Once you have the centers of the faces, it calculates the distance of each center to the point (0, 0, -50000), the reason I used this point was because it negates the differences between individual object's positions, which would be an issue if I used the camera's position. Then just sort based on the distance between both points.
 
 3. Once you have the order just draw each face as a shape (for a box it is a quadrilateral), draw the furthest ones first. You know which points to use because we hardcoded the index's of the corners in the object's PhysicalMatrix and therefore the CameraObjectMatrix.\
 The reason this works is because although you are rotating and translating the shape, the corners don't actually move in relation to each other
 
-4. If the user wanted to also show border lines then we just use the edges indexes, which are also hardcoded when creating the object, again for the same reason as the diagonals and faces. Then just draw the lines using the points in the CameraObjectMatrix and ignore the Z-Axis.
+4. If the user wanted to also show border lines (edges) then we just render the lines at the same time as drawing the faces, this means I don't have to worry about the wrong edges being shown as the faces will be in the correct order so the edges will be too.
 
 *The Absolute 3D World refers to a point's position on the actual screen, but if you consider the screen as 3D, you just can't see the Z-Axis. This means when I actually draw the point on the screen I just ignore the Z position, and just use the X and Y position*
 
