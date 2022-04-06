@@ -105,15 +105,7 @@ class Camera {
     updateRotationMatrix() //rotate entire world
     {
         const [rX, rY, rZ] = [(this.worldRotation.x % 360), (this.worldRotation.y % 360), (this.worldRotation.z % 360)]
-
-        const worldiHat = [cos(rY) * cos(rZ), cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ), sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ)];
-        const worldjHat = [-(cos(rY)) * sin(rZ), cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ), sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ)];
-        const worldkHat = [sin(rY), -(sin(rX)) * cos(rY), cos(rX) * cos(rY)];
-
-        this.worldRotationMatrix = new matrix();
-        this.worldRotationMatrix.addColumn(worldiHat);
-        this.worldRotationMatrix.addColumn(worldjHat);
-        this.worldRotationMatrix.addColumn(worldkHat);
+        this.worldRotationMatrix = calculateRotationMatrix(rX, rY, rZ);
     }
 
     renderGrid()

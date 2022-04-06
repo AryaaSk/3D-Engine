@@ -130,3 +130,23 @@ const distanceBetween = (p1: number[], p2: number[]) => {
     const distance = Math.sqrt(bottomDiagonal ** 2 + (p2[1] - p1[1]) ** 2);
     return distance;
 }
+
+const calculateRotationMatrix = (rotationX: number, rotationY: number, rotationZ: number) => {
+    //XYZ Euler rotation, Source: https://support.zemax.com/hc/en-us/articles/1500005576822-Rotation-Matrix-and-Tilt-About-X-Y-Z-in-OpticStudio
+    //Just using the rotation matrix formula, look at Research/xyzrotationmatrix.jpeg for more info
+
+    const [rX, rY, rZ] = [(rotationX % 360), (rotationY % 360), (rotationZ % 360)];
+
+    //calculate iHat, jHat and kHat (x, y, z axis)
+    const iHat = [cos(rY) * cos(rZ), cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ), sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ)]; //x-axis (iHat)
+    const jHat = [-(cos(rY)) * sin(rZ), cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ), sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ)]; //y-axis (jHat)
+    const kHat = [sin(rY), -(sin(rX)) * cos(rY), cos(rX) * cos(rY)]; //z-axis (kHat)
+
+    //Set the unit vectors onto the singular rotation matrix
+    const rotationMatrix = new matrix();
+    rotationMatrix.addColumn(iHat);
+    rotationMatrix.addColumn(jHat);
+    rotationMatrix.addColumn(kHat);
+
+    return rotationMatrix;
+}

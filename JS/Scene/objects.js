@@ -18,16 +18,8 @@ class Shape {
         this.showFaceIndexes = false;
     }
     updateRotationMatrix() {
-        //XYZ Euler rotation, Source: https://support.zemax.com/hc/en-us/articles/1500005576822-Rotation-Matrix-and-Tilt-About-X-Y-Z-in-OpticStudio
         const [rX, rY, rZ] = [(this.rotation.x % 360), (this.rotation.y % 360), (this.rotation.z % 360)];
-        const iHat = [cos(rY) * cos(rZ), cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ), sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ)]; //x-axis (iHat)
-        const jHat = [-(cos(rY)) * sin(rZ), cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ), sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ)]; //y-axis (jHat)
-        const kHat = [sin(rY), -(sin(rX)) * cos(rY), cos(rX) * cos(rY)]; //z-axis (kHat)
-        //Set the unit vectors onto the singular rotation matrix
-        this.rotationMatrix = new matrix();
-        this.rotationMatrix.addColumn(iHat);
-        this.rotationMatrix.addColumn(jHat);
-        this.rotationMatrix.addColumn(kHat);
+        this.rotationMatrix = calculateRotationMatrix(rX, rY, rZ);
     }
     updatePhysicalMatrix() {
         this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix);

@@ -231,6 +231,21 @@ var distanceBetween = function (p1, p2) {
     var distance = Math.sqrt(Math.pow(bottomDiagonal, 2) + Math.pow((p2[1] - p1[1]), 2));
     return distance;
 };
+var calculateRotationMatrix = function (rotationX, rotationY, rotationZ) {
+    //XYZ Euler rotation, Source: https://support.zemax.com/hc/en-us/articles/1500005576822-Rotation-Matrix-and-Tilt-About-X-Y-Z-in-OpticStudio
+    //Just using the rotation matrix formula, look at Research/xyzrotationmatrix.jpeg for more info
+    var _a = [(rotationX % 360), (rotationY % 360), (rotationZ % 360)], rX = _a[0], rY = _a[1], rZ = _a[2];
+    //calculate iHat, jHat and kHat (x, y, z axis)
+    var iHat = [cos(rY) * cos(rZ), cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ), sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ)]; //x-axis (iHat)
+    var jHat = [-(cos(rY)) * sin(rZ), cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ), sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ)]; //y-axis (jHat)
+    var kHat = [sin(rY), -(sin(rX)) * cos(rY), cos(rX) * cos(rY)]; //z-axis (kHat)
+    //Set the unit vectors onto the singular rotation matrix
+    var rotationMatrix = new matrix();
+    rotationMatrix.addColumn(iHat);
+    rotationMatrix.addColumn(jHat);
+    rotationMatrix.addColumn(kHat);
+    return rotationMatrix;
+};
 //All shapes are subclasses of class Shape, because an object is just a collection of it's points
 //When the camera renders the object is just needs its Physical Matrix (points relative to the origin), so the subclasses are purely for constructing the shape
 var Shape = /** @class */ (function () {
@@ -250,16 +265,8 @@ var Shape = /** @class */ (function () {
         this.showFaceIndexes = false;
     }
     Shape.prototype.updateRotationMatrix = function () {
-        //XYZ Euler rotation, Source: https://support.zemax.com/hc/en-us/articles/1500005576822-Rotation-Matrix-and-Tilt-About-X-Y-Z-in-OpticStudio
         var _a = [(this.rotation.x % 360), (this.rotation.y % 360), (this.rotation.z % 360)], rX = _a[0], rY = _a[1], rZ = _a[2];
-        var iHat = [cos(rY) * cos(rZ), cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ), sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ)]; //x-axis (iHat)
-        var jHat = [-(cos(rY)) * sin(rZ), cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ), sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ)]; //y-axis (jHat)
-        var kHat = [sin(rY), -(sin(rX)) * cos(rY), cos(rX) * cos(rY)]; //z-axis (kHat)
-        //Set the unit vectors onto the singular rotation matrix
-        this.rotationMatrix = new matrix();
-        this.rotationMatrix.addColumn(iHat);
-        this.rotationMatrix.addColumn(jHat);
-        this.rotationMatrix.addColumn(kHat);
+        this.rotationMatrix = calculateRotationMatrix(rX, rY, rZ);
     };
     Shape.prototype.updatePhysicalMatrix = function () {
         this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix);
@@ -495,13 +502,7 @@ var Camera = /** @class */ (function () {
     };
     Camera.prototype.updateRotationMatrix = function () {
         var _a = [(this.worldRotation.x % 360), (this.worldRotation.y % 360), (this.worldRotation.z % 360)], rX = _a[0], rY = _a[1], rZ = _a[2];
-        var worldiHat = [cos(rY) * cos(rZ), cos(rX) * sin(rZ) + sin(rX) * sin(rY) * cos(rZ), sin(rX) * sin(rZ) - cos(rX) * sin(rY) * cos(rZ)];
-        var worldjHat = [-(cos(rY)) * sin(rZ), cos(rX) * cos(rZ) - sin(rX) * sin(rY) * sin(rZ), sin(rX) * cos(rZ) + cos(rX) * sin(rY) * sin(rZ)];
-        var worldkHat = [sin(rY), -(sin(rX)) * cos(rY), cos(rX) * cos(rY)];
-        this.worldRotationMatrix = new matrix();
-        this.worldRotationMatrix.addColumn(worldiHat);
-        this.worldRotationMatrix.addColumn(worldjHat);
-        this.worldRotationMatrix.addColumn(worldkHat);
+        this.worldRotationMatrix = calculateRotationMatrix(rX, rY, rZ);
     };
     Camera.prototype.renderGrid = function () {
         var gridLength = 1000 * this.zoom;
