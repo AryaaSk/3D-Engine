@@ -4,7 +4,7 @@ If you want to know how it works go [here](Research/Pipeline.md)
 ## Importing
 To import the library, just copy this script tag into your HTML head *(Make sure to do this before using it in another JS file)*.
 ```
-<script src="https://gitcdn.link/cdn/AryaaSk/3D-Engine/9d4be4184592a49cf75d056dabd0a3087f751d9a/aryaa3D.js"></script>
+<script src="https://gitcdn.link/cdn/AryaaSk/3D-Engine/ed4a62e85d68dad90d68d1f6c8b88ef62ec1a8c7/aryaa3D.js"></script>
 
 <script src="yourownjsfile.js" defer></script> <!-- You should add a defer tag on your own file, since you will need to wait for the canvas element to load into the DOM -->
 ```
