@@ -54,7 +54,7 @@ document.onmousemove = ($e) => {
         if (absX > 90 && absX < 270)  { differenceX *= -1; }
         camera.worldRotation.x -= differenceY / 5;
         camera.worldRotation.y -= differenceX / 5;
-        camera.updateRotationMatrix();
+        camera.updateRotationMatrix()
     }
     [previousX, previousY] = [$e.clientX, $e.clientY];
 }

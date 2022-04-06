@@ -54,7 +54,7 @@ const drawLine = (p1, p2, colour) => {
     c.lineTo(gridX(p2[0] * dpi), gridY(p2[1] * dpi));
     c.stroke();
 };
-const drawShape = (points, colour) => {
+const drawShape = (points, colour, outline) => {
     if (c == undefined) {
         console.error("Cannot draw, canvas is not linked, please use the linkCanvas(canvasID) before rendering any shapes");
         return;
@@ -71,6 +71,12 @@ const drawShape = (points, colour) => {
     }
     c.closePath();
     c.fill();
+    if (outline == true) {
+        for (let i = 1; i != points.length; i += 1) {
+            drawLine(points[i - 1], points[i], "#000000");
+        }
+        drawLine(points[points.length - 1], points[0], "000000"); //to cover the line from last point to first point
+    }
 };
 const clearCanvas = () => {
     if (c == undefined) {

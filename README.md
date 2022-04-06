@@ -54,7 +54,7 @@ cube.faces[5].colour = "#ff0000";
 ```
 Here you changed the back-facing face to transparent, so you can see through it and see the other faces.
 
-Finally if you want to show the outline you can set the outline property to true, however this will also show the edges which should originally be hidden.
+Finally if you want to show the outline:
 ```
 cube.outline = true;
 ```

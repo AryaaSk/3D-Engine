@@ -47,16 +47,23 @@ const drawLine = (p1: number[], p2: number[], colour: string) => {
     c.lineTo(gridX(p2[0] * dpi), gridY(p2[1] * dpi));
     c.stroke();
 }
-const drawShape = (points: number[][], colour: string) => {
+const drawShape = (points: number[][], colour: string, outline?: boolean) => {
     if (c == undefined) { console.error("Cannot draw, canvas is not linked, please use the linkCanvas(canvasID) before rendering any shapes"); return; }
     if (points.length < 3) { console.error("Cannot draw shape, need at least 3 points to draw a shape"); return; }
     c.fillStyle = colour;
     c.beginPath();
     c.moveTo(gridX(points[0][0] * dpi), gridY(points[0][1] * dpi));
-    for (let pointsIndex = 1; pointsIndex != points.length; pointsIndex += 1)
-    { c.lineTo(gridX(points[pointsIndex][0] * dpi), gridY(points[pointsIndex][1] * dpi)) }
+    for (let pointsIndex = 1; pointsIndex != points.length; pointsIndex += 1) { 
+        c.lineTo(gridX(points[pointsIndex][0] * dpi), gridY(points[pointsIndex][1] * dpi)) 
+    }
     c.closePath();
     c.fill();
+
+    if (outline == true) { 
+        for (let i = 1; i != points.length; i += 1)
+        { drawLine(points[i - 1], points[i], "#000000"); }
+        drawLine(points[points.length - 1], points[0], "000000"); //to cover the line from last point to first point
+    }
 }
 
 const clearCanvas = () => {

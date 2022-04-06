@@ -79,17 +79,7 @@ class Camera {
                 const facePoints = sortedFaces[i].points;
                 let colour = sortedFaces[i].colour;
                 if (colour == "") { continue; } //transparent face
-                drawShape(facePoints, colour);
-            }
-
-            //draw the edges if outline is true
-            if (object.outline == true) {
-                for (let i = 0; i != object.edgeIndexes.length; i += 1)
-                {
-                    const point1 = screenPoints.getColumn(object.edgeIndexes[i][0]);
-                    const point2 = screenPoints.getColumn(object.edgeIndexes[i][1]);
-                    drawLine(point1, point2, "#000000")
-                }
+                drawShape(facePoints, colour, object.outline);
             }
         }
     }
