@@ -31,7 +31,6 @@ elongatedOctahedron.faces[10].colour = "";
 elongatedOctahedron.faces[11].colour = "";
 
 setInterval(() => { //animation loop
-
     cube.rotation.y += 1;
     cube.rotation.z += 1;
     cube.updateMatrices();
