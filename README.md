@@ -1,5 +1,5 @@
 **This is not meant to be used for any serious projects, I just made this to learn more about 3D rendering and Matrix transformations**\
-If you want to know how it works go here [Rendering Pipeline](Research/Pipeline.md)\
+If you want to know how it works go here [Rendering Pipeline](Research/Pipeline.md)
 
 ## Importing
 To import the library, just copy this script tag into your HTML head *(Make sure to do this before using it in another JS file)*.
