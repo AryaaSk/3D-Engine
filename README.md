@@ -109,6 +109,9 @@ You can also just enable the inbuilt movement controls, which allow the user to 
 camera.enableMovementControls(canvasID: string, rotation: boolean, movement: boolean, zoom: boolean);
 ```
 
-Here is a preview of the project in this repo (example.html)
-
+Here is a preview of the project in this repo (example.html)\
 ![Preview Gif](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/3DEngineDemo.gif?raw=true)
+
+Here is a preview of the Shape Builder which you can use to build custom shapes\
+![Shape Builder Preview](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ShapeBuilderPreview2.png?raw=true)\
+*Read the [Development Readme](Research/DevelopmentREADME.md) for more information*
