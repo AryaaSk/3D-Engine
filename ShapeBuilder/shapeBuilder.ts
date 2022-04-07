@@ -5,12 +5,17 @@ const camera = new Camera();
 camera.enableMovementControls("renderingWindow", true, false, true);
 
 const shape = new Shape();
-shape.pointMatrix.addColumn([0, 0, 0]);
-shape.pointMatrix.addColumn([100, 0, 0]);
-shape.pointMatrix.addColumn([50, 0, 100]);
-shape.pointMatrix.addColumn([50, 100, 50]);
-shape.faces.push({ pointIndexes: [0, 1, 3], colour: "#ff0000"})
-shape.updateMatrices();
+const loadDefaultShape = () => {
+    shape.pointMatrix.addColumn([0, 0, 0]);
+    shape.pointMatrix.addColumn([100, 0, 0]);
+    shape.pointMatrix.addColumn([50, 0, 100]);
+    shape.pointMatrix.addColumn([50, 100, 50]);
+    shape.faces.push({ pointIndexes: [0, 1, 2], colour: "#ff0000"});
+    shape.faces.push({ pointIndexes: [0, 1, 3], colour: "#ff9300"});
+    shape.faces.push({ pointIndexes: [1, 2, 3], colour: "#00f900"});
+    shape.faces.push({ pointIndexes: [2, 3, 0], colour: "#0433ff"});
+    shape.updateMatrices();
+}
 
 const updatePoints = () => {
     //get data from existing points, can just use the indexes from the point matrix, and update the values
@@ -71,6 +76,55 @@ const updateAll = () => {
     //changes should be handled by animation loop
 }
 
+const updateDOM = () => {
+    const pointMatrixList = document.getElementById("pointMatrixList")!;
+    pointMatrixList.innerText = ""; //clear the list
+    for (let i = 0; i != shape.pointMatrix.width; i += 1)
+    {
+        const point = shape.pointMatrix.getColumn(i);
+        const pointDiv = document.createElement('div');
+        pointDiv.className = 'point';
+
+        pointDiv.innerHTML = `
+                <div class="centered">${String(i)}</div>
+                <div class="centered"> X: <input type="text" style="width: 90%;" value="${point[0]}" id="point${String(i)}X"> </div>
+                <div class="centered"> Y: <input type="text" style="width: 90%;" value="${point[1]}" id="point${String(i)}Y"> </div>
+                <div class="centered"> Z: <input type="text" style="width: 90%;" value="${point[2]}" id="point${String(i)}Z"> </div>
+                <div class="centered"><input type="button" class="controlButton deleteStyle" id="DeletePoint${String(i)}" value="Delete Point" style="float: right;"></div>
+        `;
+        pointMatrixList.appendChild(pointDiv)
+    }
+    const pointControls = document.createElement('div');
+    pointControls.className = "centered";
+    pointControls.innerHTML = `
+        <input type="button" class="controlButton" id="addPoint" value="Add Point">
+    `;
+    pointMatrixList.appendChild(pointControls);
+
+    const faceList = document.getElementById("faceList")!;
+    faceList.innerText = "";
+    for (let i = 0; i != shape.faces.length; i += 1)
+    {
+        const face = shape.faces[i];
+        const faceDiv = document.createElement('div');
+        faceDiv.className = "face";
+        faceDiv.innerHTML= `
+            <div class="centered"> ${String(i)} </div>
+            <div class="centeredLeft"> Point Indexes: <input type="text" style="margin-left: 20px; width: 70%;" id="pointIndexes${String(i)}" value="${String(face.pointIndexes)}"> </div>
+            <div class="centeredLeft"> Colour: <input type="color" style="width: 90%;" id="colour${String(i)}" value="${String(face.colour)}"></div>
+            <div class="centeredLeft"><input type="button" class="controlButton deleteStyle" id="DeleteFace${String(i)}" value="Delete Face" style="float: right;"></div>
+        `;
+
+        faceList.appendChild(faceDiv);
+    }
+    const faceControls = document.createElement('div');
+    faceControls.className = "centered";
+    faceControls.innerHTML = `
+        <input type="button" class="controlButton" id="addFace" value="Add Face">
+    `;
+    faceList.appendChild(faceControls);
+}
+
 const generateExportCode = () => {
     const shapeName = (<HTMLInputElement>document.getElementById("shapeName")!).value || "NewShape";
 
@@ -80,6 +134,7 @@ const generateExportCode = () => {
         const point = shape.pointMatrix.getColumn(i);
         pointMatrixPoints.push(point)
     }
+    //don't need to worry about centering since the points should already be centered when building the shape
 
     const exportCode = 
 `class ${shapeName} extends Shape {
@@ -98,7 +153,7 @@ const generateExportCode = () => {
         this.faces = ${JSON.stringify(shape.faces).replace(/"([^"]+)":/g, '$1:')};
     }
 }
-`; //don't need to worry about centering since the points should already be centered when building the shape
+`;
 
     return exportCode;
 }
@@ -160,61 +215,12 @@ const startButtonListeners = () => {
         document.getElementById("exportCode")!.innerText = generateExportCode();
     }
 }
-document.getElementById("exportCode")!.innerText = generateExportCode();
 
-const updateDOM = () => {
-    const pointMatrixList = document.getElementById("pointMatrixList")!;
-    pointMatrixList.innerText = ""; //clear the list
-    for (let i = 0; i != shape.pointMatrix.width; i += 1)
-    {
-        const point = shape.pointMatrix.getColumn(i);
-        const pointDiv = document.createElement('div');
-        pointDiv.className = 'point';
-
-        pointDiv.innerHTML = `
-                <div class="centered">${String(i)}</div>
-                <div class="centered"> X: <input type="text" style="width: 90%;" value="${point[0]}" id="point${String(i)}X"> </div>
-                <div class="centered"> Y: <input type="text" style="width: 90%;" value="${point[1]}" id="point${String(i)}Y"> </div>
-                <div class="centered"> Z: <input type="text" style="width: 90%;" value="${point[2]}" id="point${String(i)}Z"> </div>
-                <div class="centered"><input type="button" class="controlButton deleteStyle" id="DeletePoint${String(i)}" value="Delete Point" style="float: right;"></div>
-        `;
-        pointMatrixList.appendChild(pointDiv)
-    }
-    const pointControls = document.createElement('div');
-    pointControls.className = "centered";
-    pointControls.innerHTML = `
-        <input type="button" class="controlButton" id="addPoint" value="Add Point">
-    `;
-    pointMatrixList.appendChild(pointControls);
-
-    const faceList = document.getElementById("faceList")!;
-    faceList.innerText = "";
-    for (let i = 0; i != shape.faces.length; i += 1)
-    {
-        const face = shape.faces[i];
-        const faceDiv = document.createElement('div');
-        faceDiv.className = "face";
-        faceDiv.innerHTML= `
-            <div class="centered"> ${String(i)} </div>
-            <div class="centeredLeft"> Point Indexes: <input type="text" style="margin-left: 20px; width: 70%;" id="pointIndexes${String(i)}" value="${String(face.pointIndexes)}"> </div>
-            <div class="centeredLeft"> Colour: <input type="color" style="width: 90%;" id="colour${String(i)}" value="${String(face.colour)}"></div>
-            <div class="centeredLeft"><input type="button" class="controlButton deleteStyle" id="DeleteFace${String(i)}" value="Delete Face" style="float: right;"></div>
-        `;
-
-        faceList.appendChild(faceDiv);
-    }
-    const faceControls = document.createElement('div');
-    faceControls.className = "centered";
-    faceControls.innerHTML = `
-        <input type="button" class="controlButton" id="addFace" value="Add Face">
-    `;
-    faceList.appendChild(faceControls);
-
-    startButtonListeners();    
-}
+//Startup
+loadDefaultShape();
 updateDOM();
-
-
+startButtonListeners();
+document.getElementById("exportCode")!.innerText = generateExportCode();
 
 //Animation Loop
 setInterval(() => {
@@ -222,6 +228,16 @@ setInterval(() => {
     camera.renderGrid();
     camera.render([shape], true);
 }, 16)
+
+
+
+
+
+
+
+
+
+
 
 
 
