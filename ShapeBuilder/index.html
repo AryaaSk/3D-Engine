@@ -29,15 +29,17 @@
         }
         #renderingWindow
         {
-            height: 100%;
-            width: 100%;
+            position: fixed;
+
+            height: 100vh;
+            width: 50vw;
         }
     </style>
 </head>
 <body>
     
     <div>
-        <h1 style="text-align: center; position: absolute; left: 0; right: 0; margin-top: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">
+        <h1 style="text-align: center; position: fixed; left: 0; right: 0; margin-top: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">
             Build custom shapes and then just export the code
         </h1>
         <canvas id="renderingWindow"></canvas>
@@ -47,27 +49,31 @@
         
         <h3 style="margin-bottom: 0px;">Point Matrix</h3>
         <div id="pointMatrixList">
-            <div class="centered">
-                <input type="button" id="UpdatePointsButton" value="Update Points">
-                <input type="button" id="AddPointButton" value="Add Point">
-            </div>
+            <!-- Element are added in JS -->
         </div>
 
         <br>
 
         <h3 style="margin-bottom: 0px;">Faces</h3>
         <div id="faceList">
+            <!-- Element are added in JS -->
+        </div>
 
+        <h3 style="margin-bottom: 0px;">Centering</h3>
+        <div id="centeringContainer">
+            <div></div>
+            <div class="centered" style="height: 50px;"> X: <input type="text" style="width: 90%;" value="0" id="centeringX"> </div>
+            <div class="centered" style="height: 50px;"> Y: <input type="text" style="width: 90%;" value="0" id="centeringY"> </div>
+            <div class="centered" style="height: 50px;"> Z: <input type="text" style="width: 90%;" value="0" id="centeringZ"> </div>
 
-            <div class="face">
-                <div class="centered"> 0 </div>
-                <div class="centered"> Point Indexes: <input type="text" value="0, 1, 3"> </div>
-                <div class="centered"> Colour: <input type="text" value="#ff0000"></div>
+            <div id="resetCenteringWrapper" class="centered">
+                <input type="button" class="controlButton" id="resetCentering" value="Reset Centering">
             </div>
+        </div>
 
-            <div class="centered">
-                <input type="button" id="AddFaceButton" value="Add Face">
-            </div>
+        <br>
+        <div id="updateButtonWrapper" class="centered">
+            <input type="button" class="controlButton" id="update" value="Update">
         </div>
 
     </div>

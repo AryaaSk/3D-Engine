@@ -4,21 +4,37 @@
     align-items: center;
     justify-content: center;
 }
+.centeredLeft
+{
+    display: flex;
+    align-items: center;
+    justify-content: left;
+}
+.controlButton
+{
+    height: 40px;
+    width: 200px;
+    margin-bottom: 10px;
+
+    font-size: medium;
+
+    border: none;
+    border-radius: 5px;
+    background-color: rgb(215, 215, 215);
+}
 
 #shapeBuilderMenu
 {
     padding: 10px;
     padding-top: 80px;
 
-    background-color: lime;
+    background-color: rgb(235, 235, 235);
 }
 
 #pointMatrixList
 {
     width: 100%;
     height: max-content;
-
-    background-color: red;
 }
 .point
 {
@@ -36,16 +52,38 @@
 {
     width: 100%;
     height: max-content;
-
-    background-color: lightskyblue;
 }
 .face
 {
     height: 50px;
+    padding-right: 10px;
 
     display: grid;
-    grid-template-columns: 10% 60% 30%;
+    grid-template-columns: 10% 50% 25% 15%;
     grid-template-rows: 100%;
 
     font-size: large;
+}
+
+#centeringContainer
+{
+    width: 100%;
+    height: max-content;
+
+    display: grid;
+    grid-template-columns: 10% 30% 30% 30%;
+}
+#resetCenteringWrapper
+{
+    grid-column: 1 / 5;
+    height: 50%;
+
+    margin-top: 15px;
+}
+
+
+#updateButtonWrapper
+{
+    width: 100%;
+    height: 50px;
 }
