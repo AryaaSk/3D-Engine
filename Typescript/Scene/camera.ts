@@ -46,7 +46,7 @@ class Camera {
 
         //sort objects based on distance to the position point:
         const positionPoint = [0, 0, -50000];
-        const sortedObjects = this.sortFurthestDistanceTo(objectData, "center", positionPoint);
+        const sortedObjects: { object: Shape, screenPoints: matrix, center: number[] }[] = this.sortFurthestDistanceTo(objectData, "center", positionPoint);
 
         for (let objectIndex = 0; objectIndex != sortedObjects.length; objectIndex += 1 )
         {
@@ -80,7 +80,6 @@ class Camera {
                 let colour = sortedFaces[i].colour;
                 if (colour != "") { drawShape(facePoints, colour, object.showOutline); } //if face is transparent then just don't render it
                 
-
                 if (object.showFaceIndexes == true)
                 { plotPoint(sortedFaces[i].center, "#000000", String(sortedFaces[i].faceIndex)); }
             }
