@@ -7,7 +7,7 @@
 
 2. Inside the Box class constructor, it creates a new box, around the origin, using the above dimensions. The box is represented as a matrix called pointMatrix, each column is a vector or point around the origin. You can see the order of the points in the image below\
 ![Box Layout](https://github.com/AryaaSk/3D-Engine/blob/master/Research/BoxLayout.png?raw=true)\
-Each number represents the (index of the corner)+1, the +1 is because I didn't want to start at 0. The red point represents the origin, all the scale and rotation transformatiosn are performed around the origin, and then the object is translated to it's actual position after to prevent inaccurate rotations.\
+Each number represents the (index of the corner)+1, the +1 is because I didn't want to start at 0. The red point represents the origin, all the scale and rotation transformatiosn are performed around the origin, and then the object is translated to it's actual position after to prevent inaccurate rotations.
 
 * Since we know where each corner is located in relation to the others, we can hardcode the faces and therefore the edges, each face is comprised of 4 vertexes (in a cube). These are useful later on when we render the shape.
 
@@ -27,7 +27,7 @@ This will give us our Î (iHat), Ĵ (jHat), and k̂ (kHat), unit vectors which r
 
     2. **Rotate for world rotation (when the user changes camera.rotation)**
 
-    3. **Translate bassed on camera position**:\
+    3. **Translate based on camera position**:\
     It calculates the vector from the (screen origin) -> (virtual origin), the virtual origin is the position of the grid's origin, it is not the same as the actual origin as the grid origin will move when the camera moves. It is just the inverse of the camera's position, and I save as **gridOrigin**. Then I just translate the object with this.
 
     4. **Translate based on world rotation**:\
