@@ -44,6 +44,7 @@ class matrix {
     }
     setValue(columnIndex: number, rowIndex: number, value: number) { this.data[columnIndex][rowIndex] = value; }
     getValue(columnIndex: number, rowIndex: number) { return this.data[columnIndex][rowIndex]; }
+    deleteColumn(columnIndex: number) { this.data.splice(columnIndex, 1); this.width -= 1; }
 
     scaleUp(factor: number) { for (let i in this.data) { for (let a in this.data[i]) { this.data[i][a] *= factor; } } }
     scaledUp(factor: number) { //returns a scaled up version of the matrix, instead of directly modifying it

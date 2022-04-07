@@ -2,29 +2,27 @@
 //All shapes are subclasses of class Shape, because an object is just a collection of it's points
 //When the camera renders the object is just needs its Physical Matrix (points relative to the origin), so the subclasses are purely for constructing the shape
 class Shape {
-    constructor() {
-        //Construction    
-        this.pointMatrix = new matrix(); //pointMatrix is constructed in the subclasses
-        //Rotation
-        this.rotationMatrix = new matrix();
-        this.rotation = { x: 0, y: 0, z: 0 };
-        //Physical (as if the shape was being rendered around the origin)
-        this.physicalMatrix = new matrix();
-        this.scale = 1;
-        //Rendering
-        this.position = { x: 0, y: 0, z: 0 };
-        this.showOutline = false;
-        this.faces = []; //stores the indexes of the columns (points) in the physicalMatrix
-        this.showFaceIndexes = false;
-    }
+    //Construction    
+    pointMatrix = new matrix(); //pointMatrix is constructed in the subclasses
+    //Rotation
+    rotationMatrix = new matrix();
+    rotation = { x: 0, y: 0, z: 0 };
     updateRotationMatrix() {
         const [rX, rY, rZ] = [(this.rotation.x % 360), (this.rotation.y % 360), (this.rotation.z % 360)];
         this.rotationMatrix = calculateRotationMatrix(rX, rY, rZ);
     }
+    //Physical (as if the shape was being rendered around the origin)
+    physicalMatrix = new matrix();
+    scale = 1;
     updatePhysicalMatrix() {
         this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix);
         this.physicalMatrix.scaleUp(this.scale);
     }
+    //Rendering
+    position = { x: 0, y: 0, z: 0 };
+    showOutline = false;
+    faces = []; //stores the indexes of the columns (points) in the physicalMatrix
+    showFaceIndexes = false;
     updateMatrices() {
         this.updateRotationMatrix();
         this.updatePhysicalMatrix();

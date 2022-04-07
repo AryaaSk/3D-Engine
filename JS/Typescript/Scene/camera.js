@@ -1,13 +1,10 @@
 "use strict";
 class Camera {
-    constructor() {
-        this.position = { x: 0, y: 0 };
-        this.zoom = 1;
-        this.worldRotation = { x: 0, y: 0, z: 0 };
-        this.worldRotationMatrix = new matrix();
-        this.updateRotationMatrix();
-    }
-    render(objects) {
+    position = { x: 0, y: 0 };
+    zoom = 1;
+    worldRotation = { x: 0, y: 0, z: 0 };
+    worldRotationMatrix = new matrix();
+    render(objects, showPoints) {
         const objectData = [];
         for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
             //transform the object's physicalMatrix to how the camera would see it:
@@ -74,6 +71,13 @@ class Camera {
                 } //if face is transparent then just don't render it
                 if (object.showFaceIndexes == true) {
                     plotPoint(sortedFaces[i].center, "#000000", String(sortedFaces[i].faceIndex));
+                }
+            }
+            //draw points last so you can see them through the faces
+            if (showPoints == true) {
+                for (let i = 0; i != screenPoints.width; i += 1) {
+                    const point = screenPoints.getColumn(i);
+                    plotPoint(point, "#000000", String(i));
                 }
             }
         }
@@ -175,6 +179,9 @@ class Camera {
             }
             this.zoom -= $e.wheelDeltaY / 1000;
         };
+    }
+    constructor() {
+        this.updateRotationMatrix();
     }
     ;
 }

@@ -5,7 +5,7 @@ class Camera {
     worldRotation: {x: number, y: number, z: number} = { x: 0, y: 0, z: 0 };
     worldRotationMatrix = new matrix();
 
-    render(objects: Shape[]) {  
+    render(objects: Shape[], showPoints?: boolean) {  
 
         const objectData: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
         for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1)
@@ -51,7 +51,7 @@ class Camera {
         for (let objectIndex = 0; objectIndex != sortedObjects.length; objectIndex += 1 )
         {
             const object = sortedObjects[objectIndex].object;
-            const screenPoints = sortedObjects[objectIndex].screenPoints
+            const screenPoints = sortedObjects[objectIndex].screenPoints;
 
             //draw faces of shape in correct order, by finding the center and sorting based on distance to the position point
             let objectFaces: { points: number[][], center: number[], colour: string, faceIndex: number }[] = [];
@@ -83,6 +83,16 @@ class Camera {
 
                 if (object.showFaceIndexes == true)
                 { plotPoint(sortedFaces[i].center, "#000000", String(sortedFaces[i].faceIndex)); }
+            }
+
+            //draw points last so you can see them through the faces
+            if (showPoints == true)
+            {
+                for (let i = 0; i != screenPoints.width; i += 1)
+                {
+                    const point = screenPoints.getColumn(i);
+                    plotPoint(point, "#000000", String(i));
+                }
             }
         }
     }

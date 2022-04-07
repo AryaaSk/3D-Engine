@@ -1,11 +1,9 @@
 "use strict";
 //MATRIX FUNCTIONS
 class matrix {
-    constructor() {
-        this.data = []; /* DO NOT SET THIS EXPLICITLY, USE THE FUNCTIONS */
-        this.width = 0; //num of columns
-        this.height = 0; //num of rows
-    }
+    data = []; /* DO NOT SET THIS EXPLICITLY, USE THE FUNCTIONS */
+    width = 0; //num of columns
+    height = 0; //num of rows
     addColumn(nums) {
         this.data.push(nums);
         this.height = nums.length;
@@ -49,6 +47,7 @@ class matrix {
     }
     setValue(columnIndex, rowIndex, value) { this.data[columnIndex][rowIndex] = value; }
     getValue(columnIndex, rowIndex) { return this.data[columnIndex][rowIndex]; }
+    deleteColumn(columnIndex) { this.data.splice(columnIndex, 1); this.width -= 1; }
     scaleUp(factor) { for (let i in this.data) {
         for (let a in this.data[i]) {
             this.data[i][a] *= factor;
@@ -85,6 +84,7 @@ class matrix {
         }
         return copyMatrix;
     }
+    constructor() { }
     ;
 }
 const multiplyMatrixs = (m1, m2) => {
@@ -126,8 +126,8 @@ const sin = (num) => { return Math.sin(toRadians(num)); };
 const cos = (num) => { return Math.cos(toRadians(num)); };
 const distanceBetween = (p1, p2) => {
     //first use pythagoruses thoerm to get the bottom diagonal
-    const bottomDiagonal = Math.sqrt(Math.pow((p2[0] - p1[0]), 2) + Math.pow((p2[2] - p1[2]), 2));
-    const distance = Math.sqrt(Math.pow(bottomDiagonal, 2) + Math.pow((p2[1] - p1[1]), 2));
+    const bottomDiagonal = Math.sqrt((p2[0] - p1[0]) ** 2 + (p2[2] - p1[2]) ** 2);
+    const distance = Math.sqrt(bottomDiagonal ** 2 + (p2[1] - p1[1]) ** 2);
     return distance;
 };
 const calculateRotationMatrix = (rotationX, rotationY, rotationZ) => {

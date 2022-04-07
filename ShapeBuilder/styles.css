@@ -1,0 +1,51 @@
+.centered
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#shapeBuilderMenu
+{
+    padding: 10px;
+    padding-top: 80px;
+
+    background-color: lime;
+}
+
+#pointMatrixList
+{
+    width: 100%;
+    height: max-content;
+
+    background-color: red;
+}
+.point
+{
+    height: 50px;
+    padding-right: 10px;
+
+    display: grid;
+    grid-template-columns: 10% 25% 25% 25% 15%;
+    grid-template-rows:  100%;
+
+    font-size: large;
+}
+
+#faceList
+{
+    width: 100%;
+    height: max-content;
+
+    background-color: lightskyblue;
+}
+.face
+{
+    height: 50px;
+
+    display: grid;
+    grid-template-columns: 10% 60% 30%;
+    grid-template-rows: 100%;
+
+    font-size: large;
+}
