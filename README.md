@@ -1,10 +1,10 @@
 **This is not meant to be used for any serious projects, I just made this to learn more about 3D rendering and Matrix transformations**\
-If you want to know how it works go [here](Research/Pipeline.md)
+If you want to know how it works go here [Rendering Pipeline](Research/Pipeline.md)\
 
 ## Importing
 To import the library, just copy this script tag into your HTML head *(Make sure to do this before using it in another JS file)*.
 ```
-<script src="https://gitcdn.link/cdn/AryaaSk/3D-Engine/cdb928b0e1f0a113aca81fd8ebdc264e89edc708/JS/aryaa3D.js"></script>
+<script src="https://gitcdn.link/cdn/AryaaSk/3D-Engine/9404dc01aad14f84ddf487d7fdea55c1ad66d0e9/JS/aryaa3D.js"></script>
 
 <script src="yourownjsfile.js" defer></script> <!-- You should add a defer tag on your own file, since you will need to wait for the canvas element to load into the DOM -->
 ```
