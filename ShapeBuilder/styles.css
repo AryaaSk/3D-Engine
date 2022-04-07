@@ -39,11 +39,10 @@
 .point
 {
     height: 50px;
-    padding-right: 10px;
 
     display: grid;
     grid-template-columns: 10% 25% 25% 25% 15%;
-    grid-template-rows:  100%;
+    grid-template-rows: 100%;
 
     font-size: large;
 }
@@ -56,7 +55,6 @@
 .face
 {
     height: 50px;
-    padding-right: 10px;
 
     display: grid;
     grid-template-columns: 10% 50% 25% 15%;
