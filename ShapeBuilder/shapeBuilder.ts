@@ -12,8 +12,6 @@ shape.pointMatrix.addColumn([50, 100, 50]);
 shape.faces.push({ pointIndexes: [0, 1, 3], colour: "#ff0000"})
 shape.updateMatrices();
 
-const shapeName = "NewShape";
-
 const updatePoints = () => {
     //get data from existing points, can just use the indexes from the point matrix, and update the values
     const pointMatrixWidth = shape.pointMatrix.width;
@@ -74,9 +72,7 @@ const updateAll = () => {
 }
 
 const generateExportCode = () => {
-
-    const [centeringXString, centeringYString, centeringZString] = [(<HTMLInputElement>document.getElementById("centeringX")!).value, (<HTMLInputElement>document.getElementById("centeringY")!).value, (<HTMLInputElement>document.getElementById("centeringZ")!).value];
-    const [centeringX, centeringY, centeringZ] = [Number(centeringXString), Number(centeringYString), Number(centeringZString)];
+    const shapeName = (<HTMLInputElement>document.getElementById("shapeName")!).value || "NewShape";
 
     let pointMatrixPoints: number[][] = [];
     for (let i = 0; i != shape.pointMatrix.width; i += 1)
@@ -95,17 +91,14 @@ const generateExportCode = () => {
         for (let i = 0; i != points.length; i += 1)
         { this.pointMatrix.addColumn(points[i]); }
 
-        const [centeringX, centeringY, centeringZ] = [${centeringX}, ${centeringY}, ${centeringZ}];
-        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
-
         this.setFaces();
         this.updateMatrices();
     }
-    private setFaces() {
+    setFaces() {
         this.faces = ${JSON.stringify(shape.faces).replace(/"([^"]+)":/g, '$1:')};
     }
 }
-`;
+`; //don't need to worry about centering since the points should already be centered when building the shape
 
     return exportCode;
 }
@@ -163,6 +156,7 @@ const startButtonListeners = () => {
     }
 
     document.getElementById("export")!.onclick = () => {
+        updateAll();
         document.getElementById("exportCode")!.innerText = generateExportCode();
     }
 }

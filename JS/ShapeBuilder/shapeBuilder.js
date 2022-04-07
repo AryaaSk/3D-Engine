@@ -10,7 +10,6 @@ const localScope = () => {
     shape.pointMatrix.addColumn([50, 100, 50]);
     shape.faces.push({ pointIndexes: [0, 1, 3], colour: "#ff0000" });
     shape.updateMatrices();
-    const shapeName = "NewShape";
     const updatePoints = () => {
         //get data from existing points, can just use the indexes from the point matrix, and update the values
         const pointMatrixWidth = shape.pointMatrix.width;
@@ -65,8 +64,7 @@ const localScope = () => {
         //changes should be handled by animation loop
     };
     const generateExportCode = () => {
-        const [centeringXString, centeringYString, centeringZString] = [document.getElementById("centeringX").value, document.getElementById("centeringY").value, document.getElementById("centeringZ").value];
-        const [centeringX, centeringY, centeringZ] = [Number(centeringXString), Number(centeringYString), Number(centeringZString)];
+        const shapeName = document.getElementById("shapeName").value || "NewShape";
         let pointMatrixPoints = [];
         for (let i = 0; i != shape.pointMatrix.width; i += 1) {
             const point = shape.pointMatrix.getColumn(i);
@@ -81,17 +79,14 @@ const localScope = () => {
         for (let i = 0; i != points.length; i += 1)
         { this.pointMatrix.addColumn(points[i]); }
 
-        const [centeringX, centeringY, centeringZ] = [${centeringX}, ${centeringY}, ${centeringZ}];
-        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
-
         this.setFaces();
         this.updateMatrices();
     }
-    private setFaces() {
+    setFaces() {
         this.faces = ${JSON.stringify(shape.faces).replace(/"([^"]+)":/g, '$1:')};
     }
 }
-`;
+`; //don't need to worry about centering since the points should already be centered when building the shape
         return exportCode;
     };
     const startButtonListeners = () => {
@@ -146,6 +141,7 @@ const localScope = () => {
             updateAll();
         };
         document.getElementById("export").onclick = () => {
+            updateAll();
             document.getElementById("exportCode").innerText = generateExportCode();
         };
     };
