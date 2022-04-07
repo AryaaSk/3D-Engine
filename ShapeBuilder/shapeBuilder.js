@@ -3,7 +3,6 @@ var localScope = function () {
     var camera = new Camera();
     camera.enableMovementControls("renderingWindow", true, false, true);
     var shape = new Shape();
-    var displayShape = new Shape();
     var loadDefaultShape = function () {
         shape.pointMatrix.addColumn([0, 0, 0]);
         shape.pointMatrix.addColumn([100, 0, 0]);
@@ -15,6 +14,8 @@ var localScope = function () {
         shape.faces.push({ pointIndexes: [2, 3, 0], colour: "#0433ff" });
         shape.updateMatrices();
     };
+    var displayShape = new Shape();
+    displayShape.showOutline = true;
     var centeringX = 0;
     var centeringY = 0;
     var centeringZ = 0;

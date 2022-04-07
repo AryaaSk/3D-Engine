@@ -4,7 +4,6 @@ const localScope = () => {
     const camera = new Camera();
     camera.enableMovementControls("renderingWindow", true, false, true);
     const shape = new Shape();
-    const displayShape = new Shape();
     const loadDefaultShape = () => {
         shape.pointMatrix.addColumn([0, 0, 0]);
         shape.pointMatrix.addColumn([100, 0, 0]);
@@ -16,6 +15,8 @@ const localScope = () => {
         shape.faces.push({ pointIndexes: [2, 3, 0], colour: "#0433ff" });
         shape.updateMatrices();
     };
+    const displayShape = new Shape();
+    displayShape.showOutline = true;
     let centeringX = 0;
     let centeringY = 0;
     let centeringZ = 0;
