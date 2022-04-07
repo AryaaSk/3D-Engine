@@ -4,6 +4,7 @@ const localScope = () => {
     const camera = new Camera();
     camera.enableMovementControls("renderingWindow", true, false, true);
     const shape = new Shape();
+    const displayShape = new Shape();
     const loadDefaultShape = () => {
         shape.pointMatrix.addColumn([0, 0, 0]);
         shape.pointMatrix.addColumn([100, 0, 0]);
@@ -15,6 +16,9 @@ const localScope = () => {
         shape.faces.push({ pointIndexes: [2, 3, 0], colour: "#0433ff" });
         shape.updateMatrices();
     };
+    let centeringX = 0;
+    let centeringY = 0;
+    let centeringZ = 0;
     const updatePoints = () => {
         //get data from existing points, can just use the indexes from the point matrix, and update the values
         const pointMatrixWidth = shape.pointMatrix.width;
@@ -58,14 +62,18 @@ const localScope = () => {
         shape.updateMatrices();
         updateDOM();
     };
+    const updateCentering = () => {
+        const [centeringXString, centeringYString, centeringZString] = [document.getElementById("centeringX").value, document.getElementById("centeringY").value, document.getElementById("centeringZ").value];
+        [centeringX, centeringY, centeringZ] = [Number(centeringXString), Number(centeringYString), Number(centeringZString)];
+    };
     const updateAll = () => {
         updatePoints();
         updateFaces();
-        //updateCentering
-        const [centeringXString, centeringYString, centeringZString] = [document.getElementById("centeringX").value, document.getElementById("centeringY").value, document.getElementById("centeringZ").value];
-        const [centeringX, centeringY, centeringZ] = [Number(centeringXString), Number(centeringYString), Number(centeringZString)];
-        shape.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
-        shape.updateMatrices();
+        displayShape.pointMatrix = shape.pointMatrix.copy();
+        displayShape.faces = shape.faces;
+        updateCentering(); //don't actually render the shape, we render the displayShape to avoid directly modifying the shape's pointMatrix with the centering vectors
+        displayShape.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
+        displayShape.updateMatrices();
         //changes should be handled by animation loop
     };
     const updateDOM = () => {
@@ -88,6 +96,7 @@ const localScope = () => {
         pointControls.className = "centered";
         pointControls.innerHTML = `
         <input type="button" class="controlButton" id="addPoint" value="Add Point">
+        <input type="button" style="margin-left: 20px;" class="controlButton" id="duplicatePoints" value="Duplicate Points">
     `;
         pointMatrixList.appendChild(pointControls);
         const faceList = document.getElementById("faceList");
@@ -110,6 +119,7 @@ const localScope = () => {
         <input type="button" class="controlButton" id="addFace" value="Add Face">
     `;
         faceList.appendChild(faceControls);
+        startButtonListeners();
     };
     const generateExportCode = () => {
         const shapeName = document.getElementById("shapeName").value || "NewShape";
@@ -118,7 +128,7 @@ const localScope = () => {
             const point = shape.pointMatrix.getColumn(i);
             pointMatrixPoints.push(point);
         }
-        //don't need to worry about centering since the points should already be centered when building the shape
+        updateCentering();
         const exportCode = `class ${shapeName} extends Shape {
     constructor () {
         super();
@@ -127,6 +137,9 @@ const localScope = () => {
         const points = ${JSON.stringify(pointMatrixPoints)};
         for (let i = 0; i != points.length; i += 1)
         { this.pointMatrix.addColumn(points[i]); }
+
+        const [centeringX, centeringY, centeringZ] = [${centeringX}, ${centeringY}, ${centeringZ}];
+        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
 
         this.setFaces();
         this.updateMatrices();
@@ -142,6 +155,7 @@ const localScope = () => {
         document.onkeydown = ($e) => {
             const key = $e.key.toLowerCase();
             if (key == "enter") {
+                document.getElementById("exportCodeTitle").innerText = "*Export Code:";
                 updateAll();
             }
         };
@@ -162,8 +176,56 @@ const localScope = () => {
                 }
                 shape.updateMatrices();
                 updateDOM();
+                updateAll();
             };
         }
+        document.getElementById("duplicatePoints").onclick = () => {
+            const pointIndexesToDupList = prompt("Enter the indexes of the points you want to duplicate separated by a comma");
+            if (pointIndexesToDupList == undefined || pointIndexesToDupList == "") {
+                return;
+            }
+            const pointIndexesToDup = pointIndexesToDupList.split(",").map(Number);
+            const pointMatrixWidth = shape.pointMatrix.width;
+            for (let i = 0; i != pointIndexesToDup.length; i += 1) {
+                if (pointIndexesToDup[i] > pointMatrixWidth - 1) {
+                    alert("One or more of indexes was not a valid pooint index");
+                    return;
+                }
+            }
+            const changeAxis = prompt("Which axis do you want to change")?.toLowerCase();
+            if (changeAxis == undefined) {
+                alert("Invalid Axis");
+                return;
+            }
+            if (!(changeAxis == "x" || changeAxis == "y" || changeAxis == "z")) {
+                alert("Invalid Axis");
+                return;
+            }
+            const changeTo = Number(prompt(`What do you want to change the ${changeAxis} to: `));
+            if (changeTo == undefined) {
+                alert("Invalid number");
+                return;
+            }
+            const newPoints = [];
+            for (let i = 0; i != pointIndexesToDup.length; i += 1) {
+                const point = JSON.parse(JSON.stringify(shape.pointMatrix.getColumn(pointIndexesToDup[i])));
+                if (changeAxis == "x") {
+                    point[0] = changeTo - centeringX;
+                }
+                else if (changeAxis == "y") {
+                    point[1] = changeTo - centeringY;
+                }
+                else if (changeAxis == "z") {
+                    point[2] = changeTo - centeringZ;
+                }
+                newPoints.push(point);
+            }
+            for (let i = 0; i != newPoints.length; i += 1) {
+                shape.pointMatrix.addColumn(newPoints[i]);
+            }
+            updateDOM();
+            updateAll();
+        };
         document.getElementById("addFace").onclick = () => {
             if (shape.pointMatrix.width < 3) {
                 alert("You need at least 3 points to construct a face");
@@ -180,30 +242,26 @@ const localScope = () => {
                 updateDOM();
             };
         }
-        document.getElementById("resetCentering").onclick = () => {
-            document.getElementById("centeringX").value = "0";
-            document.getElementById("centeringY").value = "0";
-            document.getElementById("centeringZ").value = "0";
-            updateAll();
-        };
         document.getElementById("update").onclick = () => {
+            document.getElementById("exportCodeTitle").innerText = "*Export Code:";
             updateAll();
         };
         document.getElementById("export").onclick = () => {
             updateAll();
+            document.getElementById("exportCodeTitle").innerText = "Export Code:";
             document.getElementById("exportCode").innerText = generateExportCode();
         };
     };
     //Startup
     loadDefaultShape();
     updateDOM();
-    startButtonListeners();
+    updateAll();
     document.getElementById("exportCode").innerText = generateExportCode();
     //Animation Loop
     setInterval(() => {
         clearCanvas();
         camera.renderGrid();
-        camera.render([shape], true);
+        camera.render([displayShape], true);
     }, 16);
 };
 localScope();

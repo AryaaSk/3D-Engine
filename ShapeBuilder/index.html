@@ -69,22 +69,15 @@
                 <div class="centered" style="height: 50px;"> X: <input type="text" style="width: 90%;" value="0" id="centeringX"> </div>
                 <div class="centered" style="height: 50px;"> Y: <input type="text" style="width: 90%;" value="0" id="centeringY"> </div>
                 <div class="centered" style="height: 50px;"> Z: <input type="text" style="width: 90%;" value="0" id="centeringZ"> </div>
-    
-                <div id="resetCenteringWrapper" class="centered">
-                    <input type="button" class="controlButton" id="resetCentering" value="Reset Centering">
-                </div>
             </div>
     
             <br>
             <div class="updateExportButtonWrapper centered">
                 <input type="button" class="controlButton" style="height: 40px;" id="update" value="Render Shape (Enter)">
+                <input type="button" class="controlButton" style="margin-left: 20px; height: 40px;" id="export" value="Export Shape to Code">
             </div>
     
-            <br>
-            <div class="updateExportButtonWrapper centered">
-                <input type="button" class="controlButton" style="height: 40px;" id="export" value="Export Shape to Code">
-            </div>
-            <h3 style="margin: 0px;">Export Code:</h3>
+            <h3 id="exportCodeTitle" style="margin: 0px;">Export Code:</h3>
             <br>
             <div id="exportCode"></div>
     

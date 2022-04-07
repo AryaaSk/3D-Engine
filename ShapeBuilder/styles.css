@@ -26,9 +26,13 @@
 }
 .controlButton:hover
 { background-color: rgb(190, 190, 190) }
-
 .deleteStyle:hover
 { background-color: red; }
+
+input[type=text]
+{
+    font-size: large;
+}
 
 
 #shapeBuilderMenuWrapper

@@ -69,6 +69,38 @@
         elongatedOctahedron.faces[10].colour = "";
         elongatedOctahedron.faces[11].colour = "";
 
+
+
+
+
+
+        class Pentagon extends Shape {
+            constructor () {
+                super();
+
+                this.pointMatrix = new matrix();
+                const points = [[0,0,0],[100,0,0],[150,100,0],[50,150,0],[-50,100,0],[0,0,200],[100,0,200],[150,100,200],[50,150,200],[-50,100,200]];
+                for (let i = 0; i != points.length; i += 1)
+                { this.pointMatrix.addColumn(points[i]); }
+
+                const [centeringX, centeringY, centeringZ] = [-50, -75, -100];
+                this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
+
+                this.setFaces();
+                this.updateMatrices();
+            }
+            setFaces() {
+                this.faces = [{pointIndexes:[0,1,6,5],colour:"#ff2600"},{pointIndexes:[1,2,7,6],colour:"#ff9300"},{pointIndexes:[2,3,8,7],colour:"#fffb00"},{pointIndexes:[3,4,9,8],colour:"#00f900"},{pointIndexes:[0,4,9,5],colour:"#00fdff"},{pointIndexes:[0,1,2,3,4],colour:"#0433ff"},{pointIndexes:[5,6,7,8,9],colour:"#ff40ff"}];
+            }
+        }
+        const pentagon = new Pentagon()
+        pentagon.position.x = 300;
+        pentagon.position.y = 300;
+
+
+
+
+
         setInterval(() => { //animation loop
             cube.rotation.y += 1;
             cube.rotation.z += 1;
@@ -76,7 +108,7 @@
 
             clearCanvas();
             camera.renderGrid();
-            camera.render([cube, pyramid, triangularPrism, elongatedOctahedron]);
+            camera.render([cube, pyramid, triangularPrism, elongatedOctahedron, pentagon]);
 
             plotPoint([0, 0], "#000000"); //a visual marker of where it will zoom into
         }, 16);

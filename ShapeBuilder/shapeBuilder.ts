@@ -5,6 +5,7 @@ const camera = new Camera();
 camera.enableMovementControls("renderingWindow", true, false, true);
 
 const shape = new Shape();
+const displayShape = new Shape();
 const loadDefaultShape = () => {
     shape.pointMatrix.addColumn([0, 0, 0]);
     shape.pointMatrix.addColumn([100, 0, 0]);
@@ -17,7 +18,11 @@ const loadDefaultShape = () => {
     shape.updateMatrices();
 }
 
-const updatePoints = () => {
+let centeringX = 0;
+let centeringY = 0;
+let centeringZ = 0;
+
+const updatePoints = () => { //takes data from DOM, and saves it to the shape.pointMatrix
     //get data from existing points, can just use the indexes from the point matrix, and update the values
     const pointMatrixWidth = shape.pointMatrix.width;
     shape.pointMatrix = new matrix();
@@ -32,7 +37,7 @@ const updatePoints = () => {
     }
     shape.updateMatrices();
 };
-const updateFaces = () => {
+const updateFaces = () => { //takes data from DOM, and saves it to the shape.faces
     for (let i = 0; i != shape.faces.length; i += 1)
     {
         const pointIndexesString = (<HTMLInputElement>document.getElementById(`pointIndexes${String(i)}`)!).value;
@@ -64,19 +69,26 @@ const updateFaces = () => {
     updateDOM();
 };
 
+const updateCentering = () => {
+    const [centeringXString, centeringYString, centeringZString] = [(<HTMLInputElement>document.getElementById("centeringX")!).value, (<HTMLInputElement>document.getElementById("centeringY")!).value, (<HTMLInputElement>document.getElementById("centeringZ")!).value];
+    [centeringX, centeringY, centeringZ] = [Number(centeringXString), Number(centeringYString), Number(centeringZString)];   
+}
+
 const updateAll = () => {
     updatePoints()
     updateFaces()
 
-    //updateCentering
-    const [centeringXString, centeringYString, centeringZString] = [(<HTMLInputElement>document.getElementById("centeringX")!).value, (<HTMLInputElement>document.getElementById("centeringY")!).value, (<HTMLInputElement>document.getElementById("centeringZ")!).value];
-    const [centeringX, centeringY, centeringZ] = [Number(centeringXString), Number(centeringYString), Number(centeringZString)];
-    shape.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
-    shape.updateMatrices();
+    displayShape.pointMatrix = shape.pointMatrix.copy();
+    displayShape.faces = shape.faces;
+
+    updateCentering(); //don't actually render the shape, we render the displayShape to avoid directly modifying the shape's pointMatrix with the centering vectors
+    displayShape.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
+    displayShape.updateMatrices();
+
     //changes should be handled by animation loop
 }
 
-const updateDOM = () => {
+const updateDOM = () => { //updates the data from the shape, to display in the DOM
     const pointMatrixList = document.getElementById("pointMatrixList")!;
     pointMatrixList.innerText = ""; //clear the list
     for (let i = 0; i != shape.pointMatrix.width; i += 1)
@@ -98,9 +110,9 @@ const updateDOM = () => {
     pointControls.className = "centered";
     pointControls.innerHTML = `
         <input type="button" class="controlButton" id="addPoint" value="Add Point">
+        <input type="button" style="margin-left: 20px;" class="controlButton" id="duplicatePoints" value="Duplicate Points">
     `;
     pointMatrixList.appendChild(pointControls);
-
     const faceList = document.getElementById("faceList")!;
     faceList.innerText = "";
     for (let i = 0; i != shape.faces.length; i += 1)
@@ -123,6 +135,8 @@ const updateDOM = () => {
         <input type="button" class="controlButton" id="addFace" value="Add Face">
     `;
     faceList.appendChild(faceControls);
+
+    startButtonListeners();
 }
 
 const generateExportCode = () => {
@@ -134,7 +148,8 @@ const generateExportCode = () => {
         const point = shape.pointMatrix.getColumn(i);
         pointMatrixPoints.push(point)
     }
-    //don't need to worry about centering since the points should already be centered when building the shape
+
+    updateCentering();
 
     const exportCode = 
 `class ${shapeName} extends Shape {
@@ -145,6 +160,9 @@ const generateExportCode = () => {
         const points = ${JSON.stringify(pointMatrixPoints)};
         for (let i = 0; i != points.length; i += 1)
         { this.pointMatrix.addColumn(points[i]); }
+
+        const [centeringX, centeringY, centeringZ] = [${centeringX}, ${centeringY}, ${centeringZ}];
+        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
 
         this.setFaces();
         this.updateMatrices();
@@ -161,7 +179,7 @@ const generateExportCode = () => {
 const startButtonListeners = () => {
     document.onkeydown = ($e) => {
         const key = $e.key.toLowerCase();
-        if (key == "enter") { updateAll(); }
+        if (key == "enter") { document.getElementById("exportCodeTitle")!.innerText = "*Export Code:"; updateAll(); }
     }
 
     document.getElementById("addPoint")!.onclick = () => {
@@ -181,7 +199,39 @@ const startButtonListeners = () => {
             }
             shape.updateMatrices();
             updateDOM();
+            updateAll();
         }
+    }
+    document.getElementById("duplicatePoints")!.onclick = () => {
+        const pointIndexesToDupList = prompt("Enter the indexes of the points you want to duplicate separated by a comma");
+        if (pointIndexesToDupList == undefined || pointIndexesToDupList == "") { return; }
+        const pointIndexesToDup = pointIndexesToDupList.split(",").map(Number);
+
+        const pointMatrixWidth = shape.pointMatrix.width;
+        for (let i = 0; i != pointIndexesToDup.length; i += 1)
+        { if (pointIndexesToDup[i] > pointMatrixWidth - 1) { alert("One or more of indexes was not a valid pooint index"); return; } }
+
+        const changeAxis = prompt("Which axis do you want to change")?.toLowerCase();
+        if (changeAxis == undefined) { alert("Invalid Axis"); return; }
+        if (!(changeAxis == "x" || changeAxis == "y" || changeAxis == "z")) { alert("Invalid Axis"); return; }
+
+        const changeTo = Number(prompt(`What do you want to change the ${changeAxis} to: `))
+        if (changeTo == undefined) { alert("Invalid number"); return; }
+
+        const newPoints: number[][] = [];
+        for (let i = 0; i != pointIndexesToDup.length; i += 1) {
+            const point = JSON.parse(JSON.stringify(shape.pointMatrix.getColumn(pointIndexesToDup[i])));
+            if (changeAxis == "x") { point[0] = changeTo - centeringX; }
+            else if (changeAxis == "y") { point[1] = changeTo - centeringY; }
+            else if (changeAxis == "z") { point[2] = changeTo - centeringZ; }
+            newPoints.push(point);
+        }
+
+        for (let i = 0; i != newPoints.length; i += 1)
+        { shape.pointMatrix.addColumn(newPoints[i]); }
+
+        updateDOM();
+        updateAll();
     }
 
     document.getElementById("addFace")!.onclick = () => {
@@ -199,19 +249,14 @@ const startButtonListeners = () => {
         }
     }
 
-    document.getElementById("resetCentering")!.onclick = () => {
-        (<HTMLInputElement>document.getElementById("centeringX")!).value = "0";
-        (<HTMLInputElement>document.getElementById("centeringY")!).value = "0";
-        (<HTMLInputElement>document.getElementById("centeringZ")!).value = "0";
-        updateAll();
-    }
-
     document.getElementById("update")!.onclick = () => {
+        document.getElementById("exportCodeTitle")!.innerText = "*Export Code:"
         updateAll();
     }
 
     document.getElementById("export")!.onclick = () => {
         updateAll();
+        document.getElementById("exportCodeTitle")!.innerText = "Export Code:"
         document.getElementById("exportCode")!.innerText = generateExportCode();
     }
 }
@@ -219,14 +264,14 @@ const startButtonListeners = () => {
 //Startup
 loadDefaultShape();
 updateDOM();
-startButtonListeners();
+updateAll();
 document.getElementById("exportCode")!.innerText = generateExportCode();
 
 //Animation Loop
 setInterval(() => {
     clearCanvas();
     camera.renderGrid();
-    camera.render([shape], true);
+    camera.render([displayShape], true);
 }, 16)
 
 
