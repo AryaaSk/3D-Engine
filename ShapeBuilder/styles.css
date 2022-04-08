@@ -26,6 +26,8 @@
 }
 .controlButton:hover
 { background-color: rgb(190, 190, 190) }
+.deleteStyle
+{ transform: translateY(5px); }
 .deleteStyle:hover
 { background-color: red; }
 
@@ -59,13 +61,14 @@ input[type=text]
     height: auto;
 
     display: grid;
-    grid-template-columns: auto 20%;
+    grid-template-columns: auto max-content;
     grid-template-rows: 100%;
 }
 #uploadShape
 {
-    width: calc(max-content + 50px);
+    width: 150px;
     transform: translateY(5px);
+    margin-right: 20px;
 }
 
 #pointMatrixList
