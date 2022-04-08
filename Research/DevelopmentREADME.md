@@ -35,6 +35,16 @@ camera.render([pentagon]);
 ![Shape Builder Code](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ImportCodeExplanation.png?raw=true)
 4. Once you finish pasting in the 3 arrays, you should have that shape in the Editor, where you can edit it normally, and then just export it again.
 
+## How to setup local environment for the Source Code:
+- When developing use the JS files in the /JS folder:
+```
+<script src="/JS/Typescript/Utilities/canvasUtilities.js"></script>
+<script src="/JS/Typescript/Utilities/utilities.js"></script>
+<script src="/JS/Typescript/Scene/objects.js"></script>
+<script src="/JS/Typescript/Scene/camera.js"></script>
+```
+- When you have finished the changes, comment out the local /JS files, and use the CDN script instead after updating the CDN (look at the section below).
+
 ## How to update source code to CDN:
 1. Make changes locally, you will probably be using local script tags.
 2. Run this command from the project root directory: 
@@ -46,22 +56,17 @@ npx tsc --outfile JS/aryaa3D.js Typescript/Utilities/canvasUtilities.ts Typescri
 5. Replace current gitcdn link with old hash, with new hash (just replace the hashes), in README.md and also index.html
 6. Commit and Upload again to github. 
 
-## How to setup local development environment for Shape Builder or Example:
-- When working on either of the websites, you will need to run the typescript compiler to watch and update the JS code in the /JS folder.
-- Use the local /JS files when working locally
+## How to setup local development environment for Shape Builder:
+- When developing you will need to use the local /JS file which is automatically compiled by the typescript compiler, so use this script tag:
 ```
-<script src="/JS/Typescript/Utilities/canvasUtilities.js"></script>
-<script src="/JS/Typescript/Utilities/utilities.js"></script>
-<script src="/JS/Typescript/Scene/objects.js"></script>
-<script src="/JS/Typescript/Scene/camera.js"></script>
+<script src="/JS/docs/shapeBuilder.js" defer></script>
 ```
 
-- When you have finished, comment out the local /JS script tags, and use the CDN script tag, *if you have updated the source code then you will need update it to the CDN*
-```
-<script src="https://gitcdn.link/cdn/AryaaSk/3D-Engine/newestCommitHash/JS/aryaa3D.js"></script> 
-```
-- If you were working on the Shape Builder then run this command:
+- When you have finished, comment that previous line, and run this command:
 ```
 npx tsc ShapeBuilder/shapeBuilder.ts
 ```
-Then use the script tag to the local file instead of to the /JS folder
+This generates a local JS file in the same directory, then just use that instead of the /JS file:
+```
+<script src="shapeBuilder.js" defer></script>
+```
