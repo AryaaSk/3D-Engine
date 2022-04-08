@@ -60,3 +60,8 @@ npx tsc --outfile JS/aryaa3D.js Typescript/Utilities/canvasUtilities.ts Typescri
 ```
 <script src="https://gitcdn.link/cdn/AryaaSk/3D-Engine/newestCommitHash/JS/aryaa3D.js"></script> 
 ```
+- If you were working on the Shape Builder then run this command:
+```
+npx tsc ShapeBuilder/shapeBuilder.ts
+```
+Then use the script tag to the local file instead of to the /JS folder
