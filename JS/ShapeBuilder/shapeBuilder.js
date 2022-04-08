@@ -13,7 +13,6 @@ const localScope = () => {
         shape.faces.push({ pointIndexes: [0, 1, 3], colour: "#ff9300" });
         shape.faces.push({ pointIndexes: [1, 2, 3], colour: "#00f900" });
         shape.faces.push({ pointIndexes: [2, 3, 0], colour: "#0433ff" });
-        shape.updateMatrices();
     };
     const displayShape = new Shape();
     displayShape.showOutline = true;
@@ -31,7 +30,7 @@ const localScope = () => {
             const [x, y, z] = [Number(DOMPointX.value), Number(DOMPointY.value), Number(DOMPointZ.value)];
             shape.pointMatrix.addColumn([x, y, z]);
         }
-        shape.updateMatrices();
+        updateDisplayShape();
     };
     const updateFaces = () => {
         for (let i = 0; i != shape.faces.length; i += 1) {
@@ -60,22 +59,24 @@ const localScope = () => {
                 shape.faces[i].colour = colour;
             }
         }
-        shape.updateMatrices();
+        updateDisplayShape();
         updateDOM();
     };
     const updateCentering = () => {
         const [centeringXString, centeringYString, centeringZString] = [document.getElementById("centeringX").value, document.getElementById("centeringY").value, document.getElementById("centeringZ").value];
         [centeringX, centeringY, centeringZ] = [Number(centeringXString), Number(centeringYString), Number(centeringZString)];
     };
-    const updateAll = () => {
+    const updateVariables = () => {
         updatePoints();
         updateFaces();
+        updateCentering();
+    };
+    const updateDisplayShape = () => {
+        //don't actually render the shape, we render the displayShape to avoid directly modifying the shape's pointMatrix with the centering vectors
         displayShape.pointMatrix = shape.pointMatrix.copy();
         displayShape.faces = shape.faces;
-        updateCentering(); //don't actually render the shape, we render the displayShape to avoid directly modifying the shape's pointMatrix with the centering vectors
         displayShape.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
         displayShape.updateMatrices();
-        //changes should be handled by animation loop
     };
     const updateDOM = () => {
         const pointMatrixList = document.getElementById("pointMatrixList");
@@ -157,27 +158,31 @@ const localScope = () => {
             const key = $e.key.toLowerCase();
             if (key == "enter") {
                 document.getElementById("exportCodeTitle").innerText = "*Export Code:";
-                updateAll();
+                updateVariables();
+                updateDisplayShape();
             }
         };
         document.getElementById("addPoint").onclick = () => {
-            shape.pointMatrix.addColumn([0, 0, 0]);
-            shape.updateMatrices();
+            shape.pointMatrix.addColumn([0 - centeringX, 0 - centeringY, 0 - centeringZ]);
+            updateDisplayShape();
             updateDOM();
         };
         for (let i = 0; i != shape.pointMatrix.width; i += 1) {
             document.getElementById(`DeletePoint${String(i)}`).onclick = () => {
                 shape.pointMatrix.deleteColumn(i);
-                //also need to check if there are any faces with this point
-                for (let i = 0; i != shape.faces.length; i += 1) {
-                    if (shape.faces[i].pointIndexes.includes(i) == true) {
-                        shape.faces.splice(i, 1);
-                        i -= 1;
+                //also need to check if there are any faces with this point, i = pointIndex
+                let a = 0;
+                while (a != shape.faces.length) {
+                    if (shape.faces[a]?.pointIndexes.includes(i) == true) {
+                        shape.faces.splice(a, 1);
+                        a -= 1;
+                    }
+                    else {
+                        a += 1;
                     }
                 }
-                shape.updateMatrices();
+                updateDisplayShape();
                 updateDOM();
-                updateAll();
             };
         }
         document.getElementById("duplicatePoints").onclick = () => {
@@ -225,7 +230,7 @@ const localScope = () => {
                 shape.pointMatrix.addColumn(newPoints[i]);
             }
             updateDOM();
-            updateAll();
+            updateDisplayShape();
         };
         document.getElementById("addFace").onclick = () => {
             if (shape.pointMatrix.width < 3) {
@@ -233,30 +238,35 @@ const localScope = () => {
                 return;
             }
             shape.faces.push({ pointIndexes: [0, 1, 2], colour: "#c4c4c4" });
-            shape.updateMatrices();
+            updateDisplayShape();
             updateDOM();
         };
         for (let i = 0; i != shape.faces.length; i += 1) {
             document.getElementById(`DeleteFace${String(i)}`).onclick = () => {
                 shape.faces.splice(i, 1);
-                shape.updateMatrices();
+                updateDisplayShape();
                 updateDOM();
             };
         }
         document.getElementById("update").onclick = () => {
             document.getElementById("exportCodeTitle").innerText = "*Export Code:";
-            updateAll();
+            updateVariables();
+            updateDisplayShape();
         };
         document.getElementById("export").onclick = () => {
-            updateAll();
+            updateVariables();
             document.getElementById("exportCodeTitle").innerText = "Export Code:";
             document.getElementById("exportCode").innerText = generateExportCode();
         };
+        document.querySelectorAll("input[type='color']").forEach(input => {
+            const colorInput = input;
+            colorInput.addEventListener('input', () => { updateVariables(); updateDisplayShape(); });
+        });
     };
     //Startup
     loadDefaultShape();
     updateDOM();
-    updateAll();
+    updateDisplayShape();
     document.getElementById("exportCode").innerText = generateExportCode();
     //Animation Loop
     setInterval(() => {

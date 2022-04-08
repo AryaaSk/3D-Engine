@@ -7,7 +7,8 @@
 ![Shape Builder Preview 2](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ShapeBuilderPreview2.png?raw=true)
 4. Then make sure to center the shape using the centering inputs, the origin should be in the center of the shape, and then you can click on the Export to Code button, which will generate the code of the shape you have just created. Here is what the Pentagonal Prism's code looks like after centering it:\
 ![Shape Builder Preview 3](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ShapeBuilderPreview3.png?raw=true)\
-*Don't forget to name your shape, if you want to see the changes you made then click the Render Shape button, or click Enter*
+*Don't forget to name your shape, if your changes haven't been updated to the screen then press Render Shape, or click Enter*
+- It is strongly recommended to create the points first, then the faces, and then center the shape in that order, this is because the faces are dependant on the points, and the centering is easier when you can see the entire shape. You can always modify the points even after you have connected a face to them, but if you delete points which construct a face then there may be some issues.
 
 5. Finally you can just copy and paste this code into your script, and then after that you can use the shape like any other shape.
 ```
