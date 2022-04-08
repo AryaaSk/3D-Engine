@@ -27,7 +27,7 @@ camera.render([pentagon]);
 3. Create centering vectors, for example in a cube, the centeringX is -(width / 2)
 4. Clear the pointMatrix, and populate it with points around the origin, and then translate that matrix by the centering vectors. After this the pointMatrix should be populated with points around the origin.
 5. Create a setFaces() method, and call it + updateMatrices(); after you have setup the pointMatrix. Inside of this you just need to set the faces to the indexes of the vertexs which they are made of. For example in a cube, you may have a face object like { pointIndexes: [0, 1, 2, 3], colour: "#ff0000" }, the point 0, 1, 2, 3 refer to the vertexs of the cube. Refer to *Research/BoxLayout.png* for more info.\
-*You can look at the currently existing shapes in Typescript/Scene/Objects.ts for reference, it will make more sense when you see it yourself*
+*You can look at the currently existing shapes in Source/Scene/Objects.ts for reference, it will make more sense when you see it yourself*
 
 ## How to import shapes into Shape Builder:
 1. Click on the Import Shape button next to the title in the Shape Builder
@@ -40,10 +40,10 @@ camera.render([pentagon]);
 ## How to setup local environment for the Source Code:
 - When developing use the JS files in the /JS folder:
 ```
-<script src="/JS/Typescript/Utilities/canvasUtilities.js"></script>
-<script src="/JS/Typescript/Utilities/utilities.js"></script>
-<script src="/JS/Typescript/Scene/objects.js"></script>
-<script src="/JS/Typescript/Scene/camera.js"></script>
+<script src="/JS/Source/Utilities/canvasUtilities.js"></script>
+<script src="/JS/Source/Utilities/utilities.js"></script>
+<script src="/JS/Source/Scene/objects.js"></script>
+<script src="/JS/Source/Scene/camera.js"></script>
 ```
 - When you have finished the changes, comment out the local /JS files, and use the CDN script instead after updating the CDN (look at the section below).
 
@@ -51,11 +51,11 @@ camera.render([pentagon]);
 1. Make changes locally, you will probably be using local script tags.
 2. Run this command from the project root directory: 
 ```
-npx tsc --outfile JS/aryaa3D.js Typescript/Utilities/canvasUtilities.ts Typescript/Utilities/utilities.ts Typescript/Scene/objects.ts Typescript/Scene/camera.ts
+npx tsc --outfile JS/aryaa3D.js Source/Utilities/canvasUtilities.ts Source/Utilities/utilities.ts Source/Scene/objects.ts Source/Scene/camera.ts
 ```
 3. Commit and Upload to github
 4. Get commit hash from github (it is next to the time ago at the start page of the repo), you have to click on it and get the whole thing
-5. Replace current gitcdn link with old hash, with new hash (just replace the hashes), in README.md and also index.html
+5. Replace current gitcdn link with old hash, with new hash (just replace the hashes), in README.md, in docs/example.html, and docs/index.html
 6. Commit and Upload again to github. 
 
 ## How to setup local development environment for Shape Builder:
