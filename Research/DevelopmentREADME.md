@@ -1,6 +1,6 @@
 ## How to create new object:
 ### Using the Shape Builder (**recommended**):
-1. Goto/Download the [Shape Builder Folder](https://github.com/AryaaSk/3D-Engine/blob/master/ShapeBuilder) and open the index.html, this is the Shape Builder/Editor
+1. Go to [Shape Builder](https://aryaask.github.io/3D-Engine/), this is the Shape Builder/Editor
 2. Then add the points to construct your shape, don't worry about centering them around the origin, you can do that later with the centering inputs, the number on the point is the point's index, which will be important later when defining the faces/ Here you can see me making a Pentagonal Prism, what it looks like after I added the points:\
 ![Shape Builder Preview 1](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ShapeBuilderPreview1.png?raw=true)
 3. Once you have added the points, you need to define the faces, just add as many faces as the shape you are making has, and input the point indexes which connect to make the face, make sure to use regular mathmatical notation, the points should go around the face, and not cross over. Here you can see how the Pentagonal Prism looks after defining the face:\
