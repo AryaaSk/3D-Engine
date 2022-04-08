@@ -1,23 +1,65 @@
-var localScope = function () {
+(function () {
     linkCanvas("renderingWindow");
     var camera = new Camera();
     camera.enableMovementControls("renderingWindow", true, false, true);
     var shape = new Shape();
-    var loadDefaultShape = function () {
-        shape.pointMatrix.addColumn([0, 0, 0]);
-        shape.pointMatrix.addColumn([100, 0, 0]);
-        shape.pointMatrix.addColumn([50, 0, 100]);
-        shape.pointMatrix.addColumn([50, 100, 50]);
-        shape.faces.push({ pointIndexes: [0, 1, 2], colour: "#ff0000" });
-        shape.faces.push({ pointIndexes: [0, 1, 3], colour: "#ff9300" });
-        shape.faces.push({ pointIndexes: [1, 2, 3], colour: "#00f900" });
-        shape.faces.push({ pointIndexes: [2, 3, 0], colour: "#0433ff" });
-    };
     var displayShape = new Shape();
     displayShape.showOutline = true;
     var centeringX = 0;
     var centeringY = 0;
     var centeringZ = 0;
+    var duplicatePoints = function () {
+        var pointIndexesToDupList = prompt("Enter the indexes of the points you want to duplicate separated by a comma");
+        if (pointIndexesToDupList == undefined || pointIndexesToDupList == "") {
+            return;
+        }
+        var pointIndexesToDup = pointIndexesToDupList.split(",").map(Number);
+        var pointMatrixWidth = shape.pointMatrix.width;
+        for (var i = 0; i != pointIndexesToDup.length; i += 1) {
+            if (pointIndexesToDup[i] > pointMatrixWidth - 1) {
+                alert("One or more of indexes was not a valid point index");
+                return;
+            }
+        }
+        var newPoints = [];
+        for (var i = 0; i != pointIndexesToDup.length; i += 1) {
+            var point = JSON.parse(JSON.stringify(shape.pointMatrix.getColumn(pointIndexesToDup[i])));
+            newPoints.push(point);
+        }
+        for (var i = 0; i != newPoints.length; i += 1) {
+            shape.pointMatrix.addColumn(newPoints[i]);
+        }
+        updateDOM();
+        updateDisplayShape();
+    };
+    var translatePoints = function () {
+        var pointIndexesList = prompt("Enter the indexes of the points you want to duplicate separated by a comma");
+        if (pointIndexesList == undefined || pointIndexesList == "") {
+            return;
+        }
+        var pointIndexes = pointIndexesList.split(",").map(Number);
+        var pointMatrixWidth = shape.pointMatrix.width;
+        for (var i = 0; i != pointIndexes.length; i += 1) {
+            if (pointIndexes[i] > pointMatrixWidth - 1) {
+                alert("One or more of indexes was not a valid point index");
+                return;
+            }
+        }
+        var translationVectorString = prompt("Enter the translation vector in format [x, y, z]");
+        if (translationVectorString == undefined || translationVectorString == "") {
+            alert("Invalid translation vector");
+            return;
+        }
+        var translationVector = JSON.parse(translationVectorString);
+        for (var i = 0; i != pointIndexes.length; i += 1) {
+            var point = shape.pointMatrix.getColumn(pointIndexes[i]);
+            shape.pointMatrix.setValue(pointIndexes[i], 0, point[0] + translationVector[0]);
+            shape.pointMatrix.setValue(pointIndexes[i], 1, point[1] + translationVector[1]);
+            shape.pointMatrix.setValue(pointIndexes[i], 2, point[2] + translationVector[2]);
+        }
+        updateDOM();
+        updateDisplayShape();
+    };
     var updatePoints = function () {
         //get data from existing points, can just use the indexes from the point matrix, and update the values
         var pointMatrixWidth = shape.pointMatrix.width;
@@ -90,7 +132,7 @@ var localScope = function () {
         }
         var pointControls = document.createElement('div');
         pointControls.className = "centered";
-        pointControls.innerHTML = "\n        <input type=\"button\" class=\"controlButton\" id=\"addPoint\" value=\"Add Point\">\n        <input type=\"button\" style=\"margin-left: 20px;\" class=\"controlButton\" id=\"duplicatePoints\" value=\"Duplicate Points\">\n    ";
+        pointControls.innerHTML = "\n        <input type=\"button\" class=\"controlButton\" id=\"addPoint\" value=\"Add Point\">\n        <input type=\"button\" style=\"margin-left: 20px;\" class=\"controlButton\" id=\"pointCommands\" value=\"Point Commands\">\n    ";
         pointMatrixList.appendChild(pointControls);
         var faceList = document.getElementById("faceList");
         faceList.innerText = "";
@@ -118,6 +160,49 @@ var localScope = function () {
         var exportCode = "class ".concat(shapeName, " extends Shape {\n    constructor () {\n        super();\n\n        this.pointMatrix = new matrix();\n        const points = ").concat(JSON.stringify(pointMatrixPoints), ";\n        for (let i = 0; i != points.length; i += 1)\n        { this.pointMatrix.addColumn(points[i]); }\n\n        const [centeringX, centeringY, centeringZ] = [").concat(centeringX, ", ").concat(centeringY, ", ").concat(centeringZ, "];\n        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);\n\n        this.setFaces();\n        this.updateMatrices();\n    }\n    setFaces() {\n        this.faces = ").concat(JSON.stringify(shape.faces).replace(/"([^"]+)":/g, '$1:'), ";\n    }\n}\n");
         return exportCode;
     };
+    var importShape = function () {
+        var pointsJSON = prompt("Copy and paste the points array here:");
+        if (pointsJSON == undefined || pointsJSON == "") {
+            alert("Invalid Points");
+            return;
+        }
+        if (pointsJSON.endsWith(";")) {
+            pointsJSON = pointsJSON.slice(0, -1);
+        }
+        var points = JSON.parse(pointsJSON);
+        var facesJSON = prompt("Copy and paste the faces array here:");
+        if (facesJSON == undefined || facesJSON == "") {
+            alert("Invalid Faces");
+            return;
+        }
+        if (facesJSON.endsWith(";")) {
+            facesJSON = facesJSON.slice(0, -1);
+        }
+        facesJSON = facesJSON.replaceAll('pointIndexes', '"pointIndexes"');
+        facesJSON = facesJSON.replaceAll('colour', '"colour"');
+        var faces = JSON.parse(facesJSON);
+        var centeringJSON = prompt("Copy and paste the centering vectors array here:");
+        if (centeringJSON == undefined || centeringJSON == "") {
+            alert("Invalid Centering Vectors");
+            return;
+        }
+        if (centeringJSON.endsWith(";")) {
+            centeringJSON = centeringJSON.slice(0, -1);
+        }
+        var centeringVectors = JSON.parse(centeringJSON);
+        shape.pointMatrix = new matrix();
+        for (var i = 0; i != points.length; i += 1) {
+            shape.pointMatrix.addColumn(points[i]);
+        }
+        shape.faces = faces;
+        centeringX = centeringVectors[0], centeringY = centeringVectors[1], centeringZ = centeringVectors[2];
+        updateDisplayShape();
+        updateDOM();
+        document.getElementById("centeringX").value = String(centeringX);
+        document.getElementById("centeringY").value = String(centeringY);
+        document.getElementById("centeringZ").value = String(centeringZ);
+        document.getElementById("exportCodeTitle").innerText = "*Export Code:";
+    };
     var startButtonListeners = function () {
         document.onkeydown = function ($e) {
             var key = $e.key.toLowerCase();
@@ -128,47 +213,7 @@ var localScope = function () {
             }
         };
         document.getElementById("uploadShape").onclick = function () {
-            var pointsJSON = prompt("Copy and paste the points array here:");
-            if (pointsJSON == undefined || pointsJSON == "") {
-                alert("Invalid Points");
-                return;
-            }
-            if (pointsJSON.endsWith(";")) {
-                pointsJSON = pointsJSON.slice(0, -1);
-            }
-            var points = JSON.parse(pointsJSON);
-            var facesJSON = prompt("Copy and paste the faces array here:");
-            if (facesJSON == undefined || facesJSON == "") {
-                alert("Invalid Faces");
-                return;
-            }
-            if (facesJSON.endsWith(";")) {
-                facesJSON = facesJSON.slice(0, -1);
-            }
-            facesJSON = facesJSON.replaceAll('pointIndexes', '"pointIndexes"');
-            facesJSON = facesJSON.replaceAll('colour', '"colour"');
-            var faces = JSON.parse(facesJSON);
-            var centeringJSON = prompt("Copy and paste the centering vectors array here:");
-            if (centeringJSON == undefined || centeringJSON == "") {
-                alert("Invalid Centering Vectors");
-                return;
-            }
-            if (centeringJSON.endsWith(";")) {
-                centeringJSON = centeringJSON.slice(0, -1);
-            }
-            var centeringVectors = JSON.parse(centeringJSON);
-            shape.pointMatrix = new matrix();
-            for (var i = 0; i != points.length; i += 1) {
-                shape.pointMatrix.addColumn(points[i]);
-            }
-            shape.faces = faces;
-            centeringX = centeringVectors[0], centeringY = centeringVectors[1], centeringZ = centeringVectors[2];
-            updateDisplayShape();
-            updateDOM();
-            document.getElementById("centeringX").value = String(centeringX);
-            document.getElementById("centeringY").value = String(centeringY);
-            document.getElementById("centeringZ").value = String(centeringZ);
-            document.getElementById("exportCodeTitle").innerText = "*Export Code:";
+            importShape();
         };
         document.getElementById("addPoint").onclick = function () {
             shape.pointMatrix.addColumn([0 - centeringX, 0 - centeringY, 0 - centeringZ]);
@@ -197,53 +242,22 @@ var localScope = function () {
         for (var i = 0; i != shape.pointMatrix.width; i += 1) {
             _loop_1(i);
         }
-        document.getElementById("duplicatePoints").onclick = function () {
+        document.getElementById("pointCommands").onclick = function () {
             var _a;
-            var pointIndexesToDupList = prompt("Enter the indexes of the points you want to duplicate separated by a comma");
-            if (pointIndexesToDupList == undefined || pointIndexesToDupList == "") {
+            var command = (_a = prompt("What command do you want to perform, enter a letter:\n    D: Duplicate Points\n    T: Translate Points")) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+            if (command == undefined) {
                 return;
             }
-            var pointIndexesToDup = pointIndexesToDupList.split(",").map(Number);
-            var pointMatrixWidth = shape.pointMatrix.width;
-            for (var i = 0; i != pointIndexesToDup.length; i += 1) {
-                if (pointIndexesToDup[i] > pointMatrixWidth - 1) {
-                    alert("One or more of indexes was not a valid pooint index");
-                    return;
-                }
+            if (command == "d") {
+                duplicatePoints();
             }
-            var changeAxis = (_a = prompt("Which axis do you want to change")) === null || _a === void 0 ? void 0 : _a.toLowerCase();
-            if (changeAxis == undefined) {
-                alert("Invalid Axis");
+            else if (command == "t") {
+                translatePoints();
+            }
+            else {
+                alert("Invalid command");
                 return;
             }
-            if (!(changeAxis == "x" || changeAxis == "y" || changeAxis == "z")) {
-                alert("Invalid Axis");
-                return;
-            }
-            var changeTo = Number(prompt("What do you want to change the ".concat(changeAxis, " to: ")));
-            if (changeTo == undefined) {
-                alert("Invalid number");
-                return;
-            }
-            var newPoints = [];
-            for (var i = 0; i != pointIndexesToDup.length; i += 1) {
-                var point = JSON.parse(JSON.stringify(shape.pointMatrix.getColumn(pointIndexesToDup[i])));
-                if (changeAxis == "x") {
-                    point[0] = changeTo - centeringX;
-                }
-                else if (changeAxis == "y") {
-                    point[1] = changeTo - centeringY;
-                }
-                else if (changeAxis == "z") {
-                    point[2] = changeTo - centeringZ;
-                }
-                newPoints.push(point);
-            }
-            for (var i = 0; i != newPoints.length; i += 1) {
-                shape.pointMatrix.addColumn(newPoints[i]);
-            }
-            updateDOM();
-            updateDisplayShape();
         };
         document.getElementById("addFace").onclick = function () {
             if (shape.pointMatrix.width < 3) {
@@ -274,13 +288,24 @@ var localScope = function () {
             document.getElementById("exportCodeTitle").innerText = "Export Code:";
             document.getElementById("exportCode").innerText = generateExportCode();
         };
-        document.querySelectorAll("input[type='color']").forEach(function (input) {
-            var colorInput = input;
-            colorInput.addEventListener('input', function () { updateVariables(); updateDisplayShape(); });
-        });
     };
     //Startup
-    loadDefaultShape();
+    (function () {
+        shape.pointMatrix.addColumn([0, 0, 0]);
+        shape.pointMatrix.addColumn([100, 0, 0]);
+        shape.pointMatrix.addColumn([50, 0, 100]);
+        shape.pointMatrix.addColumn([50, 100, 50]);
+        shape.faces.push({ pointIndexes: [0, 1, 2], colour: "#ff0000" });
+        shape.faces.push({ pointIndexes: [0, 1, 3], colour: "#ff9300" });
+        shape.faces.push({ pointIndexes: [1, 2, 3], colour: "#00f900" });
+        shape.faces.push({ pointIndexes: [2, 3, 0], colour: "#0433ff" });
+        centeringX = -50;
+        centeringY = -50;
+        centeringZ = -50;
+        document.getElementById("centeringX").value = String(centeringX); //the centering values do not get updated in updateDOM();
+        document.getElementById("centeringY").value = String(centeringY);
+        document.getElementById("centeringZ").value = String(centeringZ);
+    })();
     updateDOM();
     updateDisplayShape();
     document.getElementById("exportCode").innerText = generateExportCode();
@@ -290,5 +315,5 @@ var localScope = function () {
         camera.renderGrid();
         camera.render([displayShape], true);
     }, 16);
-};
-localScope();
+})();
+//localScope();

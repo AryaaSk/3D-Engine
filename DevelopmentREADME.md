@@ -64,7 +64,7 @@ npx tsc --outfile JS/aryaa3D.js Typescript/Utilities/canvasUtilities.ts Typescri
 
 - When you have finished, comment that previous line, and run this command:
 ```
-npx tsc ShapeBuilder/shapeBuilder.ts
+npx tsc docs/shapeBuilder.ts
 ```
 This generates a local JS file in the same directory, then just use that instead of the /JS file:
 ```
