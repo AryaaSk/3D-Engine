@@ -127,7 +127,7 @@
             var point = shape.pointMatrix.getColumn(i);
             var pointDiv = document.createElement('div');
             pointDiv.className = 'point';
-            pointDiv.innerHTML = "\n                <div class=\"centered\">".concat(String(i), "</div>\n                <div class=\"centered\"> X: <input type=\"text\" style=\"width: 90%;\" value=\"").concat(point[0], "\" id=\"point").concat(String(i), "X\"> </div>\n                <div class=\"centered\"> Y: <input type=\"text\" style=\"width: 90%;\" value=\"").concat(point[1], "\" id=\"point").concat(String(i), "Y\"> </div>\n                <div class=\"centered\"> Z: <input type=\"text\" style=\"width: 90%;\" value=\"").concat(point[2], "\" id=\"point").concat(String(i), "Z\"> </div>\n                <div class=\"centered\"><input type=\"button\" class=\"controlButton deleteStyle\" id=\"DeletePoint").concat(String(i), "\" value=\"Delete Point\" style=\"float: right;\"></div>\n        ");
+            pointDiv.innerHTML = "\n                <div class=\"centered\">".concat(String(i), "</div>\n                <div class=\"centered\"> X: <input type=\"text\" name=\"pointX").concat(String(i), "\" style=\"width: 90%;\" value=\"").concat(point[0], "\" id=\"point").concat(String(i), "X\"> </div>\n                <div class=\"centered\"> Y: <input type=\"text\" name=\"pointY").concat(String(i), "\" style=\"width: 90%;\" value=\"").concat(point[1], "\" id=\"point").concat(String(i), "Y\"> </div>\n                <div class=\"centered\"> Z: <input type=\"text\" name=\"pointZ").concat(String(i), "\" style=\"width: 90%;\" value=\"").concat(point[2], "\" id=\"point").concat(String(i), "Z\"> </div>\n                <div class=\"centered\"><input type=\"button\" class=\"controlButton deleteStyle\" id=\"DeletePoint").concat(String(i), "\" value=\"Delete Point\" style=\"float: right;\"></div>\n        ");
             pointMatrixList.appendChild(pointDiv);
         }
         var pointControls = document.createElement('div');
@@ -140,7 +140,7 @@
             var face = shape.faces[i];
             var faceDiv = document.createElement('div');
             faceDiv.className = "face";
-            faceDiv.innerHTML = "\n            <div class=\"centered\"> ".concat(String(i), " </div>\n            <div class=\"centeredLeft\"> Point Indexes: <input type=\"text\" style=\"margin-left: 20px; width: 70%;\" id=\"pointIndexes").concat(String(i), "\" value=\"").concat(String(face.pointIndexes), "\"> </div>\n            <div class=\"centeredLeft\"> Colour: <input type=\"color\" style=\"width: 90%;\" id=\"colour").concat(String(i), "\" value=\"").concat(String(face.colour), "\"></div>\n            <div class=\"centeredLeft\"><input type=\"button\" class=\"controlButton deleteStyle\" id=\"DeleteFace").concat(String(i), "\" value=\"Delete Face\" style=\"float: right;\"></div>\n        ");
+            faceDiv.innerHTML = "\n            <div class=\"centered\"> ".concat(String(i), " </div>\n            <div class=\"centeredLeft\"> Point Indexes: <input type=\"text\" name=\"face").concat(String(i), "\" style=\"margin-left: 20px; width: 70%;\" id=\"pointIndexes").concat(String(i), "\" value=\"").concat(String(face.pointIndexes), "\"> </div>\n            <div class=\"centeredLeft\"> Colour: <input type=\"color\" style=\"width: 90%;\" id=\"colour").concat(String(i), "\" value=\"").concat(String(face.colour), "\"></div>\n            <div class=\"centeredLeft\"><input type=\"button\" class=\"controlButton deleteStyle\" id=\"DeleteFace").concat(String(i), "\" value=\"Delete Face\" style=\"float: right;\"></div>\n        ");
             faceList.appendChild(faceDiv);
         }
         var faceControls = document.createElement('div');
@@ -305,6 +305,50 @@
             document.getElementById("exportCodeTitle").innerText = "Export Code:";
             document.getElementById("exportCode").innerText = generateExportCode();
         };
+        var faceTextFieldInFocusID = undefined;
+        document.onclick = function ($e) {
+            var _a, _b;
+            var clickedElement = document.activeElement;
+            if ((_a = clickedElement.name) === null || _a === void 0 ? void 0 : _a.startsWith("face")) //only interested if the user clicks a face textfield
+             {
+                faceTextFieldInFocusID = clickedElement.id;
+            }
+            else if ($e.clientX < canvasWidth && $e.clientY < canvasHeight) //don't change textFieldInFocus when user clicks the renderingWindow
+             {
+                (_b = document.getElementById(faceTextFieldInFocusID)) === null || _b === void 0 ? void 0 : _b.focus();
+            }
+            else {
+                faceTextFieldInFocusID = undefined;
+            }
+            return false;
+        };
+        document.getElementById("renderingWindow").onclick = function ($e) {
+            var clickedPoint = undefined;
+            //we need to convert these click X and Y coordinates into the coordinates on the grid
+            var gridX = $e.clientX - (canvasWidth / 2);
+            var gridY = (canvasHeight / 2) - $e.clientY;
+            //now we need to loop through the screenPoints, and check which points are within a certain radius of the click using X and Y coordinates (nearest 2 dp)
+            var roundMultiple = 0.01; //making the points less accurate so that the user doesn't have to click exactly on the point, higher means user has to be more precise
+            var gridXRounded = Math.round(gridX * roundMultiple) / roundMultiple;
+            var gridYRounded = Math.round(gridY * roundMultiple) / roundMultiple;
+            for (var i = 0; i != screenPoints.width; i += 1) {
+                var point = screenPoints.getColumn(i);
+                var pointXRounded = Math.round(point[0] * roundMultiple) / roundMultiple;
+                var pointYRounded = Math.round(point[1] * roundMultiple) / roundMultiple;
+                if (gridXRounded == pointXRounded && gridYRounded == pointYRounded) {
+                    clickedPoint = i;
+                }
+            }
+            if (faceTextFieldInFocusID != undefined && clickedPoint != undefined) {
+                var faceTextfield = document.getElementById(faceTextFieldInFocusID);
+                if (faceTextfield.value.endsWith(",")) {
+                    faceTextfield.value = faceTextfield.value + " ".concat(clickedPoint);
+                }
+                else {
+                    faceTextfield.value = faceTextfield.value + ", ".concat(clickedPoint);
+                }
+            }
+        };
     };
     //Startup
     (function () {
@@ -327,10 +371,11 @@
     updateDisplayShape();
     document.getElementById("exportCode").innerText = generateExportCode();
     //Animation Loop
+    var screenPoints = new matrix(); //always updated to have the current screen points, in correct order
     setInterval(function () {
         clearCanvas();
         camera.renderGrid();
-        camera.render([displayShape], true);
+        screenPoints = camera.render([displayShape], true)[0].screenPoints; //camera now returns the sortedObjects, since we are only rendering 1 object we can always get [0]
     }, 16);
 })();
 //localScope();

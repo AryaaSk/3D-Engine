@@ -129,9 +129,9 @@
             pointDiv.className = 'point';
             pointDiv.innerHTML = `
                 <div class="centered">${String(i)}</div>
-                <div class="centered"> X: <input type="text" style="width: 90%;" value="${point[0]}" id="point${String(i)}X"> </div>
-                <div class="centered"> Y: <input type="text" style="width: 90%;" value="${point[1]}" id="point${String(i)}Y"> </div>
-                <div class="centered"> Z: <input type="text" style="width: 90%;" value="${point[2]}" id="point${String(i)}Z"> </div>
+                <div class="centered"> X: <input type="text" name="pointX${String(i)}" style="width: 90%;" value="${point[0]}" id="point${String(i)}X"> </div>
+                <div class="centered"> Y: <input type="text" name="pointY${String(i)}" style="width: 90%;" value="${point[1]}" id="point${String(i)}Y"> </div>
+                <div class="centered"> Z: <input type="text" name="pointZ${String(i)}" style="width: 90%;" value="${point[2]}" id="point${String(i)}Z"> </div>
                 <div class="centered"><input type="button" class="controlButton deleteStyle" id="DeletePoint${String(i)}" value="Delete Point" style="float: right;"></div>
         `;
             pointMatrixList.appendChild(pointDiv);
@@ -151,7 +151,7 @@
             faceDiv.className = "face";
             faceDiv.innerHTML = `
             <div class="centered"> ${String(i)} </div>
-            <div class="centeredLeft"> Point Indexes: <input type="text" style="margin-left: 20px; width: 70%;" id="pointIndexes${String(i)}" value="${String(face.pointIndexes)}"> </div>
+            <div class="centeredLeft"> Point Indexes: <input type="text" name="face${String(i)}" style="margin-left: 20px; width: 70%;" id="pointIndexes${String(i)}" value="${String(face.pointIndexes)}"> </div>
             <div class="centeredLeft"> Colour: <input type="color" style="width: 90%;" id="colour${String(i)}" value="${String(face.colour)}"></div>
             <div class="centeredLeft"><input type="button" class="controlButton deleteStyle" id="DeleteFace${String(i)}" value="Delete Face" style="float: right;"></div>
         `;
@@ -332,6 +332,49 @@
             document.getElementById("exportCodeTitle").innerText = "Export Code:";
             document.getElementById("exportCode").innerText = generateExportCode();
         };
+        let faceTextFieldInFocusID = undefined;
+        document.onclick = ($e) => {
+            const clickedElement = document.activeElement;
+            if (clickedElement.name?.startsWith("face")) //only interested if the user clicks a face textfield
+             {
+                faceTextFieldInFocusID = clickedElement.id;
+            }
+            else if ($e.clientX < canvasWidth && $e.clientY < canvasHeight) //don't change textFieldInFocus when user clicks the renderingWindow
+             {
+                document.getElementById(faceTextFieldInFocusID)?.focus();
+            }
+            else {
+                faceTextFieldInFocusID = undefined;
+            }
+            return false;
+        };
+        document.getElementById("renderingWindow").onclick = ($e) => {
+            let clickedPoint = undefined;
+            //we need to convert these click X and Y coordinates into the coordinates on the grid
+            const gridX = $e.clientX - (canvasWidth / 2);
+            const gridY = (canvasHeight / 2) - $e.clientY;
+            //now we need to loop through the screenPoints, and check which points are within a certain radius of the click using X and Y coordinates (nearest 2 dp)
+            const roundMultiple = 0.01; //making the points less accurate so that the user doesn't have to click exactly on the point, higher means user has to be more precise
+            const gridXRounded = Math.round(gridX * roundMultiple) / roundMultiple;
+            const gridYRounded = Math.round(gridY * roundMultiple) / roundMultiple;
+            for (let i = 0; i != screenPoints.width; i += 1) {
+                const point = screenPoints.getColumn(i);
+                const pointXRounded = Math.round(point[0] * roundMultiple) / roundMultiple;
+                const pointYRounded = Math.round(point[1] * roundMultiple) / roundMultiple;
+                if (gridXRounded == pointXRounded && gridYRounded == pointYRounded) {
+                    clickedPoint = i;
+                }
+            }
+            if (faceTextFieldInFocusID != undefined && clickedPoint != undefined) {
+                const faceTextfield = document.getElementById(faceTextFieldInFocusID);
+                if (faceTextfield.value.endsWith(",")) {
+                    faceTextfield.value = faceTextfield.value + ` ${clickedPoint}`;
+                }
+                else {
+                    faceTextfield.value = faceTextfield.value + `, ${clickedPoint}`;
+                }
+            }
+        };
     };
     //Startup
     (() => {
@@ -354,10 +397,11 @@
     updateDisplayShape();
     document.getElementById("exportCode").innerText = generateExportCode();
     //Animation Loop
+    let screenPoints = new matrix(); //always updated to have the current screen points, in correct order
     setInterval(() => {
         clearCanvas();
         camera.renderGrid();
-        camera.render([displayShape], true);
+        screenPoints = camera.render([displayShape], true)[0].screenPoints; //camera now returns the sortedObjects, since we are only rendering 1 object we can always get [0]
     }, 16);
 })();
 //localScope();
