@@ -1,3 +1,5 @@
+**The example page and Shape Builder are in the /docs folder because Github Pages requires them to be there**
+
 ## How to create new object:
 ### Using the Shape Builder (**recommended**):
 1. Go to [Shape Builder](https://aryaask.github.io/3D-Engine/), this is the Shape Builder/Editor
@@ -33,7 +35,7 @@ camera.render([pentagon]);
 ![Shape Builder Code](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ImportCodeExplanation.png?raw=true)
 4. Once you finish pasting in the 3 arrays, you should have that shape in the Editor, where you can edit it normally, and then just export it again.
 
-## How to update code to CDN:
+## How to update source code to CDN:
 1. Make changes locally, you will probably be using local script tags.
 2. Run this command from the project root directory: 
 ```
@@ -43,3 +45,18 @@ npx tsc --outfile JS/aryaa3D.js Typescript/Utilities/canvasUtilities.ts Typescri
 4. Get commit hash from github (it is next to the time ago at the start page of the repo), you have to click on it and get the whole thing
 5. Replace current gitcdn link with old hash, with new hash (just replace the hashes), in README.md and also index.html
 6. Commit and Upload again to github. 
+
+## How to setup local development environment for Shape Builder or Example:
+- When working on either of the websites, you will need to run the typescript compiler to watch and update the JS code in the /JS folder.
+- Use the local /JS files when working locally
+```
+<script src="/JS/Typescript/Utilities/canvasUtilities.js"></script>
+<script src="/JS/Typescript/Utilities/utilities.js"></script>
+<script src="/JS/Typescript/Scene/objects.js"></script>
+<script src="/JS/Typescript/Scene/camera.js"></script>
+```
+
+- When you have finished, comment out the local /JS script tags, and use the CDN script tag, *if you have updated the source code then you will need update it to the CDN*
+```
+<script src="https://gitcdn.link/cdn/AryaaSk/3D-Engine/newestCommitHash/JS/aryaa3D.js"></script> 
+```
