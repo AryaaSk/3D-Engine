@@ -81,6 +81,7 @@ class Camera {
                 }
             }
         }
+        return sortedObjects;
     }
     sortFurthestDistanceTo(list, positionKey, positionPoint) {
         const sortedList = [];

@@ -94,6 +94,8 @@ class Camera {
                 }
             }
         }
+
+        return sortedObjects;
     }
     private sortFurthestDistanceTo(list: any[], positionKey: string, positionPoint: number[])
     {

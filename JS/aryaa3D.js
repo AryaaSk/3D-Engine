@@ -492,6 +492,7 @@ var Camera = /** @class */ (function () {
                 }
             }
         }
+        return sortedObjects;
     };
     Camera.prototype.sortFurthestDistanceTo = function (list, positionKey, positionPoint) {
         var sortedList = [];
