@@ -21,7 +21,7 @@ linkCanvas("renderingWindow");
 ```
 
 ## Creating an Object
-I have not made a lot of inbuilt objects, however it is very easy to create more, read the [Development Readme](Research/DevelopmentREADME.md) for more information.\
+I have not made a lot of inbuilt objects, however it is very easy to create more, read the [Development Readme](DevelopmentREADME.md) for more information.\
 In this example I will create a box, the only thing you would have to change for other objects is the dimensions you pass in when creating them
 
 To create a box the user passes in 3 arguments, width, height and depth (for a pyramid it is just the bottomSideLength and height):
@@ -114,4 +114,4 @@ Here is a preview of the project in this repo [example.html](https://aryaask.git
 
 Here is a preview of the Shape Builder which you can use to build custom shapes\
 ![Shape Builder Preview](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ShapeBuilderPreview2.png?raw=true)\
-*Read the [Development Readme](Research/DevelopmentREADME.md) for more information*
+*Read the [Development Readme](DevelopmentREADME.md) for more information*

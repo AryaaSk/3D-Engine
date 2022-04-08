@@ -175,6 +175,39 @@ const generateExportCode = () => {
     return exportCode;
 }
 
+const uploadShape = () => {
+    let pointsJSON = prompt("Copy and paste the points array here:");
+    if (pointsJSON == undefined || pointsJSON == "") { alert("Invalid Points"); return; }
+    if (pointsJSON.endsWith(";")) { pointsJSON = pointsJSON.slice(0, -1); }
+    const points = JSON.parse(pointsJSON);
+
+    let facesJSON = prompt("Copy and paste the faces array here:");
+    if (facesJSON == undefined || facesJSON == "") { alert("Invalid Faces"); return; }
+    if (facesJSON.endsWith(";")) { facesJSON = facesJSON.slice(0, -1); }
+    facesJSON = facesJSON.replaceAll('pointIndexes', '"pointIndexes"');
+    facesJSON = facesJSON.replaceAll('colour', '"colour"');
+    const faces = JSON.parse(facesJSON);
+
+    let centeringJSON = prompt("Copy and paste the centering vectors array here:");
+    if (centeringJSON == undefined || centeringJSON == "") { alert("Invalid Centering Vectors"); return; }
+    if (centeringJSON.endsWith(";")) { centeringJSON = centeringJSON.slice(0, -1); }
+    const centeringVectors = JSON.parse(centeringJSON);
+
+    shape.pointMatrix = new matrix();
+    for (let i = 0; i != points.length; i += 1)
+    { shape.pointMatrix.addColumn(points[i]); }
+    shape.faces = faces;
+    [centeringX, centeringY, centeringZ] = centeringVectors;
+
+    updateDisplayShape();
+
+    updateDOM();
+    (<HTMLInputElement>document.getElementById("centeringX")!).value = String(centeringX);
+    (<HTMLInputElement>document.getElementById("centeringY")!).value = String(centeringY);
+    (<HTMLInputElement>document.getElementById("centeringZ")!).value = String(centeringZ);
+    document.getElementById("exportCodeTitle")!.innerText = "*Export Code:";
+}
+
 const startButtonListeners = () => {
     document.onkeydown = ($e) => {
         const key = $e.key.toLowerCase();
@@ -182,36 +215,7 @@ const startButtonListeners = () => {
     }
 
     document.getElementById("uploadShape")!.onclick = () => {
-        let pointsJSON = prompt("Copy and paste the points array here:");
-        if (pointsJSON == undefined || pointsJSON == "") { alert("Invalid Points"); return; }
-        if (pointsJSON.endsWith(";")) { pointsJSON = pointsJSON.slice(0, -1); }
-        const points = JSON.parse(pointsJSON);
-
-        let facesJSON = prompt("Copy and paste the faces array here:");
-        if (facesJSON == undefined || facesJSON == "") { alert("Invalid Faces"); return; }
-        if (facesJSON.endsWith(";")) { facesJSON = facesJSON.slice(0, -1); }
-        facesJSON = facesJSON.replaceAll('pointIndexes', '"pointIndexes"');
-        facesJSON = facesJSON.replaceAll('colour', '"colour"');
-        const faces = JSON.parse(facesJSON);
-
-        let centeringJSON = prompt("Copy and paste the centering vectors array here:");
-        if (centeringJSON == undefined || centeringJSON == "") { alert("Invalid Centering Vectors"); return; }
-        if (centeringJSON.endsWith(";")) { centeringJSON = centeringJSON.slice(0, -1); }
-        const centeringVectors = JSON.parse(centeringJSON);
-
-        shape.pointMatrix = new matrix();
-        for (let i = 0; i != points.length; i += 1)
-        { shape.pointMatrix.addColumn(points[i]); }
-        shape.faces = faces;
-        [centeringX, centeringY, centeringZ] = centeringVectors;
-
-        updateDisplayShape();
-
-        updateDOM();
-        (<HTMLInputElement>document.getElementById("centeringX")!).value = String(centeringX);
-        (<HTMLInputElement>document.getElementById("centeringY")!).value = String(centeringY);
-        (<HTMLInputElement>document.getElementById("centeringZ")!).value = String(centeringZ);
-        document.getElementById("exportCodeTitle")!.innerText = "*Export Code:";
+        uploadShape();
     }
 
     document.getElementById("addPoint")!.onclick = () => {
