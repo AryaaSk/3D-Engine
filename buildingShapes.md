@@ -1,0 +1,20 @@
+# How to build shapes using Shape Builder
+## Explaining some techniques and tips on how to use the Shape Builder well
+
+### Points:
+1. You should create the points first, since they are the building blocks of all the components. 
+2. You can use the Point Commands to speed up the workflow:
+    - The Translate option will allow you to translate a group of points by a vector, this is very useful if you have some points and you want to create a shape such as a prism
+    - The Duplicate option will just duplicate a group of points, by using this and the translation, it is very quick to create a prism, just create 1 face, duplicate the points, and translate the new points by the depth of your prism.
+
+### Faces:
+1. It is important to configure the faces correctly, otherwise your shape may look weird from different angles.
+2. If you have a plane, and then you have positioned more components on top of it, it may cause some issues with the renderer, where the plane is rendered above the components, since it is so large that the center is actually closer to the position point (0, 0, -50000). To minimize this issue you need to try and keep each face as small as possible:
+    - Here is an example, I am building a house object, and the front face is covering parts of the door and windows
+    ![House Disjointed Faces](https://github.com/AryaaSk/3D-Engine/blob/master/Research/HouseJoinedFace.png?raw=true)
+
+    - Instead of creating a single face for the front wall, I have split it up between the door and the window components, this drastically helps reduce the issue of faces being wrongly placed on top of each other. This is what it looks like after I split up the faces:\
+    ![House Disjointed Faces](https://github.com/AryaaSk/3D-Engine/blob/master/Research/HouseDisjointedFaces.png?raw=true)
+
+### Centering:
+- To center the object, an easy way is to find the *upper and lower bound* of each axis, then just center it by halfing the range between them.

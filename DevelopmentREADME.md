@@ -19,7 +19,7 @@ pentagon.position.x = 300;
 pentagon.position.y = 300;
 camera.render([pentagon]);
 ```
-**There are a lot of custom shapes in the [customShapes.js](customShapes.js) file, just go there and find a good shape, then you can copy and paste it into your own project and use it there**
+**If you want to know some good techniques and tips to create shapes, go to the [Building Shapes README](buildingShapes.md)**
 
 ### Manually setting points and faces through code (**not recommended**):
 1. Create a subclass of Shape and call it the shape you are trying to create

@@ -22,7 +22,7 @@ linkCanvas("renderingWindow");
 
 ## Creating an Object
 I have not made a lot of inbuilt objects, however it is very easy to add/create more, to add more you can look at the [customShapes.js](customShapes.js) file, which contains some classes of extra objects, to use them just copy and paste them into your code, and then use it like any other shape.\
-If you want to create your own custom shapes/objects read the [Development Readme](DevelopmentREADME.md).\
+If you want to create your own custom shapes/objects read the [Development Readme](DevelopmentREADME.md).
 
 In this example I will create a box, the only thing you may have to change for other objects is the dimensions you pass in when creating them
 
