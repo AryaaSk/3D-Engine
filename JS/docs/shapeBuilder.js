@@ -196,35 +196,52 @@
         return exportCode;
     };
     const importShape = () => {
-        let pointsJSON = prompt("Copy and paste the points array here:");
-        if (pointsJSON == undefined || pointsJSON == "") {
-            alert("Invalid Points");
+        let shapeCode = prompt("Copy and paste the shape's code here\nMake sure you haven't added a line break between any of the datasets:");
+        if (shapeCode == undefined || shapeCode == "") {
+            alert("Invalid Shape Code");
             return;
         }
-        if (pointsJSON.endsWith(";")) {
-            pointsJSON = pointsJSON.slice(0, -1);
+        shapeCode = shapeCode.replaceAll(" ", "");
+        var lineArray = shapeCode.split(/\r?\n/);
+        let points = [];
+        let centeringVectors = [];
+        let faces = [];
+        let found = 0;
+        //find lines which begin with, "constpoints=", "const[centeringX,centeringY,centeringZ]=", and "this.faces=", this is the data we need to construct the object
+        //when it finds one, then split at '=', and get second element
+        for (let i = 0; i != lineArray.length; i += 1) {
+            const line = lineArray[i];
+            if (line.startsWith("constpoints=")) {
+                let pointsJSON = line.split("=")[1];
+                if (pointsJSON.endsWith(";")) {
+                    pointsJSON = pointsJSON.slice(0, -1);
+                }
+                points = JSON.parse(pointsJSON);
+                found += 1;
+            }
+            else if (line.startsWith("const[centeringX,centeringY,centeringZ]=")) {
+                let centeringJSON = line.split("=")[1];
+                if (centeringJSON.endsWith(";")) {
+                    centeringJSON = centeringJSON.slice(0, -1);
+                }
+                centeringVectors = JSON.parse(centeringJSON);
+                found += 1;
+            }
+            else if (line.startsWith("this.faces=")) {
+                let facesJSON = line.split("=")[1];
+                if (facesJSON.endsWith(";")) {
+                    facesJSON = facesJSON.slice(0, -1);
+                }
+                facesJSON = facesJSON.replaceAll('pointIndexes', '"pointIndexes"');
+                facesJSON = facesJSON.replaceAll('colour', '"colour"');
+                faces = JSON.parse(facesJSON);
+                found += 1;
+            }
         }
-        const points = JSON.parse(pointsJSON);
-        let facesJSON = prompt("Copy and paste the faces array here:");
-        if (facesJSON == undefined || facesJSON == "") {
-            alert("Invalid Faces");
+        if (found != 3) {
+            alert("Unable to find all required data");
             return;
         }
-        if (facesJSON.endsWith(";")) {
-            facesJSON = facesJSON.slice(0, -1);
-        }
-        facesJSON = facesJSON.replaceAll('pointIndexes', '"pointIndexes"');
-        facesJSON = facesJSON.replaceAll('colour', '"colour"');
-        const faces = JSON.parse(facesJSON);
-        let centeringJSON = prompt("Copy and paste the centering vectors array here:");
-        if (centeringJSON == undefined || centeringJSON == "") {
-            alert("Invalid Centering Vectors");
-            return;
-        }
-        if (centeringJSON.endsWith(";")) {
-            centeringJSON = centeringJSON.slice(0, -1);
-        }
-        const centeringVectors = JSON.parse(centeringJSON);
         shape.pointMatrix = new matrix();
         for (let i = 0; i != points.length; i += 1) {
             shape.pointMatrix.addColumn(points[i]);
@@ -326,9 +343,9 @@
         shape.faces.push({ pointIndexes: [0, 1, 3], colour: "#ff9300" });
         shape.faces.push({ pointIndexes: [1, 2, 3], colour: "#00f900" });
         shape.faces.push({ pointIndexes: [2, 3, 0], colour: "#0433ff" });
-        centeringX = -50;
-        centeringY = -50;
-        centeringZ = -50;
+        centeringX = 0;
+        centeringY = 0;
+        centeringZ = 0;
         document.getElementById("centeringX").value = String(centeringX); //the centering values do not get updated in updateDOM();
         document.getElementById("centeringY").value = String(centeringY);
         document.getElementById("centeringZ").value = String(centeringZ);

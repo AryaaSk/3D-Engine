@@ -19,6 +19,7 @@ pentagon.position.x = 300;
 pentagon.position.y = 300;
 camera.render([pentagon]);
 ```
+**There are a lot of custom shapes in the [customShapes.js](customShapes.js) file, just go there and find a good shape, then you can copy and paste it into your own project and use it there**
 
 ### Manually setting points and faces through code (**not recommended**):
 1. Create a subclass of Shape and call it the shape you are trying to create
@@ -30,10 +31,11 @@ camera.render([pentagon]);
 
 ## How to import shapes into Shape Builder:
 1. Click on the Import Shape button next to the title in the Shape Builder
-2. It will ask you to input the Points Array, then the Faces Array, then the Centering Array.
-3. You just need to copy and paste those specific arrays into the inputs, if you are unsure of which arrays it is talking about, you can refer to this:\
+2. Copy and paste the shape class code into the text input, make sure you haven't added a line break between the Points Array, the Faces Array, or the Centering Array.
+3. Click done and your shape should be in the Shape Editor, where you can edit it normally, and then just export it again.
+
+- If you are are unsure of what arrays/data it is talking about, you can refer to this:\
 ![Shape Builder Code](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ImportCodeExplanation.png?raw=true)
-4. Once you finish pasting in the 3 arrays, you should have that shape in the Editor, where you can edit it normally, and then just export it again.
 
 ## How to setup local environment for the Source Code:
 - When developing use the JS files in the /JS folder:
