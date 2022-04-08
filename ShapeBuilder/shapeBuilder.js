@@ -12,7 +12,6 @@ var localScope = function () {
         shape.faces.push({ pointIndexes: [0, 1, 3], colour: "#ff9300" });
         shape.faces.push({ pointIndexes: [1, 2, 3], colour: "#00f900" });
         shape.faces.push({ pointIndexes: [2, 3, 0], colour: "#0433ff" });
-        shape.updateMatrices();
     };
     var displayShape = new Shape();
     displayShape.showOutline = true;
@@ -30,7 +29,7 @@ var localScope = function () {
             var _a = [Number(DOMPointX.value), Number(DOMPointY.value), Number(DOMPointZ.value)], x = _a[0], y = _a[1], z = _a[2];
             shape.pointMatrix.addColumn([x, y, z]);
         }
-        shape.updateMatrices();
+        updateDisplayShape();
     };
     var updateFaces = function () {
         for (var i = 0; i != shape.faces.length; i += 1) {
@@ -59,7 +58,7 @@ var localScope = function () {
                 shape.faces[i].colour = colour;
             }
         }
-        shape.updateMatrices();
+        updateDisplayShape();
         updateDOM();
     };
     var updateCentering = function () {
@@ -67,15 +66,17 @@ var localScope = function () {
         var _b = [document.getElementById("centeringX").value, document.getElementById("centeringY").value, document.getElementById("centeringZ").value], centeringXString = _b[0], centeringYString = _b[1], centeringZString = _b[2];
         _a = [Number(centeringXString), Number(centeringYString), Number(centeringZString)], centeringX = _a[0], centeringY = _a[1], centeringZ = _a[2];
     };
-    var updateAll = function () {
+    var updateVariables = function () {
         updatePoints();
         updateFaces();
+        updateCentering();
+    };
+    var updateDisplayShape = function () {
+        //don't actually render the shape, we render the displayShape to avoid directly modifying the shape's pointMatrix with the centering vectors
         displayShape.pointMatrix = shape.pointMatrix.copy();
         displayShape.faces = shape.faces;
-        updateCentering(); //don't actually render the shape, we render the displayShape to avoid directly modifying the shape's pointMatrix with the centering vectors
         displayShape.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
         displayShape.updateMatrices();
-        //changes should be handled by animation loop
     };
     var updateDOM = function () {
         var pointMatrixList = document.getElementById("pointMatrixList");
@@ -122,27 +123,75 @@ var localScope = function () {
             var key = $e.key.toLowerCase();
             if (key == "enter") {
                 document.getElementById("exportCodeTitle").innerText = "*Export Code:";
-                updateAll();
+                updateVariables();
+                updateDisplayShape();
             }
         };
+        document.getElementById("uploadShape").onclick = function () {
+            var pointsJSON = prompt("Copy and paste the points array here:");
+            if (pointsJSON == undefined || pointsJSON == "") {
+                alert("Invalid Points");
+                return;
+            }
+            if (pointsJSON.endsWith(";")) {
+                pointsJSON = pointsJSON.slice(0, -1);
+            }
+            var points = JSON.parse(pointsJSON);
+            var facesJSON = prompt("Copy and paste the faces array here:");
+            if (facesJSON == undefined || facesJSON == "") {
+                alert("Invalid Faces");
+                return;
+            }
+            if (facesJSON.endsWith(";")) {
+                facesJSON = facesJSON.slice(0, -1);
+            }
+            facesJSON = facesJSON.replaceAll('pointIndexes', '"pointIndexes"');
+            facesJSON = facesJSON.replaceAll('colour', '"colour"');
+            var faces = JSON.parse(facesJSON);
+            var centeringJSON = prompt("Copy and paste the centering vectors array here:");
+            if (centeringJSON == undefined || centeringJSON == "") {
+                alert("Invalid Centering Vectors");
+                return;
+            }
+            if (centeringJSON.endsWith(";")) {
+                centeringJSON = centeringJSON.slice(0, -1);
+            }
+            var centeringVectors = JSON.parse(centeringJSON);
+            shape.pointMatrix = new matrix();
+            for (var i = 0; i != points.length; i += 1) {
+                shape.pointMatrix.addColumn(points[i]);
+            }
+            shape.faces = faces;
+            centeringX = centeringVectors[0], centeringY = centeringVectors[1], centeringZ = centeringVectors[2];
+            updateDisplayShape();
+            updateDOM();
+            document.getElementById("centeringX").value = String(centeringX);
+            document.getElementById("centeringY").value = String(centeringY);
+            document.getElementById("centeringZ").value = String(centeringZ);
+            document.getElementById("exportCodeTitle").innerText = "*Export Code:";
+        };
         document.getElementById("addPoint").onclick = function () {
-            shape.pointMatrix.addColumn([0, 0, 0]);
-            shape.updateMatrices();
+            shape.pointMatrix.addColumn([0 - centeringX, 0 - centeringY, 0 - centeringZ]);
+            updateDisplayShape();
             updateDOM();
         };
         var _loop_1 = function (i) {
             document.getElementById("DeletePoint".concat(String(i))).onclick = function () {
+                var _a;
                 shape.pointMatrix.deleteColumn(i);
-                //also need to check if there are any faces with this point
-                for (var i_1 = 0; i_1 != shape.faces.length; i_1 += 1) {
-                    if (shape.faces[i_1].pointIndexes.includes(i_1) == true) {
-                        shape.faces.splice(i_1, 1);
-                        i_1 -= 1;
+                //also need to check if there are any faces with this point, i = pointIndex
+                var a = 0;
+                while (a != shape.faces.length) {
+                    if (((_a = shape.faces[a]) === null || _a === void 0 ? void 0 : _a.pointIndexes.includes(i)) == true) {
+                        shape.faces.splice(a, 1);
+                        a -= 1;
+                    }
+                    else {
+                        a += 1;
                     }
                 }
-                shape.updateMatrices();
+                updateDisplayShape();
                 updateDOM();
-                updateAll();
             };
         };
         for (var i = 0; i != shape.pointMatrix.width; i += 1) {
@@ -194,7 +243,7 @@ var localScope = function () {
                 shape.pointMatrix.addColumn(newPoints[i]);
             }
             updateDOM();
-            updateAll();
+            updateDisplayShape();
         };
         document.getElementById("addFace").onclick = function () {
             if (shape.pointMatrix.width < 3) {
@@ -202,13 +251,13 @@ var localScope = function () {
                 return;
             }
             shape.faces.push({ pointIndexes: [0, 1, 2], colour: "#c4c4c4" });
-            shape.updateMatrices();
+            updateDisplayShape();
             updateDOM();
         };
         var _loop_2 = function (i) {
             document.getElementById("DeleteFace".concat(String(i))).onclick = function () {
                 shape.faces.splice(i, 1);
-                shape.updateMatrices();
+                updateDisplayShape();
                 updateDOM();
             };
         };
@@ -217,18 +266,23 @@ var localScope = function () {
         }
         document.getElementById("update").onclick = function () {
             document.getElementById("exportCodeTitle").innerText = "*Export Code:";
-            updateAll();
+            updateVariables();
+            updateDisplayShape();
         };
         document.getElementById("export").onclick = function () {
-            updateAll();
+            updateVariables();
             document.getElementById("exportCodeTitle").innerText = "Export Code:";
             document.getElementById("exportCode").innerText = generateExportCode();
         };
+        document.querySelectorAll("input[type='color']").forEach(function (input) {
+            var colorInput = input;
+            colorInput.addEventListener('input', function () { updateVariables(); updateDisplayShape(); });
+        });
     };
     //Startup
     loadDefaultShape();
     updateDOM();
-    updateAll();
+    updateDisplayShape();
     document.getElementById("exportCode").innerText = generateExportCode();
     //Animation Loop
     setInterval(function () {
