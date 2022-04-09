@@ -346,11 +346,11 @@
             else if ($e.clientX < canvasWidth && $e.clientY < canvasHeight) //don't change textFieldInFocus when user clicks the renderingWindow
              {
                 (_b = document.getElementById(faceTextFieldInFocusID)) === null || _b === void 0 ? void 0 : _b.focus();
+                return false;
             }
             else {
                 faceTextFieldInFocusID = undefined;
             }
-            return false;
         };
         document.getElementById("renderingWindow").onclick = function ($e) {
             var clickedPoint = undefined;

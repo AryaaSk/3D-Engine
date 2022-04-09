@@ -357,10 +357,8 @@ const startButtonListeners = () => {
         if (clickedElement.name?.startsWith("face")) //only interested if the user clicks a face textfield
         { faceTextFieldInFocusID = clickedElement.id; }
         else if ( $e.clientX < canvasWidth && $e.clientY < canvasHeight ) //don't change textFieldInFocus when user clicks the renderingWindow
-        { document.getElementById(faceTextFieldInFocusID)?.focus(); } 
+        { document.getElementById(faceTextFieldInFocusID)?.focus(); return false; } 
         else { faceTextFieldInFocusID = undefined; }
-
-        return false;
     }
 
     document.getElementById("renderingWindow")!.onclick = ($e) => {        
