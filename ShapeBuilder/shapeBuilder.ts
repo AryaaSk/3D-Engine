@@ -13,10 +13,25 @@ let centeringY = 0;
 let centeringZ = 0;
 
 //Point/Face Commands
+const getIndexes = (message: string, type: string) => {
+    let pointIndexesList = prompt(message + "\nYou can also type 'All', to select everything");
+    if (pointIndexesList == undefined || pointIndexesList == "") { return; }
+    if (pointIndexesList.toLowerCase() == "all") {
+        pointIndexesList = "";
+        if (type == "points") {
+            for (let i = 0; i != shape.pointMatrix.width; i += 1) { pointIndexesList = pointIndexesList + String(i) + "," }
+        }
+        else { //faces
+            for (let i = 0; i != shape.faces.length; i += 1) { pointIndexesList = pointIndexesList + String(i) + "," }
+        }
+    }
+    if (pointIndexesList.endsWith(",")) { pointIndexesList = pointIndexesList.slice(0, -1); }
+    const pointIndexes = pointIndexesList.split(",").map(Number);
+    return pointIndexes;
+}
+
 const duplicatePoints = () => {
-    const pointIndexesToDupList = prompt("Enter the indexes of the points you want to duplicate separated by a comma");
-    if (pointIndexesToDupList == undefined || pointIndexesToDupList == "") { return; }
-    const pointIndexesToDup = pointIndexesToDupList.split(",").map(Number);
+    const pointIndexesToDup = getIndexes("Enter the indexes of the points you want to duplicate separated by a comma", "points")!;
 
     const pointMatrixWidth = shape.pointMatrix.width;
     for (let i = 0; i != pointIndexesToDup.length; i += 1)
@@ -35,9 +50,7 @@ const duplicatePoints = () => {
     updateDisplayShape();
 }
 const translatePoints = () => {
-    const pointIndexesList = prompt("Enter the indexes of the points you want to translate separated by a comma");
-    if (pointIndexesList == undefined || pointIndexesList == "") { return; }
-    const pointIndexes = pointIndexesList.split(",").map(Number);
+    const pointIndexes = getIndexes("Enter the indexes of the points you want to translate separated by a comma", "points")!;
 
     const pointMatrixWidth = shape.pointMatrix.width;
     for (let i = 0; i != pointIndexes.length; i += 1)
@@ -59,9 +72,7 @@ const translatePoints = () => {
     updateDisplayShape();
 }
 const scalePoints = () => {
-    const pointIndexesList = prompt("Enter the indexes of the points you want to scale separated by a comma");
-    if (pointIndexesList == undefined || pointIndexesList == "") { return; }
-    const pointIndexes = pointIndexesList.split(",").map(Number);
+    const pointIndexes = getIndexes("Enter the indexes of the points you want to scale separated by a comma", "points")!;
 
     const pointMatrixWidth = shape.pointMatrix.width;
     for (let i = 0; i != pointIndexes.length; i += 1)
@@ -90,9 +101,7 @@ const scalePoints = () => {
 }
 
 const changeFaceColours = () => {
-    const faceIndexesList = prompt("Enter the indexes of the faces you want to change colours");
-    if (faceIndexesList == undefined || faceIndexesList == "") { return; }
-    const faceIndexes = faceIndexesList.split(",").map(Number);
+    const faceIndexes = getIndexes("Enter the indexes of the faces you want to change colours", "faces")!;
 
     const facesLength = shape.faces.length;
     for (let i = 0; i != faceIndexes.length; i += 1)
