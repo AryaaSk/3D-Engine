@@ -8,8 +8,11 @@
     - The Duplicate option will just duplicate a group of points, by using this and the translation, it is very quick to create a prism, just create 1 face, duplicate the points, and translate the new points by the depth of your prism.
 
 ### Faces:
-1. It is important to configure the faces correctly, otherwise your shape may look weird from different angles.
-2. If you have a plane, and then you have positioned more components on top of it, it may cause some issues with the renderer, where the plane is rendered above the components, since it is so large that the center is actually closer to the position point (0, 0, -50000). To minimize this issue you need to try and keep each face as small as possible:
+- It is important to configure the faces correctly, otherwise your shape may look weird from different angles.
+1. When you are editing the faces, instead of manually typing out every point index, you can just click on the text input, and then start clicking on the actual points, it will add them into the textfield for you. This speeds up the process a lot.
+2. Just like with the points, there are also face commands:
+    - The Colour Change takes in the face indexes (the number next to the face), and changes their colours based on a hex code that you give it.
+3. If you have a plane, and then you have positioned more components on top of it, it may cause some issues with the renderer, where the plane is rendered above the components, since it is so large that the center is actually closer to the position point (0, 0, -50000). To minimize this issue you need to try and keep each face as small as possible:
     - Here is an example, I am building a house object, and the front face is covering parts of the door and windows
     ![House Disjointed Faces](https://github.com/AryaaSk/3D-Engine/blob/master/Research/HouseJoinedFace.png?raw=true)
 
