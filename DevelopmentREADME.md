@@ -37,38 +37,29 @@ camera.render([pentagon]);
 - If you are are unsure of what arrays/data it is talking about, you can refer to this:\
 ![Shape Builder Code](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ImportCodeExplanation.png?raw=true)
 
-## How to setup local environment for the Source Code:
-- When developing use the JS files in the /JS folder:
+## How to update source code to CDN:
+1. Make changes locally, you will probably be using local script tags.
 ```
 <script src="/JS/Source/Utilities/canvasUtilities.js"></script>
 <script src="/JS/Source/Utilities/utilities.js"></script>
 <script src="/JS/Source/Scene/objects.js"></script>
 <script src="/JS/Source/Scene/camera.js"></script>
 ```
-- When you have finished the changes, comment out the local /JS files, and use the CDN script instead after updating the CDN (look at the section below).
-
-## How to update source code to CDN:
-1. Make changes locally, you will probably be using local script tags.
 2. Run this command from the project root directory: 
 ```
 npx tsc --outfile JS/aryaa3D.js Source/Utilities/canvasUtilities.ts Source/Utilities/utilities.ts Source/Scene/objects.ts Source/Scene/camera.ts
 ```
-3. Commit and Upload to github
-4. Get commit hash from github (it is next to the time ago at the start page of the repo), you have to click on it and get the whole thing
-5. Replace current gitcdn link with old hash, with new hash (just replace the hashes), in README.md, in docs/example.html, and docs/index.html
-6. Commit and Upload again to github. 
+3. Switch to use the Github Pages script tag
+```
+<script src="https://aryaask.github.io/3D-Engine/JS/aryaa3D.js"></script>
+```
 
 ## How to setup local development environment for Shape Builder:
 - When developing you will need to use the local /JS file which is automatically compiled by the typescript compiler, so use this script tag:
 ```
 <script src="/JS/docs/shapeBuilder.js" defer></script>
 ```
-
-- When you have finished, comment that previous line, and run this command:
+- Once you have finished, switch back to the Github pages script tag:
 ```
-npx tsc docs/shapeBuilder.ts
-```
-This generates a local JS file in the same directory, then just use that instead of the /JS file:
-```
-<script src="shapeBuilder.js" defer></script>
+<script src="https://aryaask.github.io/3D-Engine/JS/ShapeBuilder/shapeBuilder.js" defer></script>
 ```
