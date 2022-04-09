@@ -6,6 +6,7 @@
 2. You can use the Point Commands to speed up the workflow:
     - The Translate option will allow you to translate a group of points by a vector, this is very useful if you have some points and you want to create a shape such as a prism
     - The Duplicate option will just duplicate a group of points, by using this and the translation, it is very quick to create a prism, just create 1 face, duplicate the points, and translate the new points by the depth of your prism.
+    - The Scale Points option takes in a scale factor vector, as well as a group of points. It will apply a scale factor in the corresponding axis to each point. For example if you input a scale factor vector of [2, 1, 2], on point (10, 0, 5), the new point will be (20, 0, 10). **Be careful of giving 0 as a scale factor, as this will just set the corresponding axis to 0**, the Shape Builder will give you a warning if you try and add 0, since you probably meant to do 1.
 
 ### Faces:
 - It is important to configure the faces correctly, otherwise your shape may look weird from different angles.

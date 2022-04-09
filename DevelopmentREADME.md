@@ -55,7 +55,7 @@ npx tsc --outfile JS/aryaa3D.js Source/Utilities/canvasUtilities.ts Source/Utili
 ## How to setup local development environment for Shape Builder:
 - When developing you will need to use the local /JS file which is automatically compiled by the typescript compiler, so use this script tag:
 ```
-<script src="/JS/docs/shapeBuilder.js" defer></script>
+<script src="/JS/ShapeBuilder/shapeBuilder.js" defer></script>
 ```
 - Once you have finished, switch back to the Github pages script tag:
 ```

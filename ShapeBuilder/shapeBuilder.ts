@@ -12,6 +12,7 @@ let centeringX = 0;
 let centeringY = 0;
 let centeringZ = 0;
 
+//Point/Face Commands
 const duplicatePoints = () => {
     const pointIndexesToDupList = prompt("Enter the indexes of the points you want to duplicate separated by a comma");
     if (pointIndexesToDupList == undefined || pointIndexesToDupList == "") { return; }
@@ -57,6 +58,37 @@ const translatePoints = () => {
     updateDOM();
     updateDisplayShape();
 }
+const scalePoints = () => {
+    const pointIndexesList = prompt("Enter the indexes of the points you want to scale separated by a comma");
+    if (pointIndexesList == undefined || pointIndexesList == "") { return; }
+    const pointIndexes = pointIndexesList.split(",").map(Number);
+
+    const pointMatrixWidth = shape.pointMatrix.width;
+    for (let i = 0; i != pointIndexes.length; i += 1)
+    { if (pointIndexes[i] > pointMatrixWidth - 1) { alert("One or more of indexes was not a valid point index"); return; } }
+
+    const scaleFactorString = prompt("Enter the scale factor vector in form [x, y, z]\nThis will be applied around (0, 0, 0), and is applied before the centering vector");
+    if (scaleFactorString == undefined || scaleFactorString == "") { alert("Invalid scale factor"); return; }
+    const scaleFactor = JSON.parse(scaleFactorString);
+
+    //check if any of the scaleFactors are 0, user may have thought this means do nothing, however it will set the point to 0
+    if (scaleFactor[0] == 0 || scaleFactor[1] == 0 || scaleFactor[2] == 0) {
+        const confimation = prompt(`1 or more of the vectors in ${JSON.stringify(scaleFactor)} is 0, a scale factor of 0 will set the corresponding axis to 0, you may have meant a scale factor of 1 ?\nType Y to confirm a scale factor of 0\nType anything else to cancel the operation`);
+        if (confimation?.toLowerCase() != "y") { return; }
+    }
+
+    for (let i = 0; i != pointIndexes.length; i += 1)
+    {
+        const point = shape.pointMatrix.getColumn(pointIndexes[i]);
+        shape.pointMatrix.setValue(pointIndexes[i], 0, point[0] * scaleFactor[0]);
+        shape.pointMatrix.setValue(pointIndexes[i], 1, point[1] * scaleFactor[1]);
+        shape.pointMatrix.setValue(pointIndexes[i], 2, point[2] * scaleFactor[2]);
+    }
+
+    updateDOM();
+    updateDisplayShape();
+}
+
 const changeFaceColours = () => {
     const faceIndexesList = prompt("Enter the indexes of the faces you want to change colours");
     if (faceIndexesList == undefined || faceIndexesList == "") { return; }
@@ -307,11 +339,12 @@ const startButtonListeners = () => {
         }
     }
     document.getElementById("pointCommands")!.onclick = () => {
-        const command = prompt("What command do you want to perform, enter a letter:\n    D: Duplicate Points\n    T: Translate Points")?.toLowerCase();
+        const command = prompt("What command do you want to perform, enter a letter:\n    D: Duplicate Points\n    T: Translate Points\n    S: Scale Points")?.toLowerCase();
         if (command == undefined) { return; }
 
         if (command == "d") { duplicatePoints(); }
         else if ( command == "t" ) { translatePoints(); }
+        else if ( command == "s" ) { scalePoints(); }
         else { alert("Invalid command"); return; }
     }
 
