@@ -158,18 +158,18 @@ class Camera {
             }
             [previousX, previousY] = [$e.clientX, $e.clientY];
         };
-        document.onkeydown = ($e) => {
+        document.addEventListener('keydown', ($e) => {
             const key = $e.key.toLowerCase();
             if (key == "alt") {
                 altDown = true;
             }
-        };
-        document.onkeyup = ($e) => {
+        });
+        document.addEventListener('keyup', ($e) => {
             const key = $e.key.toLowerCase();
             if (key == "alt") {
                 altDown = false;
             }
-        };
+        });
         //Zooming in/out
         document.getElementById(canvasID).onwheel = ($e) => {
             if (zoom == false) {

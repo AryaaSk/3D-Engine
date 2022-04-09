@@ -182,15 +182,15 @@
                 <div class="centered"> X: <input type="text" name="pointX${String(i)}" style="width: 90%;" value="${point[0]}" id="point${String(i)}X"> </div>
                 <div class="centered"> Y: <input type="text" name="pointY${String(i)}" style="width: 90%;" value="${point[1]}" id="point${String(i)}Y"> </div>
                 <div class="centered"> Z: <input type="text" name="pointZ${String(i)}" style="width: 90%;" value="${point[2]}" id="point${String(i)}Z"> </div>
-                <div class="centered"><input type="button" class="controlButton deleteStyle" id="DeletePoint${String(i)}" value="Delete Point" style="float: right;"></div>
+                <div class="centered"><input type="button" tabindex="-1" class="controlButton deleteStyle" id="DeletePoint${String(i)}" value="Delete Point" style="float: right;"></div>
         `;
             pointMatrixList.appendChild(pointDiv);
         }
         const pointControls = document.createElement('div');
         pointControls.className = "centered";
         pointControls.innerHTML = `
-        <input type="button" class="controlButton" id="addPoint" value="Add Point">
-        <input type="button" style="margin-left: 20px;" class="controlButton" id="pointCommands" value="Point Commands">
+        <input type="button" tabindex="-1" class="controlButton" id="addPoint" value="Add Point">
+        <input type="button" tabindex="-1" style="margin-left: 20px;" class="controlButton" id="pointCommands" value="Point Commands">
     `;
         pointMatrixList.appendChild(pointControls);
         const faceList = document.getElementById("faceList");
@@ -202,16 +202,16 @@
             faceDiv.innerHTML = `
             <div class="centered"> ${String(i)} </div>
             <div class="centeredLeft"> Point Indexes: <input type="text" name="face${String(i)}" style="margin-left: 20px; width: 70%;" class="facePointIndexes" id="pointIndexes${String(i)}" value="${String(face.pointIndexes)}"> </div>
-            <div class="centeredLeft"> Colour: <input type="color" style="width: 90%;" id="colour${String(i)}" value="${String(face.colour)}"></div>
-            <div class="centeredLeft"><input type="button" class="controlButton deleteStyle" id="DeleteFace${String(i)}" value="Delete Face" style="float: right;"></div>
+            <div class="centeredLeft"> Colour: <input type="color" tabindex="-1" style="width: 90%;" id="colour${String(i)}" value="${String(face.colour)}"></div>
+            <div class="centeredLeft"><input type="button" tabindex="-1" class="controlButton deleteStyle" id="DeleteFace${String(i)}" value="Delete Face" style="float: right;"></div>
         `;
             faceList.appendChild(faceDiv);
         }
         const faceControls = document.createElement('div');
         faceControls.className = "centered";
         faceControls.innerHTML = `
-        <input type="button" class="controlButton" id="addFace" value="Add Face">
-        <input type="button" style="margin-left: 20px;" class="controlButton" id="faceCommands" value="Face Commands">
+        <input type="button" tabindex="-1" class="controlButton" id="addFace" value="Add Face">
+        <input type="button" tabindex="-1" style="margin-left: 20px;" class="controlButton" id="faceCommands" value="Face Commands">
     `;
         faceList.appendChild(faceControls);
         startButtonListeners();
@@ -306,15 +306,15 @@
         document.getElementById("centeringZ").value = String(centeringZ);
         document.getElementById("exportCodeTitle").innerText = "*Export Code:";
     };
-    document.addEventListener('keydown', ($e) => {
-        const key = $e.key.toLowerCase();
-        if (key == "enter") {
-            document.getElementById("exportCodeTitle").innerText = "*Export Code:";
-            updateVariables();
-            updateDisplayShape();
-        }
-    });
     const startButtonListeners = () => {
+        document.onkeydown = ($e) => {
+            const key = $e.key.toLowerCase();
+            if (key == "enter") {
+                document.getElementById("exportCodeTitle").innerText = "*Export Code:";
+                updateVariables();
+                updateDisplayShape();
+            }
+        };
         document.getElementById("uploadShape").onclick = () => {
             importShape();
         };

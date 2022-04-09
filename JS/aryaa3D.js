@@ -571,18 +571,18 @@ var Camera = /** @class */ (function () {
             }
             _a = [$e.clientX, $e.clientY], previousX = _a[0], previousY = _a[1];
         };
-        document.onkeydown = function ($e) {
+        document.addEventListener('keydown', function ($e) {
             var key = $e.key.toLowerCase();
             if (key == "alt") {
                 altDown = true;
             }
-        };
-        document.onkeyup = function ($e) {
+        });
+        document.addEventListener('keyup', function ($e) {
             var key = $e.key.toLowerCase();
             if (key == "alt") {
                 altDown = false;
             }
-        };
+        });
         //Zooming in/out
         document.getElementById(canvasID).onwheel = function ($e) {
             if (zoom == false) {

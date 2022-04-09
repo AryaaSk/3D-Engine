@@ -182,14 +182,14 @@ class Camera {
             }
             [previousX, previousY] = [$e.clientX, $e.clientY];
         }
-        document.onkeydown = ($e) => {
+        document.addEventListener('keydown', ($e) => { //don't need to use event listeners on the mouse since it is attached to the canvas element
             const key = $e.key.toLowerCase();
             if (key == "alt") { altDown = true; }
-        }
-        document.onkeyup = ($e) => {
+        });
+        document.addEventListener('keyup', ($e) => {
             const key = $e.key.toLowerCase();
             if (key == "alt") { altDown = false; }
-        }
+        });
 
         //Zooming in/out
         document.getElementById(canvasID)!.onwheel = ($e: any) => {

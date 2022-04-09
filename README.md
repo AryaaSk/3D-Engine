@@ -110,6 +110,7 @@ You can also just enable the inbuilt movement controls, which allow the user to 
 ```
 camera.enableMovementControls(canvasID: string, rotation: boolean, movement: boolean, zoom: boolean);
 ```
+*Do not call this too many times, as it adds event listeners everytime which will cause lag if there are too many*
 
 Here is a preview of the project in this repo [Example.html](https://aryaask.github.io/3D-Engine/Previews/example.html)\
 ![Preview Gif](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/3DEngineDemo.gif?raw=true)
