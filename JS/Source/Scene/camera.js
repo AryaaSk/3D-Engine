@@ -1,6 +1,6 @@
 "use strict";
 class Camera {
-    position = { x: 0, y: 0 };
+    absPosition = { x: 0, y: 0 };
     zoom = 1;
     worldRotation = { x: 0, y: 0, z: 0 };
     worldRotationMatrix = new matrix();
@@ -13,7 +13,7 @@ class Camera {
             cameraObjectMatrix.scaleUp(this.zoom); //scale from zoom
             cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
             //translate object relative to grid origin, since the object's position is relative to the origin, it can also be considered as a vector from the origin
-            const gridOrigin = { x: -this.position.x, y: -this.position.y, z: 0 };
+            const gridOrigin = { x: -this.absPosition.x, y: -this.absPosition.y, z: 0 };
             let originObjectVector = new matrix();
             originObjectVector.addColumn([object.position.x, object.position.y, object.position.z]);
             originObjectVector = multiplyMatrixs(this.worldRotationMatrix, originObjectVector);
@@ -116,7 +116,7 @@ class Camera {
         startPointMatrix = multiplyMatrixs(this.worldRotationMatrix, startPointMatrix);
         endPointMatrix = multiplyMatrixs(this.worldRotationMatrix, endPointMatrix);
         //we also want to offset this grid by the camera's position, and also the zoom
-        const gridOrigin = { x: -this.position.x, y: -this.position.y, z: 0 };
+        const gridOrigin = { x: -this.absPosition.x, y: -this.absPosition.y, z: 0 };
         //move grid based on zoom
         const absoluteOriginObjectVector = new matrix();
         absoluteOriginObjectVector.addColumn([gridOrigin.x, gridOrigin.y, gridOrigin.z]);
@@ -144,8 +144,8 @@ class Camera {
             }
             let [differenceX, differenceY] = [$e.clientX - previousX, $e.clientY - previousY];
             if (altDown == true && movement == true) {
-                this.position.x -= differenceX / this.zoom;
-                this.position.y += differenceY / this.zoom;
+                this.absPosition.x -= differenceX / this.zoom;
+                this.absPosition.y += differenceY / this.zoom;
             }
             else if (rotation == true) {
                 const absX = Math.abs(this.worldRotation.x) % 360;

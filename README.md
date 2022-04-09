@@ -71,9 +71,10 @@ const camera = new Camera();
 
 You can then position this camera in the scene somewhere *(This doesn't change the 3D position, it is literally the 2D position from where you view the world, which is why there is no Z coordinate)*.
 ```
-camera.position.x = 0;
-camera.position.y = 0;
+camera.absPosition.x = 0;
+camera.absPosition.y = 0;
 ```
+*To create a 3D camera, you can have one variable storing the object's actual position, and then create your own camera class which contains the actual position in 3D, then you can move the object's position relative to the camera in all 3 axis, which will basically move it on the grid, this way it actually looks like a 3D position. I may create a helper class in the future to implement this feature.*
 
 You can also change the world zoom:
 ```

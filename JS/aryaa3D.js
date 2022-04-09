@@ -410,7 +410,7 @@ var ElongatedOctahedron = /** @class */ (function (_super) {
 }(Shape));
 var Camera = /** @class */ (function () {
     function Camera() {
-        this.position = { x: 0, y: 0 };
+        this.absPosition = { x: 0, y: 0 };
         this.zoom = 1;
         this.worldRotation = { x: 0, y: 0, z: 0 };
         this.worldRotationMatrix = new matrix();
@@ -425,7 +425,7 @@ var Camera = /** @class */ (function () {
             cameraObjectMatrix.scaleUp(this.zoom); //scale from zoom
             cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
             //translate object relative to grid origin, since the object's position is relative to the origin, it can also be considered as a vector from the origin
-            var gridOrigin = { x: -this.position.x, y: -this.position.y, z: 0 };
+            var gridOrigin = { x: -this.absPosition.x, y: -this.absPosition.y, z: 0 };
             var originObjectVector = new matrix();
             originObjectVector.addColumn([object.position.x, object.position.y, object.position.z]);
             originObjectVector = multiplyMatrixs(this.worldRotationMatrix, originObjectVector);
@@ -528,7 +528,7 @@ var Camera = /** @class */ (function () {
         startPointMatrix = multiplyMatrixs(this.worldRotationMatrix, startPointMatrix);
         endPointMatrix = multiplyMatrixs(this.worldRotationMatrix, endPointMatrix);
         //we also want to offset this grid by the camera's position, and also the zoom
-        var gridOrigin = { x: -this.position.x, y: -this.position.y, z: 0 };
+        var gridOrigin = { x: -this.absPosition.x, y: -this.absPosition.y, z: 0 };
         //move grid based on zoom
         var absoluteOriginObjectVector = new matrix();
         absoluteOriginObjectVector.addColumn([gridOrigin.x, gridOrigin.y, gridOrigin.z]);
@@ -558,8 +558,8 @@ var Camera = /** @class */ (function () {
             }
             var _b = [$e.clientX - previousX, $e.clientY - previousY], differenceX = _b[0], differenceY = _b[1];
             if (altDown == true && movement == true) {
-                _this.position.x -= differenceX / _this.zoom;
-                _this.position.y += differenceY / _this.zoom;
+                _this.absPosition.x -= differenceX / _this.zoom;
+                _this.absPosition.y += differenceY / _this.zoom;
             }
             else if (rotation == true) {
                 var absX = Math.abs(_this.worldRotation.x) % 360;
