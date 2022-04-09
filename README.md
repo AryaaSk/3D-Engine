@@ -114,6 +114,6 @@ camera.enableMovementControls(canvasID: string, rotation: boolean, movement: boo
 Here is a preview of the project in this repo [example.html](https://aryaask.github.io/3D-Engine/example.html)\
 ![Preview Gif](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/3DEngineDemo.gif?raw=true)
 
-Here is a preview of the [Shape Builder](https://aryaask.github.io/3D-Engine/index.html) which you can use to build custom shapes\
+Here is a preview of the [Shape Builder](https://aryaask.github.io/3D-Engine/ShapeBuilder/) which you can use to build custom shapes\
 ![Shape Builder Preview](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ShapeBuilderPreview2.png?raw=true)\
 *Read the [Development Readme](DevelopmentREADME.md) for more information*
