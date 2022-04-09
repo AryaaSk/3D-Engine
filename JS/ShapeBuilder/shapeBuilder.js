@@ -306,15 +306,15 @@
         document.getElementById("centeringZ").value = String(centeringZ);
         document.getElementById("exportCodeTitle").innerText = "*Export Code:";
     };
+    document.addEventListener('keydown', ($e) => {
+        const key = $e.key.toLowerCase();
+        if (key == "enter") {
+            document.getElementById("exportCodeTitle").innerText = "*Export Code:";
+            updateVariables();
+            updateDisplayShape();
+        }
+    });
     const startButtonListeners = () => {
-        document.addEventListener('keydown', ($e) => {
-            const key = $e.key.toLowerCase();
-            if (key == "enter") {
-                document.getElementById("exportCodeTitle").innerText = "*Export Code:";
-                updateVariables();
-                updateDisplayShape();
-            }
-        });
         document.getElementById("uploadShape").onclick = () => {
             importShape();
         };

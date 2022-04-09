@@ -306,12 +306,12 @@ const importShape = () => {
     document.getElementById("exportCodeTitle")!.innerText = "*Export Code:";
 }
 
-const startButtonListeners = () => {
-    document.addEventListener('keydown', ($e) => {
-        const key = $e.key.toLowerCase();
-        if (key == "enter") { document.getElementById("exportCodeTitle")!.innerText = "*Export Code:"; updateVariables(); updateDisplayShape(); }
-    });
+document.addEventListener('keydown', ($e) => { //editor becomes very laggy because these pile on top of each other, so I placed it outside of the function
+    const key = $e.key.toLowerCase();
+    if (key == "enter") { document.getElementById("exportCodeTitle")!.innerText = "*Export Code:"; updateVariables(); updateDisplayShape(); }
+});
 
+const startButtonListeners = () => {
     document.getElementById("uploadShape")!.onclick = () => {
         importShape();
     }
