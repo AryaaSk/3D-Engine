@@ -17,7 +17,7 @@ pentagon.position.x = 300;
 pentagon.position.y = 300;
 camera.render([pentagon]);
 ```
-**If you want to know some good techniques and tips to create shapes, go to the [Building Shapes README](buildingShapes.md)**
+**If you want to know some good techniques and tips to create shapes, go to the [Building Shapes README](ShapeBuilder/buildingShapes.md)**
 
 ### Manually setting points and faces through code (**not recommended**):
 1. Create a subclass of Shape and call it the shape you are trying to create
