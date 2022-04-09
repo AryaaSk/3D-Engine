@@ -1,4 +1,6 @@
-**This is not meant to be used for any serious projects, I just made this to learn more about 3D rendering and Matrix transformations**\
+# Aryaa 3D: A 3D Library which uses Parallel Projection, and comes with it's own Object Builder/Editor
+
+**I just made this to learn more about 3D rendering/modelling, and Matrix transformations**\
 If you want to know how it works go here [Rendering Pipeline](Research/Pipeline.md)
 
 ## Importing
@@ -22,9 +24,9 @@ linkCanvas("renderingWindow");
 
 ## Creating an Object
 I have not made a lot of inbuilt objects, however it is very easy to add/create more, to add more you can look at the [customShapes.js](ShapeBuilder/customShapes.js) file, which contains some classes of extra objects, to use them just copy and paste them into your code, and then use it like any other shape.\
-If you want to create your own custom shapes/objects read the [Development Readme](DevelopmentREADME.md).
+If you want to create your own custom shapes/objects read about the Shape Builder in the [Development Readme](DevelopmentREADME.md).
 
-In this example I will create a box, the only thing you may have to change for other objects is the dimensions you pass in when creating them
+**In this example I will create a box, the only thing you may have to change for other objects is the dimensions you pass in when creating them**
 
 To create a box the user passes in 3 arguments, width, height and depth (for a pyramid it is just the bottomSideLength and height):
 ```
@@ -62,7 +64,7 @@ cube.showOutline = true;
 ```
 
 ## Camera
-The camera is used to render objects.
+The camera is used to render objects. It is a parallel projection, and so will not use perspective which makes it ideal for programs where the camera is static and the object's are moving in a fixed space.
  
 To create a camera object:
 ```
