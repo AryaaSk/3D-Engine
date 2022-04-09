@@ -4,7 +4,7 @@ class Camera {
     zoom = 1;
     worldRotation = { x: 0, y: 0, z: 0 };
     worldRotationMatrix = new matrix();
-    render(objects, showPoints) {
+    render(objects) {
         const objectData = [];
         for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
             //transform the object's physicalMatrix to how the camera would see it:
@@ -74,7 +74,7 @@ class Camera {
                 }
             }
             //draw points last so you can see them through the faces
-            if (showPoints == true) {
+            if (object.showPoints == true) {
                 for (let i = 0; i != screenPoints.width; i += 1) {
                     const point = screenPoints.getColumn(i);
                     plotPoint(point, "#000000", String(i));

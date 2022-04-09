@@ -5,7 +5,7 @@ class Camera {
     worldRotation: {x: number, y: number, z: number} = { x: 0, y: 0, z: 0 };
     worldRotationMatrix = new matrix();
 
-    render(objects: Shape[], showPoints?: boolean) {  
+    render(objects: Shape[]) {  
 
         const objectData: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
         for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1)
@@ -85,7 +85,7 @@ class Camera {
             }
 
             //draw points last so you can see them through the faces
-            if (showPoints == true)
+            if (object.showPoints == true)
             {
                 for (let i = 0; i != screenPoints.width; i += 1)
                 {

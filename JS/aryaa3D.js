@@ -262,6 +262,7 @@ var Shape = /** @class */ (function () {
         //Rendering
         this.position = { x: 0, y: 0, z: 0 };
         this.showOutline = false;
+        this.showPoints = false;
         this.faces = []; //stores the indexes of the columns (points) in the physicalMatrix
         this.showFaceIndexes = false;
     }
@@ -415,7 +416,7 @@ var Camera = /** @class */ (function () {
         this.worldRotationMatrix = new matrix();
         this.updateRotationMatrix();
     }
-    Camera.prototype.render = function (objects, showPoints) {
+    Camera.prototype.render = function (objects) {
         var objectData = [];
         for (var objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
             //transform the object's physicalMatrix to how the camera would see it:
@@ -485,7 +486,7 @@ var Camera = /** @class */ (function () {
                 }
             }
             //draw points last so you can see them through the faces
-            if (showPoints == true) {
+            if (object.showPoints == true) {
                 for (var i = 0; i != screenPoints.width; i += 1) {
                     var point = screenPoints.getColumn(i);
                     plotPoint(point, "#000000", String(i));

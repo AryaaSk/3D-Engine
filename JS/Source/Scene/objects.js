@@ -21,6 +21,7 @@ class Shape {
     //Rendering
     position = { x: 0, y: 0, z: 0 };
     showOutline = false;
+    showPoints = false;
     faces = []; //stores the indexes of the columns (points) in the physicalMatrix
     showFaceIndexes = false;
     updateMatrices() {

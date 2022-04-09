@@ -24,6 +24,7 @@ class Shape
     //Rendering
     position: {x: number, y: number, z: number} = {x: 0, y: 0, z: 0};
     showOutline: boolean = false;
+    showPoints: boolean = false;
     faces: { pointIndexes: number[], colour: string }[]  = []; //stores the indexes of the columns (points) in the physicalMatrix
     showFaceIndexes: boolean = false;
 

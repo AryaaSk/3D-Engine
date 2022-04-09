@@ -6,7 +6,6 @@ camera.enableMovementControls("renderingWindow", true, true, true);
 
 const shape = new Shape();
 const displayShape = new Shape();
-displayShape.showOutline = true;
 
 let centeringX = 0;
 let centeringY = 0;
@@ -452,12 +451,19 @@ updateDOM();
 updateDisplayShape();
 document.getElementById("exportCode")!.innerText = generateExportCode();
 
+displayShape.showOutline = true;
+displayShape.showPoints = true;
+(<HTMLInputElement>document.getElementById("showPoints")).checked = true;
+(<HTMLInputElement>document.getElementById("showFaces")).checked = false;
+document.getElementById("showPoints")!.onchange = () => { displayShape.showPoints = (<HTMLInputElement>document.getElementById("showPoints")).checked; }
+document.getElementById("showFaces")!.onchange = () => { displayShape.showFaceIndexes = (<HTMLInputElement>document.getElementById("showFaces")).checked; }
+
 //Animation Loop
 let screenPoints: matrix = new matrix(); //always updated to have the current screen points, in correct order
 setInterval(() => {
     clearCanvas();
     camera.renderGrid();
-    screenPoints = camera.render([displayShape], true)[0].screenPoints; //camera now returns the sortedObjects, since we are only rendering 1 object we can always get [0]
+    screenPoints = camera.render([displayShape])[0].screenPoints; //camera now returns the sortedObjects, since we are only rendering 1 object we can always get [0]
 }, 16)
 
 

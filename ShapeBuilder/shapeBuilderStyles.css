@@ -71,6 +71,12 @@ input[type=text]
     margin-right: 20px;
 }
 
+.h3Text
+{
+    font-size: large;
+    font-weight: bold;
+}
+
 #pointMatrixList
 {
     width: 100%;
