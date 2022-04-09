@@ -34,7 +34,7 @@ const duplicatePoints = () => {
     updateDisplayShape();
 }
 const translatePoints = () => {
-    const pointIndexesList = prompt("Enter the indexes of the points you want to duplicate separated by a comma");
+    const pointIndexesList = prompt("Enter the indexes of the points you want to translate separated by a comma");
     if (pointIndexesList == undefined || pointIndexesList == "") { return; }
     const pointIndexes = pointIndexesList.split(",").map(Number);
 
@@ -57,10 +57,28 @@ const translatePoints = () => {
     updateDOM();
     updateDisplayShape();
 }
+const changeFaceColours = () => {
+    const faceIndexesList = prompt("Enter the indexes of the faces you want to change colours");
+    if (faceIndexesList == undefined || faceIndexesList == "") { return; }
+    const faceIndexes = faceIndexesList.split(",").map(Number);
+
+    const facesLength = shape.faces.length;
+    for (let i = 0; i != faceIndexes.length; i += 1)
+    { if (faceIndexes[i] > facesLength - 1) { alert("One or more of indexes was not a valid face index"); return; } }
+
+    const hexCode = prompt("Enter the new hex code of the new colour, e.g #ffffff");
+    if (hexCode == undefined || hexCode == "") { alert("Invalid Hex Code"); return; }
+    
+    for (let i = 0; i != faceIndexes.length; i += 1) {
+        shape.faces[faceIndexes[i]].colour = hexCode;
+    }
+
+    updateDOM();
+    updateDisplayShape();
+}
 
 
-const updatePoints = () => { //takes data from DOM, and saves it to the shape.pointMatrix
-    //get data from existing points, can just use the indexes from the point matrix, and update the values
+const updateVariables = () => {
     const pointMatrixWidth = shape.pointMatrix.width;
     shape.pointMatrix = new matrix();
     for (let i = 0; i != pointMatrixWidth; i += 1)
@@ -73,8 +91,7 @@ const updatePoints = () => { //takes data from DOM, and saves it to the shape.po
         shape.pointMatrix.addColumn([x, y, z]);
     }
     updateDisplayShape();
-};
-const updateFaces = () => { //takes data from DOM, and saves it to the shape.faces
+
     for (let i = 0; i != shape.faces.length; i += 1)
     {
         const pointIndexesString = (<HTMLInputElement>document.getElementById(`pointIndexes${String(i)}`)!).value;
@@ -104,18 +121,11 @@ const updateFaces = () => { //takes data from DOM, and saves it to the shape.fac
     }
     updateDisplayShape();
     updateDOM();
-};
 
-const updateCentering = () => {
     const [centeringXString, centeringYString, centeringZString] = [(<HTMLInputElement>document.getElementById("centeringX")!).value, (<HTMLInputElement>document.getElementById("centeringY")!).value, (<HTMLInputElement>document.getElementById("centeringZ")!).value];
     [centeringX, centeringY, centeringZ] = [Number(centeringXString), Number(centeringYString), Number(centeringZString)];   
 }
 
-const updateVariables = () => {
-    updatePoints();
-    updateFaces();
-    updateCentering();
-}
 const updateDisplayShape = () => {
     //don't actually render the shape, we render the displayShape to avoid directly modifying the shape's pointMatrix with the centering vectors
     displayShape.pointMatrix = shape.pointMatrix.copy();
@@ -149,6 +159,8 @@ const updateDOM = () => { //updates the data from the shape, to display in the D
         <input type="button" style="margin-left: 20px;" class="controlButton" id="pointCommands" value="Point Commands">
     `;
     pointMatrixList.appendChild(pointControls);
+
+
     const faceList = document.getElementById("faceList")!;
     faceList.innerText = "";
     for (let i = 0; i != shape.faces.length; i += 1)
@@ -158,7 +170,7 @@ const updateDOM = () => { //updates the data from the shape, to display in the D
         faceDiv.className = "face";
         faceDiv.innerHTML= `
             <div class="centered"> ${String(i)} </div>
-            <div class="centeredLeft"> Point Indexes: <input type="text" name="face${String(i)}" style="margin-left: 20px; width: 70%;" id="pointIndexes${String(i)}" value="${String(face.pointIndexes)}"> </div>
+            <div class="centeredLeft"> Point Indexes: <input type="text" name="face${String(i)}" style="margin-left: 20px; width: 70%;" class="facePointIndexes" id="pointIndexes${String(i)}" value="${String(face.pointIndexes)}"> </div>
             <div class="centeredLeft"> Colour: <input type="color" style="width: 90%;" id="colour${String(i)}" value="${String(face.colour)}"></div>
             <div class="centeredLeft"><input type="button" class="controlButton deleteStyle" id="DeleteFace${String(i)}" value="Delete Face" style="float: right;"></div>
         `;
@@ -169,6 +181,7 @@ const updateDOM = () => { //updates the data from the shape, to display in the D
     faceControls.className = "centered";
     faceControls.innerHTML = `
         <input type="button" class="controlButton" id="addFace" value="Add Face">
+        <input type="button" style="margin-left: 20px;" class="controlButton" id="faceCommands" value="Face Commands">
     `;
     faceList.appendChild(faceControls);
 
@@ -177,15 +190,12 @@ const updateDOM = () => { //updates the data from the shape, to display in the D
 
 const generateExportCode = () => {
     const shapeName = (<HTMLInputElement>document.getElementById("shapeName")!).value || "NewShape";
+    updateVariables();
 
     let pointMatrixPoints: number[][] = [];
-    for (let i = 0; i != shape.pointMatrix.width; i += 1)
-    {
-        const point = shape.pointMatrix.getColumn(i);
-        pointMatrixPoints.push(point)
+    for (let i = 0; i != shape.pointMatrix.width; i += 1) {
+        const point = shape.pointMatrix.getColumn(i); pointMatrixPoints.push(point)
     }
-
-    updateCentering();
 
     const exportCode = 
 `class ${shapeName} extends Shape {
@@ -208,7 +218,6 @@ const generateExportCode = () => {
     }
 }
 `;
-
     return exportCode;
 }
 
@@ -311,6 +320,8 @@ const startButtonListeners = () => {
         shape.faces.push( { pointIndexes: [0, 1, 2], colour: "#c4c4c4" } )
         updateDisplayShape();
         updateDOM();
+        const lastPointIndexesTextinput: any = Array.from(document.querySelectorAll(".facePointIndexes")).pop(); 
+        lastPointIndexesTextinput.focus();
     }
     for (let i = 0; i != shape.faces.length; i += 1)
     {
@@ -319,6 +330,13 @@ const startButtonListeners = () => {
             updateDisplayShape();
             updateDOM();
         }
+    }
+    document.getElementById("faceCommands")!.onclick = () => {
+        const command = prompt("What command do you want to perform, enter a letter:\n    C: Colour Change")?.toLowerCase();
+        if (command == undefined) { return; }
+
+        if (command == "c") { changeFaceColours(); }
+        else { alert("Invalid command"); return; }
     }
 
     document.getElementById("update")!.onclick = () => {
@@ -366,7 +384,8 @@ const startButtonListeners = () => {
 
         if (faceTextFieldInFocusID != undefined && clickedPoint != undefined) {
             const faceTextfield = <HTMLInputElement>document.getElementById(faceTextFieldInFocusID)!;
-            if (faceTextfield.value.endsWith(",")) { faceTextfield.value = faceTextfield.value + ` ${clickedPoint}`; }
+            if (faceTextfield.selectionStart == 0) { faceTextfield.value = `${clickedPoint}` }
+            else if (faceTextfield.value.endsWith(",")) { faceTextfield.value = faceTextfield.value + ` ${clickedPoint}`; }
             else { faceTextfield.value = faceTextfield.value + `, ${clickedPoint}`; }
         }
     }

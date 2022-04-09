@@ -33,7 +33,7 @@
         updateDisplayShape();
     };
     var translatePoints = function () {
-        var pointIndexesList = prompt("Enter the indexes of the points you want to duplicate separated by a comma");
+        var pointIndexesList = prompt("Enter the indexes of the points you want to translate separated by a comma");
         if (pointIndexesList == undefined || pointIndexesList == "") {
             return;
         }
@@ -60,20 +60,42 @@
         updateDOM();
         updateDisplayShape();
     };
-    var updatePoints = function () {
-        //get data from existing points, can just use the indexes from the point matrix, and update the values
+    var changeFaceColours = function () {
+        var faceIndexesList = prompt("Enter the indexes of the faces you want to change colours");
+        if (faceIndexesList == undefined || faceIndexesList == "") {
+            return;
+        }
+        var faceIndexes = faceIndexesList.split(",").map(Number);
+        var facesLength = shape.faces.length;
+        for (var i = 0; i != faceIndexes.length; i += 1) {
+            if (faceIndexes[i] > facesLength - 1) {
+                alert("One or more of indexes was not a valid face index");
+                return;
+            }
+        }
+        var hexCode = prompt("Enter the new hex code of the new colour, e.g #ffffff");
+        if (hexCode == undefined || hexCode == "") {
+            alert("Invalid Hex Code");
+            return;
+        }
+        for (var i = 0; i != faceIndexes.length; i += 1) {
+            shape.faces[faceIndexes[i]].colour = hexCode;
+        }
+        updateDOM();
+        updateDisplayShape();
+    };
+    var updateVariables = function () {
+        var _a;
         var pointMatrixWidth = shape.pointMatrix.width;
         shape.pointMatrix = new matrix();
         for (var i = 0; i != pointMatrixWidth; i += 1) {
             var DOMPointX = document.getElementById("point".concat(String(i), "X"));
             var DOMPointY = document.getElementById("point".concat(String(i), "Y"));
             var DOMPointZ = document.getElementById("point".concat(String(i), "Z"));
-            var _a = [Number(DOMPointX.value), Number(DOMPointY.value), Number(DOMPointZ.value)], x = _a[0], y = _a[1], z = _a[2];
+            var _b = [Number(DOMPointX.value), Number(DOMPointY.value), Number(DOMPointZ.value)], x = _b[0], y = _b[1], z = _b[2];
             shape.pointMatrix.addColumn([x, y, z]);
         }
         updateDisplayShape();
-    };
-    var updateFaces = function () {
         for (var i = 0; i != shape.faces.length; i += 1) {
             var pointIndexesString = document.getElementById("pointIndexes".concat(String(i))).value;
             var pointIndexesStringList = pointIndexesString.split(",");
@@ -82,10 +104,10 @@
                 pointIndexes.push(Number(pointIndexesStringList[a]));
             }
             //check if any of the index's in pointIndexes are > the width of pointMatrix + 1, if so it means the point doesnt exist
-            var pointMatrixWidth = shape.pointMatrix.width;
+            var pointMatrixWidth_1 = shape.pointMatrix.width;
             var cancelOperation = false;
             for (var a = 0; a != pointIndexes.length; a += 1) {
-                if (pointIndexes[a] > (pointMatrixWidth - 1)) {
+                if (pointIndexes[a] > (pointMatrixWidth_1 - 1)) {
                     cancelOperation = true;
                     break;
                 }
@@ -102,16 +124,8 @@
         }
         updateDisplayShape();
         updateDOM();
-    };
-    var updateCentering = function () {
-        var _a;
-        var _b = [document.getElementById("centeringX").value, document.getElementById("centeringY").value, document.getElementById("centeringZ").value], centeringXString = _b[0], centeringYString = _b[1], centeringZString = _b[2];
+        var _c = [document.getElementById("centeringX").value, document.getElementById("centeringY").value, document.getElementById("centeringZ").value], centeringXString = _c[0], centeringYString = _c[1], centeringZString = _c[2];
         _a = [Number(centeringXString), Number(centeringYString), Number(centeringZString)], centeringX = _a[0], centeringY = _a[1], centeringZ = _a[2];
-    };
-    var updateVariables = function () {
-        updatePoints();
-        updateFaces();
-        updateCentering();
     };
     var updateDisplayShape = function () {
         //don't actually render the shape, we render the displayShape to avoid directly modifying the shape's pointMatrix with the centering vectors
@@ -140,23 +154,23 @@
             var face = shape.faces[i];
             var faceDiv = document.createElement('div');
             faceDiv.className = "face";
-            faceDiv.innerHTML = "\n            <div class=\"centered\"> ".concat(String(i), " </div>\n            <div class=\"centeredLeft\"> Point Indexes: <input type=\"text\" name=\"face").concat(String(i), "\" style=\"margin-left: 20px; width: 70%;\" id=\"pointIndexes").concat(String(i), "\" value=\"").concat(String(face.pointIndexes), "\"> </div>\n            <div class=\"centeredLeft\"> Colour: <input type=\"color\" style=\"width: 90%;\" id=\"colour").concat(String(i), "\" value=\"").concat(String(face.colour), "\"></div>\n            <div class=\"centeredLeft\"><input type=\"button\" class=\"controlButton deleteStyle\" id=\"DeleteFace").concat(String(i), "\" value=\"Delete Face\" style=\"float: right;\"></div>\n        ");
+            faceDiv.innerHTML = "\n            <div class=\"centered\"> ".concat(String(i), " </div>\n            <div class=\"centeredLeft\"> Point Indexes: <input type=\"text\" name=\"face").concat(String(i), "\" style=\"margin-left: 20px; width: 70%;\" class=\"facePointIndexes\" id=\"pointIndexes").concat(String(i), "\" value=\"").concat(String(face.pointIndexes), "\"> </div>\n            <div class=\"centeredLeft\"> Colour: <input type=\"color\" style=\"width: 90%;\" id=\"colour").concat(String(i), "\" value=\"").concat(String(face.colour), "\"></div>\n            <div class=\"centeredLeft\"><input type=\"button\" class=\"controlButton deleteStyle\" id=\"DeleteFace").concat(String(i), "\" value=\"Delete Face\" style=\"float: right;\"></div>\n        ");
             faceList.appendChild(faceDiv);
         }
         var faceControls = document.createElement('div');
         faceControls.className = "centered";
-        faceControls.innerHTML = "\n        <input type=\"button\" class=\"controlButton\" id=\"addFace\" value=\"Add Face\">\n    ";
+        faceControls.innerHTML = "\n        <input type=\"button\" class=\"controlButton\" id=\"addFace\" value=\"Add Face\">\n        <input type=\"button\" style=\"margin-left: 20px;\" class=\"controlButton\" id=\"faceCommands\" value=\"Face Commands\">\n    ";
         faceList.appendChild(faceControls);
         startButtonListeners();
     };
     var generateExportCode = function () {
         var shapeName = document.getElementById("shapeName").value || "NewShape";
+        updateVariables();
         var pointMatrixPoints = [];
         for (var i = 0; i != shape.pointMatrix.width; i += 1) {
             var point = shape.pointMatrix.getColumn(i);
             pointMatrixPoints.push(point);
         }
-        updateCentering();
         var exportCode = "class ".concat(shapeName, " extends Shape {\n    constructor () {\n        super();\n\n        this.pointMatrix = new matrix();\n        const points = ").concat(JSON.stringify(pointMatrixPoints), ";\n        for (let i = 0; i != points.length; i += 1)\n        { this.pointMatrix.addColumn(points[i]); }\n\n        const [centeringX, centeringY, centeringZ] = [").concat(centeringX, ", ").concat(centeringY, ", ").concat(centeringZ, "];\n        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);\n\n        this.setFaces();\n        this.updateMatrices();\n    }\n    setFaces() {\n        this.faces = ").concat(JSON.stringify(shape.faces).replace(/"([^"]+)":/g, '$1:'), ";\n    }\n}\n");
         return exportCode;
     };
@@ -284,6 +298,8 @@
             shape.faces.push({ pointIndexes: [0, 1, 2], colour: "#c4c4c4" });
             updateDisplayShape();
             updateDOM();
+            var lastPointIndexesTextinput = Array.from(document.querySelectorAll(".facePointIndexes")).pop();
+            lastPointIndexesTextinput.focus();
         };
         var _loop_2 = function (i) {
             document.getElementById("DeleteFace".concat(String(i))).onclick = function () {
@@ -295,6 +311,20 @@
         for (var i = 0; i != shape.faces.length; i += 1) {
             _loop_2(i);
         }
+        document.getElementById("faceCommands").onclick = function () {
+            var _a;
+            var command = (_a = prompt("What command do you want to perform, enter a letter:\n    C: Colour Change")) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+            if (command == undefined) {
+                return;
+            }
+            if (command == "c") {
+                changeFaceColours();
+            }
+            else {
+                alert("Invalid command");
+                return;
+            }
+        };
         document.getElementById("update").onclick = function () {
             document.getElementById("exportCodeTitle").innerText = "*Export Code:";
             updateVariables();
@@ -341,7 +371,10 @@
             }
             if (faceTextFieldInFocusID != undefined && clickedPoint != undefined) {
                 var faceTextfield = document.getElementById(faceTextFieldInFocusID);
-                if (faceTextfield.value.endsWith(",")) {
+                if (faceTextfield.selectionStart == 0) {
+                    faceTextfield.value = "".concat(clickedPoint);
+                }
+                else if (faceTextfield.value.endsWith(",")) {
                     faceTextfield.value = faceTextfield.value + " ".concat(clickedPoint);
                 }
                 else {

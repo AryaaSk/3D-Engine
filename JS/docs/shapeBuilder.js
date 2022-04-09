@@ -34,7 +34,7 @@
         updateDisplayShape();
     };
     const translatePoints = () => {
-        const pointIndexesList = prompt("Enter the indexes of the points you want to duplicate separated by a comma");
+        const pointIndexesList = prompt("Enter the indexes of the points you want to translate separated by a comma");
         if (pointIndexesList == undefined || pointIndexesList == "") {
             return;
         }
@@ -61,8 +61,31 @@
         updateDOM();
         updateDisplayShape();
     };
-    const updatePoints = () => {
-        //get data from existing points, can just use the indexes from the point matrix, and update the values
+    const changeFaceColours = () => {
+        const faceIndexesList = prompt("Enter the indexes of the faces you want to change colours");
+        if (faceIndexesList == undefined || faceIndexesList == "") {
+            return;
+        }
+        const faceIndexes = faceIndexesList.split(",").map(Number);
+        const facesLength = shape.faces.length;
+        for (let i = 0; i != faceIndexes.length; i += 1) {
+            if (faceIndexes[i] > facesLength - 1) {
+                alert("One or more of indexes was not a valid face index");
+                return;
+            }
+        }
+        const hexCode = prompt("Enter the new hex code of the new colour, e.g #ffffff");
+        if (hexCode == undefined || hexCode == "") {
+            alert("Invalid Hex Code");
+            return;
+        }
+        for (let i = 0; i != faceIndexes.length; i += 1) {
+            shape.faces[faceIndexes[i]].colour = hexCode;
+        }
+        updateDOM();
+        updateDisplayShape();
+    };
+    const updateVariables = () => {
         const pointMatrixWidth = shape.pointMatrix.width;
         shape.pointMatrix = new matrix();
         for (let i = 0; i != pointMatrixWidth; i += 1) {
@@ -73,8 +96,6 @@
             shape.pointMatrix.addColumn([x, y, z]);
         }
         updateDisplayShape();
-    };
-    const updateFaces = () => {
         for (let i = 0; i != shape.faces.length; i += 1) {
             const pointIndexesString = document.getElementById(`pointIndexes${String(i)}`).value;
             const pointIndexesStringList = pointIndexesString.split(",");
@@ -103,15 +124,8 @@
         }
         updateDisplayShape();
         updateDOM();
-    };
-    const updateCentering = () => {
         const [centeringXString, centeringYString, centeringZString] = [document.getElementById("centeringX").value, document.getElementById("centeringY").value, document.getElementById("centeringZ").value];
         [centeringX, centeringY, centeringZ] = [Number(centeringXString), Number(centeringYString), Number(centeringZString)];
-    };
-    const updateVariables = () => {
-        updatePoints();
-        updateFaces();
-        updateCentering();
     };
     const updateDisplayShape = () => {
         //don't actually render the shape, we render the displayShape to avoid directly modifying the shape's pointMatrix with the centering vectors
@@ -151,7 +165,7 @@
             faceDiv.className = "face";
             faceDiv.innerHTML = `
             <div class="centered"> ${String(i)} </div>
-            <div class="centeredLeft"> Point Indexes: <input type="text" name="face${String(i)}" style="margin-left: 20px; width: 70%;" id="pointIndexes${String(i)}" value="${String(face.pointIndexes)}"> </div>
+            <div class="centeredLeft"> Point Indexes: <input type="text" name="face${String(i)}" style="margin-left: 20px; width: 70%;" class="facePointIndexes" id="pointIndexes${String(i)}" value="${String(face.pointIndexes)}"> </div>
             <div class="centeredLeft"> Colour: <input type="color" style="width: 90%;" id="colour${String(i)}" value="${String(face.colour)}"></div>
             <div class="centeredLeft"><input type="button" class="controlButton deleteStyle" id="DeleteFace${String(i)}" value="Delete Face" style="float: right;"></div>
         `;
@@ -161,18 +175,19 @@
         faceControls.className = "centered";
         faceControls.innerHTML = `
         <input type="button" class="controlButton" id="addFace" value="Add Face">
+        <input type="button" style="margin-left: 20px;" class="controlButton" id="faceCommands" value="Face Commands">
     `;
         faceList.appendChild(faceControls);
         startButtonListeners();
     };
     const generateExportCode = () => {
         const shapeName = document.getElementById("shapeName").value || "NewShape";
+        updateVariables();
         let pointMatrixPoints = [];
         for (let i = 0; i != shape.pointMatrix.width; i += 1) {
             const point = shape.pointMatrix.getColumn(i);
             pointMatrixPoints.push(point);
         }
-        updateCentering();
         const exportCode = `class ${shapeName} extends Shape {
     constructor () {
         super();
@@ -314,6 +329,8 @@
             shape.faces.push({ pointIndexes: [0, 1, 2], colour: "#c4c4c4" });
             updateDisplayShape();
             updateDOM();
+            const lastPointIndexesTextinput = Array.from(document.querySelectorAll(".facePointIndexes")).pop();
+            lastPointIndexesTextinput.focus();
         };
         for (let i = 0; i != shape.faces.length; i += 1) {
             document.getElementById(`DeleteFace${String(i)}`).onclick = () => {
@@ -322,6 +339,19 @@
                 updateDOM();
             };
         }
+        document.getElementById("faceCommands").onclick = () => {
+            const command = prompt("What command do you want to perform, enter a letter:\n    C: Colour Change")?.toLowerCase();
+            if (command == undefined) {
+                return;
+            }
+            if (command == "c") {
+                changeFaceColours();
+            }
+            else {
+                alert("Invalid command");
+                return;
+            }
+        };
         document.getElementById("update").onclick = () => {
             document.getElementById("exportCodeTitle").innerText = "*Export Code:";
             updateVariables();
@@ -367,7 +397,10 @@
             }
             if (faceTextFieldInFocusID != undefined && clickedPoint != undefined) {
                 const faceTextfield = document.getElementById(faceTextFieldInFocusID);
-                if (faceTextfield.value.endsWith(",")) {
+                if (faceTextfield.selectionStart == 0) {
+                    faceTextfield.value = `${clickedPoint}`;
+                }
+                else if (faceTextfield.value.endsWith(",")) {
                     faceTextfield.value = faceTextfield.value + ` ${clickedPoint}`;
                 }
                 else {
