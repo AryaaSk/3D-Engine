@@ -35,29 +35,13 @@ camera.render([pentagon]);
 - If you are are unsure of what arrays/data it is talking about, you can refer to this:\
 ![Shape Builder Code](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ImportCodeExplanation.png?raw=true)
 
-## How to update source code to CDN:
-1. Make changes locally, you will probably be using local script tags.
+## Setting up local environment:
+- When developing locally you will want to use the local JS files which get compiled by the Typescript compiler, for example if I was working on the source I would use this tag:
 ```
-<script src="/JS/Source/Utilities/canvasUtilities.js"></script>
-<script src="/JS/Source/Utilities/utilities.js"></script>
-<script src="/JS/Source/Scene/objects.js"></script>
-<script src="/JS/Source/Scene/camera.js"></script>
+<script src="/Source/aryaa3D.js"></script>
 ```
-2. Run this command from the project root directory: 
+- When you have finished developing locally, just switch the script tag to use the Github Pages link, for the source it would be this:
 ```
-npx tsc --outfile JS/aryaa3D.js Source/Utilities/canvasUtilities.ts Source/Utilities/utilities.ts Source/Scene/objects.ts Source/Scene/camera.ts
+<script src="https://aryaask.github.io/3D-Engine/Source/aryaa3D.js"></script>
 ```
-3. Switch to use the Github Pages script tag
-```
-<script src="https://aryaask.github.io/3D-Engine/JS/aryaa3D.js"></script>
-```
-
-## How to setup local development environment for Shape Builder:
-- When developing you will need to use the local /JS file which is automatically compiled by the typescript compiler, so use this script tag:
-```
-<script src="/JS/ShapeBuilder/shapeBuilder.js" defer></script>
-```
-- Once you have finished, switch back to the Github pages script tag:
-```
-<script src="https://aryaask.github.io/3D-Engine/JS/ShapeBuilder/shapeBuilder.js" defer></script>
-```
+- It is the same process for Shape Builder, but the tags just point to different files, use the local JS files when developing, and switch to the Github tag once you have finished
