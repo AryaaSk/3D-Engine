@@ -4,13 +4,18 @@
 If you want to know how it works go here [Rendering Pipeline](Research/Pipeline.md)
 
 ## Importing
-To import the library, just copy this script tag into your HTML head *(Make sure to do this before using it in another JS file)*.
+### CDN
+To import the library with CDN, just copy this script tag into your HTML head *(Make sure to do this before using it in another JS file)*.
 ```
-<script src="https://aryaask.github.io/3D-Engine/JS/aryaa3D.js"></script>
+<script src="https://aryaask.github.io/3D-Engine/Source/aryaa3D.js"></script>
 
 <script src="yourownjsfile.js" defer></script> <!-- You should add a defer tag on your own file, since you will need to wait for the canvas element to load into the DOM -->
 ```
 
+### Typescript
+Alternatively if you want to use typescript defenitions with this library, then you can just download the [aryaa3D Source file](Source/aryaa3D.ts), and then you can compile it into JS and use it in your projeect
+
+### Setup
 Then create a canvas element in the HTML DOM with an ID, I used "renderingWindow"
 ```
 <canvas id="renderingWindow"></canvas>
