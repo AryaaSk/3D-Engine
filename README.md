@@ -127,9 +127,13 @@ camera.enableMovementControls(canvasID);
     4. Zoom?: Optional parameter to enable zoom, it is on by default
     5. limitRotation?: Optional parameter, which will limit the X Axis rotation to only 90 degrees, it is off by default.
 
+## Usage
 Here is a preview of the project in this repo [Example.html](https://aryaask.github.io/3D-Engine/Previews/example.html)\
 ![Preview Gif](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/3DEngineDemo.gif?raw=true)
 
 Here is a preview of the [Shape Builder](https://aryaask.github.io/3D-Engine/ShapeBuilder/) which you can use to build custom shapes\
 ![Shape Builder Preview](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ShapeBuilderPreview2.png?raw=true)\
 *Read the [Development Readme](DevelopmentREADME.md) for more information*
+
+I also created a 3D Chess game using this library: https://aryaask.github.io/3DChess/index.html \
+The github repo is here: https://github.com/AryaaSk/3DChess
