@@ -405,20 +405,19 @@ const startButtonListeners = () => {
         let clickedPoint = undefined;
 
         //we need to convert these click X and Y coordinates into the coordinates on the grid
-        const gridX = $e.clientX - (canvasWidth / 2);
-        const gridY = (canvasHeight / 2) - $e.clientY;
-        
-        //now we need to loop through the screenPoints, and check which points are within a certain radius of the click using X and Y coordinates (nearest 2 dp)
-        const roundMultiple = 0.01; //making the points less accurate so that the user doesn't have to click exactly on the point, higher means user has to be more precise
-        const gridXRounded = Math.round(gridX * roundMultiple) / roundMultiple;
-        const gridYRounded = Math.round(gridY * roundMultiple) / roundMultiple;
-        for (let i = 0; i != screenPoints.width; i += 1) {
-            const point = screenPoints.getColumn(i);
-            const pointXRounded = Math.round(point[0] * roundMultiple) / roundMultiple;
-            const pointYRounded = Math.round(point[1] * roundMultiple) / roundMultiple;
+        const gridX = ($e.clientX - (canvasWidth / 2)) / dpi;
+        const gridY = ((canvasHeight / 2) - $e.clientY) / dpi;
+        const cursorPoint = [gridX, gridY];
 
-            if (gridXRounded == pointXRounded && gridYRounded == pointYRounded) { clickedPoint = i; }
+        const distanceBetween2D = (p1: number[], p2: number[]) => { return Math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2); }
+        
+        //now we need to loop through the screenPoints, check which point is the closests to the pointer's x and y, and return undefined if that distance is bigger than 100
+        let shortestDistanceIndex = 0;
+        for (let i = 0; i != screenPoints.width; i += 1) {
+            if (distanceBetween2D(cursorPoint, screenPoints.getColumn(i)) < distanceBetween2D(cursorPoint, screenPoints.getColumn(shortestDistanceIndex))) 
+            { shortestDistanceIndex = i; }
         }
+        if (distanceBetween2D(cursorPoint, screenPoints.getColumn(shortestDistanceIndex)) < 10) { clickedPoint = shortestDistanceIndex; }
 
         if (faceTextFieldInFocusID != undefined && clickedPoint != undefined) {
             const faceTextfield = <HTMLInputElement>document.getElementById(faceTextFieldInFocusID)!;

@@ -1,5 +1,5 @@
 //CANVAS UTILITIES
-let dpi = 1; //window.devicePixelRatio; //it is too laggy when dpi >1
+let dpi = window.devicePixelRatio;
 let canvas: any = undefined;
 let c: any = undefined;
 let canvasWidth = 0; 
@@ -16,15 +16,14 @@ const linkCanvas = (canvasID: string) => {
     window.onresize = () => { linkCanvas(canvasID); } //just calling the function to initialise the canvas again
 }
 
-
 //ACTUAL DRAWING FUNCTIONS
 const gridX = (x: number) => {
     if (c == undefined) { console.error("Cannot draw, canvas is not linked, please use the linkCanvas(canvasID) before rendering any shapes"); return; }
-    return (canvasWidth / 2) + x;
+    return ((canvasWidth / 2) + x) * dpi;
 }
 const gridY = (y: number) => {  //on the page y = 0 is at the top, however in an actual grid y = 0 is at the bottom
     if (c == undefined) { console.error("Cannot draw, canvas is not linked, please use the linkCanvas(canvasID) before rendering any shapes"); return; }
-    return (canvasHeight / 2) - y;
+    return ((canvasHeight / 2) - y) * dpi;
 }
 const plotPoint = (p: number[], colour: string, label?: string) => {
     if (c == undefined) { console.error("Cannot draw, canvas is not linked, please use the linkCanvas(canvasID) before rendering any shapes"); return; }
@@ -33,7 +32,7 @@ const plotPoint = (p: number[], colour: string, label?: string) => {
     c.fillRect(gridX(p[0] * dpi), gridY(p[1] * dpi), 10, 10);
 
     if (label != undefined) {
-        c.font = "20px Arial";
+        c.font = `${20 * dpi}px Arial`;
         c.fillText(label, gridX(p[0] * dpi)! + 10, gridY(p[1] * dpi)! + 10);
     }
 }
@@ -587,15 +586,20 @@ class Camera {
         }
     }
 
-    enableMovementControls(canvasID: string, rotation: boolean, movement: boolean, zoom: boolean)
+    enableMovementControls(canvasID: string, rotation?: boolean, movement?: boolean, zoom?: boolean, limitRotation?: boolean)
     {
+        if (rotation == undefined) { rotation = true; }
+        if (movement == undefined) { movement = true; }
+        if (zoom == undefined) { zoom = true; }
+        if (limitRotation == undefined) { limitRotation = false; }
+
         let mouseDown = false;
         let altDown = false;
         let previousX = 0;
         let previousY = 0;
-        document.getElementById(canvasID)!.onmousedown = ($e) => { mouseDown = true; previousX = $e.clientX; previousY = $e.clientY; }
-        document.getElementById(canvasID)!.onmouseup = () => { mouseDown = false; }
-        document.getElementById(canvasID)!.onmousemove = ($e) => {
+        document.getElementById(canvasID)!.onpointerdown = ($e) => { mouseDown = true; previousX = $e.clientX; previousY = $e.clientY; } //changed these from mousedown to pointerdown, to be more mobile friendly
+        document.getElementById(canvasID)!.onpointerup = () => { mouseDown = false; }
+        document.getElementById(canvasID)!.onpointermove = ($e) => {
             if (mouseDown == false) { return; }
 
             let [differenceX, differenceY] = [$e.clientX - previousX, $e.clientY - previousY];
@@ -608,6 +612,7 @@ class Camera {
                 if (absX > 90 && absX < 270)  { differenceX *= -1; }
                 this.worldRotation.x -= differenceY / 5;
                 this.worldRotation.y -= differenceX / 5;
+                if (this.worldRotation.x < -90 && limitRotation == true) { this.worldRotation.x = -90; } else if (this.worldRotation.x > 0 && limitRotation == true) { this.worldRotation.x = 0; } //to limit rotation, user can only rotate around 90 degrees on x axis
                 this.updateRotationMatrix()
             }
             [previousX, previousY] = [$e.clientX, $e.clientY];

@@ -108,6 +108,7 @@ camera.render([cube]);
 //If you have multiple objects:
 camera.render([cube, cube2, cube3]);
 ```
+This function will also return the objects with their respective screen points, if you want to setup an interactive system where the user can select points/faces directly from the canvas, I have used this in the Shape Builder when you select the points indexes for the faces. Be aware that these points will be multiplied by the device's DPI, so if you want to use them you should first divide the points by the devices DPI, which is stored in a variable called **dpi**.
 
 You may also want to clear the page before rendering again, since otherwise there will be a copy created
 ```
@@ -116,9 +117,15 @@ clearCanvas();
 
 You can also just enable the inbuilt movement controls, which allow the user to drag the mouse around to rotate the world, hold Alt and drag to move the camera's position, and scroll up/down to zoom in/out. **However if you use these then you will also have to handle the animation loop, since if you don't keep rendering the frames then you won't see any change on the screen**
 ```
-camera.enableMovementControls(canvasID: string, rotation: boolean, movement: boolean, zoom: boolean);
+camera.enableMovementControls(canvasID);
 ```
 *Do not call this too many times, as it adds event listeners everytime which will cause lag if there are too many*
+- This function comes with 5 parameters:
+    1. CanvasID: The ID of the canvas which you use to render, this is so that it can attack event listeners to the canvas, to monitor for mouseclicks
+    2. Rotation?: Optional parameter to enable rotation, it is on by default
+    3. Movement?: Optional parameter to enable movement, it is on by default
+    4. Zoom?: Optional parameter to enable zoom, it is on by default
+    5. limitRotation?: Optional parameter, which will limit the X Axis rotation to only 90 degrees, it is off by default.
 
 Here is a preview of the project in this repo [Example.html](https://aryaask.github.io/3D-Engine/Previews/example.html)\
 ![Preview Gif](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/3DEngineDemo.gif?raw=true)
