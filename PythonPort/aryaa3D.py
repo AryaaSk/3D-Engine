@@ -1,9 +1,11 @@
 #Porting the aryaa3D.ts, into Python Turtle
 #Date: 13/04/22, this may get outdated since it is a lot of work to port the entire library from Typescript to Python
 #There will not be many comments since the functions basically perform the same thing as in the TS/JS files
-import turtle
 
 #TURTLE UTILITIES
+import turtle
+
+from matplotlib.pyplot import plot
 
 #No linkCanvas() function, since we can just initialize the screen ourselves
 canvasWidth = 1000
@@ -228,13 +230,13 @@ class Box(Shape):
 
     def setFaces(self):
         self.faces = [
-            { "pointIndexes": [0, 1, 2, 3], "pointIndexes": "#ff0000" },
-            { "pointIndexes": [1, 2, 6, 5], "pointIndexes": "#00ff00" },
-            { "pointIndexes": [2, 3, 7, 6], "pointIndexes": "#0000ff" },
+            { "pointIndexes": [0, 1, 2, 3], "colour": "#ff0000" },
+            { "pointIndexes": [1, 2, 6, 5], "colour": "#00ff00" },
+            { "pointIndexes": [2, 3, 7, 6], "colour": "#0000ff" },
             
-            { "pointIndexes": [0, 1, 5, 4], "pointIndexes": "#ffff00" },
-            { "pointIndexes": [0, 3, 7, 4], "pointIndexes": "#00ffff" },
-            { "pointIndexes": [4, 5, 6, 7], "pointIndexes": "#ff00ff" },
+            { "pointIndexes": [0, 1, 5, 4], "colour": "#ffff00" },
+            { "pointIndexes": [0, 3, 7, 4], "colour": "#00ffff" },
+            { "pointIndexes": [4, 5, 6, 7], "colour": "#ff00ff" },
         ]
 
 
@@ -256,6 +258,23 @@ class Camera:
         self.zoom = 1
         self.worldRotation = { "x" : 0 , "y" : 0, "z" : 0 }
         self.worldRotationMatrix = matrix()
+        self.updateRotationMatrix()
+
+    def sortFurthestDistanceTo(self, list, positionKey, positionPoint):
+        sortedList = []
+        listCopy = list
+        while (len(listCopy) != 0):
+            furthestDistanceIndex = 0
+            for i in range(0, len(listCopy)):
+                if (distanceBetween(positionPoint, listCopy[i][positionKey]) > distanceBetween(positionPoint, listCopy[furthestDistanceIndex][positionKey])):
+                    furthestDistanceIndex = i
+            sortedList.append(listCopy[furthestDistanceIndex])
+            del listCopy[furthestDistanceIndex]
+        return sortedList
+
+    def updateRotationMatrix(self):
+        rX, rY, rZ = self.worldRotation["x"] % 360, self.worldRotation["y"] % 360, self.worldRotation["z"] % 360
+        self.worldRotationMatrix = calculateRotationMatrix(rX, rY, rZ);
 
     def render(self, objects: list[Shape]):
         objectData = []
@@ -287,6 +306,87 @@ class Camera:
 
             objectData.append( { "object" : object, "screenPoints" : cameraObjectMatrix, "center" : center} )
 
-    #need to sort, line 476 in aryaa3D.ts,            
+        positionPoint = [0, 0, -50000]
+        sortedObjects = self.sortFurthestDistanceTo(objectData, "center", positionPoint)
+
+        for objectIndex in range(0, len(sortedObjects)):
+            object: Shape = sortedObjects[objectIndex]["object"]
+            screenPoints: matrix = sortedObjects[objectIndex]["screenPoints"]
+
+            objectFaces = []
+            for i in range(0, len(object.faces)):
+                points = []
+                for a in range(0, len(object.faces[i]["pointIndexes"])):
+                    points.append(screenPoints.getColumn(object.faces[i]["pointIndexes"][a]))
+                
+                totalX, totalY, totalZ = 0, 0, 0
+                for a in range(0, len(points)):
+                    totalX += points[a][0]; totalY += points[a][1]; totalZ += points[a][2];
+                averageX, averageY, averageZ = totalX / len(points), totalY / len(points), totalZ / len(points)
+                center = [averageX, averageY, averageZ]
+                objectFaces.append( { "points" : points, "center" : center, "colour" : object.faces[i]["colour"], "faceIndex" : i } )
+            
+            sortedFaces = self.sortFurthestDistanceTo(objectFaces, "center", positionPoint)
+
+            for i in range(0, len(sortedFaces)):
+                facePoints = sortedFaces[i]["points"]
+                colour = sortedFaces[i]["colour"]
+                if colour != "":
+                    drawShape(facePoints, colour, object.showOutline)
+
+                if object.showFaceIndexes == True:
+                    plotPoint(sortedFaces[i]["center"], "#000000", str(sortedFaces[i]["faceIndex"]))
+
+            if object.showPoints == True:
+                for i in range(0, screenPoints.width):
+                    point = screenPoints.getColumn(i)
+                    plotPoint(point, "#000000", str(i));
+
+        return sortedObjects
+
+    def renderGrid(self):
+        gridLength = 1000 * self.zoom
+
+        startPointMatrix = matrix();
+        startPointMatrix.addColumn([-gridLength, 0, 0])
+        startPointMatrix.addColumn([0, -gridLength, 0])
+        startPointMatrix.addColumn([0, 0, -gridLength])
+        endPointMatrix = matrix();
+        endPointMatrix.addColumn([gridLength, 0, 0])
+        endPointMatrix.addColumn([0, gridLength, 0])
+        endPointMatrix.addColumn([0, 0, gridLength])
+
+        startPointMatrix = multiplyMatrixs(self.worldRotationMatrix, startPointMatrix);
+        endPointMatrix = multiplyMatrixs(self.worldRotationMatrix, endPointMatrix);
+
+        gridOrigin = { "x": -(self.absPosition["x"]), "y": -(self.absPosition["y"]), "z": 0 };
+        absoluteOriginObjectVector = matrix();
+        absoluteOriginObjectVector.addColumn([gridOrigin["x"], gridOrigin["y"], gridOrigin["z"]]);
+        absoluteOriginObjectVector.scaleUp(self.zoom);
+        zoomTranslationVector = absoluteOriginObjectVector.getColumn(0)
+
+        startPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
+        endPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
+
+        for i in range(0, startPointMatrix.width):
+            point1 = startPointMatrix.getColumn(i)
+            point2 = endPointMatrix.getColumn(i)
+            drawLine(point1, point2, "#000000")
+
+
+box = Box(100, 100, 100)
+box.rotation["x"] = 0
+box.rotation["y"] = 0
+box.updateMatrices()
+
+camera = Camera()
+camera.absPosition["y"] = 100
+camera.worldRotation["x"] = -20
+camera.worldRotation["y"] = 20
+camera.updateRotationMatrix()
+
+camera.renderGrid()
+camera.render([box])
+
 
 input() #to stop it from closing straight away
