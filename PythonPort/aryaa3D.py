@@ -3,6 +3,7 @@
 #There will not be many comments since the functions basically perform the same thing as in the TS/JS files
 
 #TURTLE UTILITIES
+from re import L
 import turtle
 
 #No linkCanvas() function, since we can just initialize the screen ourselves
@@ -374,6 +375,71 @@ class Camera:
 
 
 
+#PYTHON SPECIFIC FUNCTIONS
+def convertShapeToPython(typescriptShape):
+    returnValue: str = ""
+    returnValue += typescriptShape
+    returnValue = returnValue.replace('extends Shape {', '(Shape):')
+    returnValue = returnValue.replace('constructor () {', 'def __init__(self):')
+    returnValue = returnValue.replace('setFaces() {', 'def setFaces(self):')
+    returnValue = returnValue.replace('pointIndexes', '"pointIndexes"')
+    returnValue = returnValue.replace('colour', '"colour"')
+
+    returnValue = returnValue.replace('this', 'self')
+    returnValue = returnValue.replace(';', '')
+    returnValue = returnValue.replace('new', '')
+    returnValue = returnValue.replace('const', '')
+    returnValue = returnValue.replace('super()', '')
+    return returnValue
+
+print(convertShapeToPython('''
+class Shuriken extends Shape {
+    constructor () {
+        super();
+
+        this.pointMatrix = new matrix();
+        const points = [[-100,0,100],[100,0,100],[-100,0,-100],[100,0,-100],[0,0,300],[300,0,0],[0,0,-300],[-300,0,0],[0,30,0],[0,-30,0]];
+        for (let i = 0; i != points.length; i += 1)
+        { this.pointMatrix.addColumn(points[i]); }
+
+        const [centeringX, centeringY, centeringZ] = [0, 0, 0];
+        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
+
+        this.setFaces();
+        this.updateMatrices();
+    }
+    setFaces() {
+        this.faces = [{pointIndexes:[8,4,0],colour:"#c4c4c4"},{pointIndexes:[8,4,1],colour:"#000000"},{pointIndexes:[8,1,5],colour:"#c4c4c4"},{pointIndexes:[8,5,3],colour:"#000000"},{pointIndexes:[8,3,6],colour:"#c4c4c4"},{pointIndexes:[8,2,6],colour:"#000000"},{pointIndexes:[8,2,7],colour:"#c4c4c4"},{pointIndexes:[8,0,7],colour:"#000000"},{pointIndexes:[9,4,0],colour:"#c4c4c4"},{pointIndexes:[9,4,1],colour:"#000000"},{pointIndexes:[9,1,5],colour:"#c4c4c4"},{pointIndexes:[9,5,3],colour:"#000000"},{pointIndexes:[9,3,6],colour:"#c4c4c4"},{pointIndexes:[9,2,6],colour:"#000000"},{pointIndexes:[9,2,7],colour:"#c4c4c4"},{pointIndexes:[9,0,7],colour:"#050505"}];
+    }
+}
+'''))
+
+#I want it to become like this, or similar
+class Shuriken (Shape):
+    def __init__(self):
+
+        self.pointMatrix =  matrix()
+        points = [[-100,0,100],[100,0,100],[-100,0,-100],[100,0,-100],[0,0,300],[300,0,0],[0,0,-300],[-300,0,0],[0,30,0],[0,-30,0]]
+        
+        for point in points:
+            self.pointMatrix.addColumn(point)
+
+        centeringX, centeringY, centeringZ = 0, 0, 0
+        self.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ)
+
+        self.setFaces()
+        self.updateMatrices()
+
+    def setFaces(self):
+        self.faces = [{"pointIndexes":[8,4,0],"colour":"#c4c4c4"},{"pointIndexes":[8,4,1],"colour":"#000000"},{"pointIndexes":[8,1,5],"colour":"#c4c4c4"},{"pointIndexes":[8,5,3],"colour":"#000000"},{"pointIndexes":[8,3,6],"colour":"#c4c4c4"},{"pointIndexes":[8,2,6],"colour":"#000000"},{"pointIndexes":[8,2,7],"colour":"#c4c4c4"},{"pointIndexes":[8,0,7],"colour":"#000000"},{"pointIndexes":[9,4,0],"colour":"#c4c4c4"},{"pointIndexes":[9,4,1],"colour":"#000000"},{"pointIndexes":[9,1,5],"colour":"#c4c4c4"},{"pointIndexes":[9,5,3],"colour":"#000000"},{"pointIndexes":[9,3,6],"colour":"#c4c4c4"},{"pointIndexes":[9,2,6],"colour":"#000000"},{"pointIndexes":[9,2,7],"colour":"#c4c4c4"},{"pointIndexes":[9,0,7],"colour":"#050505"}]
+
+
+
+
+
+
+
+
 #TESTING / DEMO
 camera = Camera()
 camera.worldRotation["x"] = -20
@@ -385,16 +451,13 @@ box = Box(100, 100, 100)
 box.position["x"] = 300
 
 def animationLoop():
-    #box.rotation["x"] += 1
-    #box.rotation["y"] += 1
-    #box.updateMatrices()
-
     camera.worldRotation["y"] += 1
     camera.updateRotationMatrix()
 
     clearCanvas()
     camera.renderGrid()
     camera.render([box])
+
     screen.update()
     screen.ontimer(animationLoop, 16) #16ms, 60fps
 
