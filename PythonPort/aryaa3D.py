@@ -41,8 +41,7 @@ def drawShape(points, colour, outline):
     t.penup()
     t.end_fill();
 def clearCanvas():
-    screen.clear()
-    screen.tracer(False)
+    t.clear()
 
 
 
@@ -115,8 +114,9 @@ class matrix():
             self.setValue(i, 2, column[2] + z)
             i += 1
 
-    def copy():
-        print("Will implement matrix copy() function later")
+    def copy(self):
+        #return copy.deepcopy(self)
+        return self #it appears I do not need a proper copying function in python
 
 def multiplyMatrixs(m1, m2):
     resultMatrix = matrix()
@@ -242,7 +242,6 @@ class Box(Shape):
 
 
 #CAMERA
-import copy #in future I may try and find a better way to copy a matrix class
 
 class Camera:
     absPosition = { "x" : 0, "y" : 0 }
@@ -277,7 +276,7 @@ class Camera:
     def render(self, objects: list[Shape]):
         objectData = []
         for object in objects:
-            cameraObjectMatrix = copy.deepcopy(object.physicalMatrix)
+            cameraObjectMatrix = object.physicalMatrix.copy()
             
             cameraObjectMatrix.scaleUp(self.zoom)
             cameraObjectMatrix = multiplyMatrixs(self.worldRotationMatrix, cameraObjectMatrix)
@@ -339,7 +338,6 @@ class Camera:
                 for i in range(0, screenPoints.width):
                     point = screenPoints.getColumn(i)
                     plotPoint(point, "#000000", str(i));
-        screen.update()
 
         return sortedObjects
 
@@ -377,10 +375,6 @@ class Camera:
 
 
 #TESTING / DEMO
-
-import asyncio
-import time #for an animation loop
-
 camera = Camera()
 camera.worldRotation["x"] = -20
 camera.worldRotation["y"] = 20
@@ -388,21 +382,21 @@ camera.worldRotation["z"] = 0
 camera.updateRotationMatrix()
 
 box = Box(100, 100, 100)
-box.position["x"] = 100
+box.position["x"] = 300
 
 def animationLoop():
-    while True:
-        #box.rotation["x"] += 1
-        #box.rotation["y"] += 1
-        #box.updateMatrices()
+    #box.rotation["x"] += 1
+    #box.rotation["y"] += 1
+    #box.updateMatrices()
 
-        camera.worldRotation["y"] += 1
-        camera.updateRotationMatrix()
+    camera.worldRotation["y"] += 1
+    camera.updateRotationMatrix()
 
-        clearCanvas()
-        camera.renderGrid()
-        camera.render([box])
-
-        time.sleep(16 / 1000)
+    clearCanvas()
+    camera.renderGrid()
+    camera.render([box])
+    screen.update()
+    screen.ontimer(animationLoop, 16) #16ms, 60fps
 
 animationLoop()
+screen.mainloop()
