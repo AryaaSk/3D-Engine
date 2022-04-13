@@ -1,5 +1,5 @@
 #Porting the aryaa3D.ts, into Python Turtle
-#Date: 13/04/22, this may get outdated since it is a lot of work to port the entire library from Typescript to Python
+#Date: 13/04/22, self may get outdated since it is a lot of work to port the entire library from Typescript to Python
 #There will not be many comments since the functions basically perform the same thing as in the TS/JS files
 
 #TURTLE UTILITIES
@@ -237,7 +237,7 @@ class Box(Shape):
             { "pointIndexes": [4, 5, 6, 7], "colour": "#ff00ff" },
         ]
 
-
+#todo: add more shapes
 
 
 
@@ -367,12 +367,10 @@ class Camera:
         startPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
         endPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
 
-        for i in range(0, startPointMatrix.width):
-            point1 = startPointMatrix.getColumn(i)
-            point2 = endPointMatrix.getColumn(i)
-            drawLine(point1, point2, "#000000")
-
-
+        drawLine([0, 0], [0, 0], "#000000") #for some reason the draw line function doesnt work properly, it works when I draw an imaginary line before hand
+        drawLine(startPointMatrix.getColumn(0), endPointMatrix.getColumn(0), "#000000") #x axis
+        drawLine(startPointMatrix.getColumn(1), endPointMatrix.getColumn(1), "#000000") #y axis
+        drawLine(startPointMatrix.getColumn(2), endPointMatrix.getColumn(2), "#000000") #z axis
 
 
 
@@ -380,23 +378,31 @@ class Camera:
 
 #TESTING / DEMO
 
+import asyncio
 import time #for an animation loop
 
 camera = Camera()
 camera.worldRotation["x"] = -20
 camera.worldRotation["y"] = 20
-#camera.worldRotation["z"] = 20
+camera.worldRotation["z"] = 0
 camera.updateRotationMatrix()
 
 box = Box(100, 100, 100)
-"""
-box.rotation["x"] += 1
-box.rotation["y"] += 1
-box.updateMatrices()
-"""
+box.position["x"] = 100
 
-clearCanvas()
-camera.renderGrid()
-camera.render([box])
+def animationLoop():
+    while True:
+        #box.rotation["x"] += 1
+        #box.rotation["y"] += 1
+        #box.updateMatrices()
 
-input() #to stop it from auto closing the window
+        camera.worldRotation["y"] += 1
+        camera.updateRotationMatrix()
+
+        clearCanvas()
+        camera.renderGrid()
+        camera.render([box])
+
+        time.sleep(16 / 1000)
+
+animationLoop()
