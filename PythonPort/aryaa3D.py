@@ -5,8 +5,6 @@
 #TURTLE UTILITIES
 import turtle
 
-from matplotlib.pyplot import plot
-
 #No linkCanvas() function, since we can just initialize the screen ourselves
 canvasWidth = 1000
 canvasHeight = 600
@@ -341,6 +339,7 @@ class Camera:
                 for i in range(0, screenPoints.width):
                     point = screenPoints.getColumn(i)
                     plotPoint(point, "#000000", str(i));
+        screen.update()
 
         return sortedObjects
 
@@ -374,19 +373,30 @@ class Camera:
             drawLine(point1, point2, "#000000")
 
 
-box = Box(100, 100, 100)
-box.rotation["x"] = 0
-box.rotation["y"] = 0
-box.updateMatrices()
+
+
+
+
+
+#TESTING / DEMO
+
+import time #for an animation loop
 
 camera = Camera()
-camera.absPosition["y"] = 100
 camera.worldRotation["x"] = -20
 camera.worldRotation["y"] = 20
+#camera.worldRotation["z"] = 20
 camera.updateRotationMatrix()
 
+box = Box(100, 100, 100)
+"""
+box.rotation["x"] += 1
+box.rotation["y"] += 1
+box.updateMatrices()
+"""
+
+clearCanvas()
 camera.renderGrid()
 camera.render([box])
 
-
-input() #to stop it from closing straight away
+input() #to stop it from auto closing the window
