@@ -3,7 +3,6 @@
 #There will not be many comments since the functions basically perform the same thing as in the TS/JS files
 
 #TURTLE UTILITIES
-from re import L
 import turtle
 
 #No linkCanvas() function, since we can just initialize the screen ourselves
@@ -376,23 +375,53 @@ class Camera:
 
 
 #PYTHON SPECIFIC FUNCTIONS
-def convertShapeToPython(typescriptShape):
-    returnValue: str = ""
-    returnValue += typescriptShape
-    returnValue = returnValue.replace('extends Shape {', '(Shape):')
-    returnValue = returnValue.replace('constructor () {', 'def __init__(self):')
-    returnValue = returnValue.replace('setFaces() {', 'def setFaces(self):')
-    returnValue = returnValue.replace('pointIndexes', '"pointIndexes"')
-    returnValue = returnValue.replace('colour', '"colour"')
+import json
 
-    returnValue = returnValue.replace('this', 'self')
-    returnValue = returnValue.replace(';', '')
-    returnValue = returnValue.replace('new', '')
-    returnValue = returnValue.replace('const', '')
-    returnValue = returnValue.replace('super()', '')
-    return returnValue
+#This is how you can use custom shapes from TS/JS, or from the Shape Builder, and add them to python
+def convertShapeToPython(typescriptShape: str):
+    points = []
+    centering = []
+    faces = []
+    dataCounter = 0
+    typescriptShape = typescriptShape.replace(" ", "")
+    typescriptShape = typescriptShape.replace(";", "")
 
-print(convertShapeToPython('''
+    lines = typescriptShape.splitlines()
+    for line in lines:
+        if line.startswith("constpoints="):
+            splitLine = line.split("=")
+            pointsJSON = splitLine[1]
+            points = json.loads(pointsJSON)
+            dataCounter += 1
+        elif line.startswith("const[centeringX,centeringY,centeringZ]="):
+            splitLine = line.split("=")
+            centeringJSON = splitLine[1]
+            centering = json.loads(centeringJSON)
+            dataCounter += 1
+        elif line.startswith("this.faces="):
+            splitLine = line.split("=")
+            facesJSON = splitLine[1]
+            facesJSON = facesJSON.replace('pointIndexes', '"pointIndexes"')
+            facesJSON = facesJSON.replace('colour', '"colour"')
+            faces = json.loads(facesJSON)
+            dataCounter += 1
+
+    if dataCounter < 3:
+        print("Unable to find required data")
+        return
+
+    newShape = Shape()
+    for point in points:
+        newShape.pointMatrix.addColumn(point)
+    centeringX, centeringY, centeringZ = centering[0], centering[1], centering[2]
+    newShape.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ)
+    newShape.faces = faces
+    newShape.updateMatrices()
+
+    return newShape
+
+
+Shuriken = convertShapeToPython('''
 class Shuriken extends Shape {
     constructor () {
         super();
@@ -412,35 +441,14 @@ class Shuriken extends Shape {
         this.faces = [{pointIndexes:[8,4,0],colour:"#c4c4c4"},{pointIndexes:[8,4,1],colour:"#000000"},{pointIndexes:[8,1,5],colour:"#c4c4c4"},{pointIndexes:[8,5,3],colour:"#000000"},{pointIndexes:[8,3,6],colour:"#c4c4c4"},{pointIndexes:[8,2,6],colour:"#000000"},{pointIndexes:[8,2,7],colour:"#c4c4c4"},{pointIndexes:[8,0,7],colour:"#000000"},{pointIndexes:[9,4,0],colour:"#c4c4c4"},{pointIndexes:[9,4,1],colour:"#000000"},{pointIndexes:[9,1,5],colour:"#c4c4c4"},{pointIndexes:[9,5,3],colour:"#000000"},{pointIndexes:[9,3,6],colour:"#c4c4c4"},{pointIndexes:[9,2,6],colour:"#000000"},{pointIndexes:[9,2,7],colour:"#c4c4c4"},{pointIndexes:[9,0,7],colour:"#050505"}];
     }
 }
-'''))
 
-#I want it to become like this, or similar
-class Shuriken (Shape):
-    def __init__(self):
-
-        self.pointMatrix =  matrix()
-        points = [[-100,0,100],[100,0,100],[-100,0,-100],[100,0,-100],[0,0,300],[300,0,0],[0,0,-300],[-300,0,0],[0,30,0],[0,-30,0]]
-        
-        for point in points:
-            self.pointMatrix.addColumn(point)
-
-        centeringX, centeringY, centeringZ = 0, 0, 0
-        self.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ)
-
-        self.setFaces()
-        self.updateMatrices()
-
-    def setFaces(self):
-        self.faces = [{"pointIndexes":[8,4,0],"colour":"#c4c4c4"},{"pointIndexes":[8,4,1],"colour":"#000000"},{"pointIndexes":[8,1,5],"colour":"#c4c4c4"},{"pointIndexes":[8,5,3],"colour":"#000000"},{"pointIndexes":[8,3,6],"colour":"#c4c4c4"},{"pointIndexes":[8,2,6],"colour":"#000000"},{"pointIndexes":[8,2,7],"colour":"#c4c4c4"},{"pointIndexes":[8,0,7],"colour":"#000000"},{"pointIndexes":[9,4,0],"colour":"#c4c4c4"},{"pointIndexes":[9,4,1],"colour":"#000000"},{"pointIndexes":[9,1,5],"colour":"#c4c4c4"},{"pointIndexes":[9,5,3],"colour":"#000000"},{"pointIndexes":[9,3,6],"colour":"#c4c4c4"},{"pointIndexes":[9,2,6],"colour":"#000000"},{"pointIndexes":[9,2,7],"colour":"#c4c4c4"},{"pointIndexes":[9,0,7],"colour":"#050505"}]
-
-
-
-
-
+''')
 
 
 
 #TESTING / DEMO
+#You could probably import this by downloading the file, then just calling it using open(), and using eval() to run the script before using it yourself
+
 camera = Camera()
 camera.worldRotation["x"] = -20
 camera.worldRotation["y"] = 20
@@ -450,13 +458,22 @@ camera.updateRotationMatrix()
 box = Box(100, 100, 100)
 box.position["x"] = 300
 
+shuriken = Shuriken
+shuriken.position["z"] = 300
+shuriken.showOutline = True
+shuriken.scale = 0.6
+shuriken.updateMatrices()
+
 def animationLoop():
+    shuriken.rotation["y"] += 5
+    shuriken.updateMatrices()
+
     camera.worldRotation["y"] += 1
     camera.updateRotationMatrix()
 
     clearCanvas()
     camera.renderGrid()
-    camera.render([box])
+    camera.render([box, shuriken])
 
     screen.update()
     screen.ontimer(animationLoop, 16) #16ms, 60fps
