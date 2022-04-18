@@ -41,10 +41,10 @@ camera.render([pentagon]);
     - The Colour Change takes in the face indexes (the number next to the face), and changes their colours based on a hex code that you give it.
 3. If you have a plane, and then you have positioned more components on top of it, it may cause some issues with the renderer, where the plane is rendered above the components, since it is so large that the center is actually closer to the position point (0, 0, -50000). To minimize this issue you need to try and keep each face as small as possible:
     - Here is an example, I am building a house object, and the front face is covering parts of the door and windows
-    ![House Disjointed Faces](https://github.com/AryaaSk/3D-Engine/blob/master/Research/HouseJoinedFace.png?raw=true)
+    ![House Disjointed Faces](https://github.com/AryaaSk/3D-Engine/blob/master/Docs/ResearchImages/HouseJoinedFace.png?raw=true)
 
     - Instead of creating a single face for the front wall, I have split it up between the door and the window components, this drastically helps reduce the issue of faces being wrongly placed on top of each other. This is what it looks like after I split up the faces:\
-    ![House Disjointed Faces](https://github.com/AryaaSk/3D-Engine/blob/master/Research/HouseDisjointedFaces.png?raw=true)
+    ![House Disjointed Faces](https://github.com/AryaaSk/3D-Engine/blob/master/Docs/ResearchImages/HouseDisjointedFaces.png?raw=true)
 
 ### Centering:
 - To center the object, an easy way is to find the *upper and lower bound* of each axis, then just center it by halfing the range between them.

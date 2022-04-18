@@ -509,7 +509,8 @@ class Camera {
 
             //populate the array
             for (let i = 0; i != object.faces.length; i += 1) {
-                if (object.faces[i].colour == "") { continue; } //if face is transparent then just don't render it
+                //if face is transparent then just don't render it
+                if (object.faces[i].colour == "") { continue; }
 
                 let points: number[][] = [];
                 for (let a = 0; a != object.faces[i].pointIndexes.length; a += 1) { 
@@ -528,7 +529,6 @@ class Camera {
 
             const sortedFaces = this.sortFurthestDistanceTo(objectFaces, "center", positionPoint); //sort based on distance from center to (0, 0, -50000)
 
-            //draw the faces as a quadrilateral, later I will change the drawQuadrilateral function to a drawShape function, which can take as many points as it needs
             for (let i = 0; i != sortedFaces.length; i += 1) {
                 const facePoints = sortedFaces[i].points;
                 let colour = sortedFaces[i].colour;
@@ -637,7 +637,7 @@ class Camera {
                 else if (this.worldRotation.x > 0 && limitRotation == true) { 
                     this.worldRotation.x = 0; 
                 }
-                
+
                 this.updateRotationMatrix()
             }
             [previousX, previousY] = [$e.clientX, $e.clientY];
