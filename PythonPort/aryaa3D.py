@@ -18,6 +18,7 @@ def linkCanvas():
     t = turtle.Turtle()
     t.hideturtle();
     t.penup();
+    return screen
     
 #No gridX and gridY functions since in turtle, the center of the screen is at coordinate (0, 0)
 def plotPoint(p, colour):
@@ -110,7 +111,11 @@ class matrix():
                 a += 1
             i += 1
     def scaledUp(self, factor):
-        print("Will implement matrix scaledUp() function later")
+        newMatrix = matrix()
+        for i in range(0, self.width):
+            newMatrix.addColumn(self.getColumn(i))
+        newMatrix.scaleUp(factor)
+        return newMatrix
 
     def translateMatrix(self, x, y, z):
         i = 0
@@ -475,38 +480,3 @@ class House(Shape):
         faceDict = [{"pointIndexes": [5, 6, 2, 1], "colour": "#c2600f"}, {"pointIndexes": [6, 2, 3, 7], "colour": "#c2600f"}, {"pointIndexes": [7, 4, 0, 3], "colour": "#c2600f"}, {"pointIndexes": [5, 9, 6], "colour": "#0593ff"}, {"pointIndexes": [4, 8, 9, 5], "colour": "#0593ff"}, {"pointIndexes": [6, 9, 8, 7], "colour": "#0593ff"}, {"pointIndexes": [7, 8, 4], "colour": "#0593ff"}, {"pointIndexes": [12, 16, 14, 10], "colour": "#ffce47"}, {"pointIndexes": [12, 16, 17, 13], "colour": "#ffce47"}, {"pointIndexes": [17, 13, 11, 15], "colour": "#ffce47"}, {"pointIndexes": [16, 17, 15, 14], "colour": "#ffce47"}, {"pointIndexes": [18, 19, 23, 22], "colour": "#0b07f2"}, {"pointIndexes": [18, 22, 24, 20], "colour": "#0b07f2"}, {"pointIndexes": [24, 25, 21, 20], "colour": "#0b07f2"}, {"pointIndexes": [23, 19, 21, 25], "colour": "#0b07f2"}, {"pointIndexes": [22, 23, 25, 24], "colour": "#0b07f2"}, {"pointIndexes": [26, 27, 31, 30], "colour": "#0b07f2"}, {"pointIndexes": [31, 27, 29, 33], "colour": "#0b07f2"}, {"pointIndexes": [26, 30, 32, 28], "colour": "#0b07f2"}, {"pointIndexes": [32, 33, 29, 28], "colour": "#0b07f2"}, {"pointIndexes": [30, 31, 33, 32], "colour": "#0b07f2"}, {"pointIndexes": [4, 18, 20, 0], "colour": "#c2600f"}, {"pointIndexes": [0, 20, 21, 10], "colour": "#c2600f"}, {"pointIndexes": [21, 10, 12], "colour": "#c2600f"}, {"pointIndexes": [13, 11, 28], "colour": "#c2600f"}, {"pointIndexes": [11, 28, 29, 1], "colour": "#c2600f"}, {"pointIndexes": [1, 29, 27, 5], "colour": "#c2600f"}, {"pointIndexes": [19, 26, 28, 13, 12, 21], "colour": "#c2600f"}, {"pointIndexes": [5, 27, 26, 19, 18, 4], "colour": "#c2600f"}]
         for faceObject in faceDict:
             self.faces.append(Face(faceObject["pointIndexes"], faceObject["colour"]))
-
-#TESTING / DEMO
-linkCanvas()
-
-camera = Camera()
-camera.worldRotation.x = -20
-camera.worldRotation.y = 20
-camera.worldRotation.z = 0
-camera.updateRotationMatrix()
-
-box = Box(100, 100, 100)
-box.position.x = 300
-
-box2 = Box(80, 80, 80)
-box2.position.y = 100
-box2.faces[0].colour = ""
-
-house = House()
-
-def animationLoop():
-    house.rotation.y += 5
-    house.updateMatrices()
-
-    camera.worldRotation.y += 1
-    camera.updateRotationMatrix()
-
-    clearCanvas()
-    camera.renderGrid()
-    camera.render([box, box2, house])
-
-    screen.update()
-    screen.ontimer(animationLoop, 16) #16ms, 60fps
-
-animationLoop()
-screen.mainloop()
