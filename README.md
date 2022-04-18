@@ -14,7 +14,7 @@ To import the library with CDN, just copy this script tag into your HTML head *(
 ### Typescript
 Alternatively if you want to use typescript defenitions with this library, then you can just download the [aryaa3D Source file](Source/aryaa3D.ts), and then you can compile it into JS and use it in your projeect
 ### Python
-I have ported this library over to python. To get started read the [Python README](PythonPort/README.md)
+I have ported this library over to python. To get started go to the [PythonPort](PythonPort) Folder, and read the README
 
 
 ### Setup
