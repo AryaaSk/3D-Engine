@@ -7,11 +7,9 @@ import turtle
 
 t: turtle.Turtle = None
 screen: turtle.Screen = None
-def linkCanvas():
+def linkCanvas(canvasWidth, canvasHeight):
     global t
     global screen
-    canvasWidth = 1000
-    canvasHeight = 600
     screen = turtle.Screen()
     screen.setup(canvasWidth, canvasHeight)
     screen.tracer(False) #to enable us to get smooth 60fps animation   
@@ -58,6 +56,7 @@ def clearCanvas():
 
 #MATH UTILITIES
 import math
+import copy
 
 class matrix():
     data = []
@@ -127,8 +126,7 @@ class matrix():
             i += 1
 
     def copy(self):
-        #return copy.deepcopy(self)
-        return self #it appears I do not need a proper copying function in python
+        return copy.deepcopy(self)
 
 def multiplyMatrixs(m1, m2):
     resultMatrix = matrix()
@@ -267,7 +265,6 @@ class Box(Shape):
 
 
 #CAMERA
-
 class Camera:
     absPosition = XYZ(0, 0, None) #z is irrelevant but I don't want to create a new XY class
     zoom = 1
@@ -393,6 +390,79 @@ class Camera:
         drawLine(startPointMatrix.getColumn(1), endPointMatrix.getColumn(1), "#000000") #y axis
         drawLine(startPointMatrix.getColumn(2), endPointMatrix.getColumn(2), "#000000") #z axis
 
+    def enableMovementControls(self, **kwargs):
+        global t
+        global screen
+        canvas = screen.getcanvas().winfo_toplevel()
+        canvasWidth = canvas.winfo_width()
+        canvasHeight = canvas.winfo_height()
+
+        rotation = kwargs.get('rotation', True)
+        movement = kwargs.get('movement', True)
+        zoom = kwargs.get('zoom', True)
+        limitRotation = kwargs.get('limitRotation', False)
+
+        mousedown = False
+        altDown = False
+        previousX, previousY = 0, 0
+
+        def MouseDown(event):
+            nonlocal mousedown, previousX, previousY
+            mousedown = True
+            previousX = event.x - (canvasWidth / 2)
+            previousY = event.y - (canvasHeight / 2)
+        def MouseUp(event):
+            nonlocal mousedown
+            mousedown = False
+        canvas.bind("<ButtonPress-1>", MouseDown)
+        canvas.bind("<ButtonRelease-1>", MouseUp)
+
+        def AltDown(**kwargs):
+            nonlocal altDown
+            altDown = True
+        def AltUp(**kwargs):
+            nonlocal altDown
+            altDown = False
+            print(altDown)
+        
+
+        def MouveMove(event):
+            nonlocal mousedown, altDown, previousX, previousY
+            if mousedown == False:
+                return
+            x = event.x - (canvasWidth / 2)
+            y = event.y - (canvasHeight / 2)
+            
+            differenceX, differenceY = x - previousX, y - previousY
+            print(altDown)
+            if altDown == True and movement == True:
+                print("Move abs position")
+            elif rotation == True:
+                absX = abs(self.worldRotation.x) % 360
+                if absX > 90 and absX < 270:
+                    differenceX *= -1
+                self.worldRotation.x -= differenceY / 5
+                self.worldRotation.y -= differenceX / 5
+
+                if self.worldRotation.x < -90 and limitRotation == True:
+                    self.worldRotation.x = -90
+                elif self.worldRotation.x > 0 and limitRotation == True:
+                    self.worldRotation.x = 0
+
+                self.updateRotationMatrix()
+            
+            previousX, previousY = x, y
+        canvas.bind('<Motion>', MouveMove)
+
+        def OnScroll(event):
+            if zoom == False:
+                return
+
+            delta = event.delta
+            if self.zoom < 0:
+                self.zoom = delta / 100
+            self.zoom -= delta / 100            
+        canvas.bind('<MouseWheel>', OnScroll)
 
 
 
@@ -426,7 +496,7 @@ def printPythonShape(typescriptShape: str):
             centeringJSON = splitLine[1]
             centering = json.loads(centeringJSON)
             dataCounter += 1
-        elif line.startswith("this.faces="):
+        elif line.startswith("self.faces="):
             splitLine = line.split("=")
             facesJSON = splitLine[1]
             facesJSON = facesJSON.replace('pointIndexes', '"pointIndexes"')

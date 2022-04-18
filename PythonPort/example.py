@@ -1,12 +1,13 @@
 from aryaa3D import *
 
-screen = linkCanvas()
+screen = linkCanvas(1000, 600)
 
 camera = Camera()
 camera.worldRotation.x = -20
 camera.worldRotation.y = 20
 camera.worldRotation.z = 0
 camera.updateRotationMatrix()
+camera.enableMovementControls() #pass in rotation, movement, zoom and limitRotation with arguments, e.g. rotation=False
 
 box = Box(100, 100, 100)
 box.position.x = 300
@@ -32,9 +33,6 @@ def deltaTime(constant: float):
 
 def animationLoop():
     deltaMultiplier = deltaTime(0.016)
-
-    house.rotation.y += 3 * deltaMultiplier
-    house.updateMatrices()
 
     clearCanvas()
     camera.renderGrid()
