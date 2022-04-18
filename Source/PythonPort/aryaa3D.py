@@ -21,11 +21,17 @@ def linkCanvas(canvasWidth, canvasHeight):
 #No gridX and gridY functions since in turtle, the center of the screen is at coordinate (0, 0)
 def plotPoint(p, colour):
     global t
+    if t == None:
+        print("Cannot draw, canvas has not been initialized. Please use the linkCanvas(width, height) function before rendering any shapes")
+        return
     t.penup()
     t.goto(p[0], p[1])
     t.dot(10, colour)
 def drawLine(p1, p2, colour):
     global t
+    if t == None:
+        print("Cannot draw, canvas has not been initialized. Please use the linkCanvas(width, height) function before rendering any shapes")
+        return
     t.penup()
     t.pencolor(colour)
     t.goto(p1[0], p1[1])
@@ -34,6 +40,9 @@ def drawLine(p1, p2, colour):
     t.penup()
 def drawShape(points, colour, outline):
     global t
+    if t == None:
+        print("Cannot draw, canvas has not been initialized. Please use the linkCanvas(width, height) function before rendering any shapes")
+        return
     t.penup()
     t.goto(points[0][0], points[0][1])
     t.fillcolor(colour)
@@ -47,6 +56,9 @@ def drawShape(points, colour, outline):
     t.end_fill();
 def clearCanvas():
     global t
+    if t == None:
+        print("Cannot clear, canvas has not been initialized. Please use the linkCanvas(width, height) function before rendering any shapes")
+        return
     t.clear()
 
 
@@ -394,6 +406,9 @@ class Camera:
         print("Drag mouse around to rotate world\nHold right click and drag to pan\nScroll in/out to zoom in/out")
         global t
         global screen
+        if t == None:
+            print("Cannot enableMovementControls, canvas has not been initialized. Please use the linkCanvas(width, height) function before rendering any shapes")
+            return
         canvas = screen.getcanvas().winfo_toplevel()
         canvasWidth = canvas.winfo_width()
         canvasHeight = canvas.winfo_height()
