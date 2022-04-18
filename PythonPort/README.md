@@ -14,7 +14,7 @@ To initialize a window, use the linkCanvas() function, you need to do this befor
 ```python
 screen = linkCanvas(1280, 720)
 ```
-Here I am setting up a 720p window, *the user will still be able to resize it once it has opened*.
+Here I am setting up a 720p window, *the user will still be able to resize it once it has opened*. You need to store the screen reference since it is required when you want to render objects later on
 
 ## Objects
 ### <u>Initializing Objects:</u>
@@ -28,7 +28,7 @@ Transformations such as position, rotation, and scale
 ```python
 cube.rotation.x = 30
 cube.scale = 2
-cube.position.z = 500
+cube.position = XYZ(0, 0, 200)
 ```
 
 Make sure to call the updateMatrices() function if you change rotation or scale
@@ -97,3 +97,87 @@ shuriken = Shuriken()
 shuriken.scale = 0.5
 shuriken.updateMatrices()
 ```
+
+## Camera
+**The camera is quite similar to the Javascript version**
+
+### <u>Transformations</u>
+Create camera object:
+```python
+camera = Camera()
+```
+
+Then position this in the scene somewhere, remember that this is absolute positioning, and so only includes a X and Y coordinate
+```python
+camera.absPosition.x = 100
+camera.absPosition.y = -100
+```
+
+Change zoom, about the center of the physical window:
+```python
+camera.zoom = 0.5 #everything will appear twice as small
+```
+
+Rotate the entire world with the worldRotationProperty:
+```python
+camera.worldRotation.x = -30;
+camera.worldRotation.y = 30;
+camera.worldRotation.z = 0;
+camera.updateRotationMatrix(); #make sure to call this whenever you update the worldRotation
+```
+
+I have also implemented the **enableMovementControls()**, which allow you to move around the scene using your mouse cursor, you will need to have added an animation loop in order to see the changes
+```python
+camera.enableMovementControls()
+```
+- This function can take in 4 optional boolean arguments:
+    1. Rotation
+    2. Movement
+    3. Zoom
+    4. limitRotation
+Read the main readme to learn what these arguments do, to pass them into the function you need to specify which one you are passing and then give a boolean value for it, e.g.:
+```python
+camera.enableMovementControls(limitRotation=True)
+```
+The controls will be printed when you call the function, unfortunately the keydown and keyup listeners weren't working, so instead of holding Alt like you do in the JS version, you have to hold the right click, and then drag to pan the world
+
+You can render a grid which shows where your object's are positioned:
+```python
+camera.renderGrid();
+```
+
+### <u>Rendering</u>
+To render objects:
+```python
+camera.render([cube]);
+
+camera.render([cube, cube2, cube3]); #If you have multiple objects
+```
+
+Finally once you have called all the render() and renderGrid() function (optional), you need to update the screen:
+```python
+camera.renderGrid()
+camera.render([cube])
+screen.update()
+```
+
+You will also want to clear the canvas whenever you want to render a new frame
+```python
+clearCanvas()
+```
+
+If you want to implement an animation loop, you can do something like this:
+```python
+def animationLoop():
+    clearCanvas()
+    camera.renderGrid()
+    camera.render([cube])
+
+    screen.update()
+    screen.ontimer(animationLoop, 16) #16ms, 60fps
+
+animationLoop()
+screen.mainloop()
+```
+
+**I recommend reading the [Main README](https://github.com/AryaaSk/3D-Engine/blob/master/README.md), for more information as this readme is based on that one but just modified slightly for the python port** 
