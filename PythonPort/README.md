@@ -185,8 +185,9 @@ deltaMultiplier = deltaTime(0.016) #the constant should be the same num of ms as
 ```
 
 Then you just multiply the deltaMultiplier by whatever transformations you want to do inside the animation loop, for example if I wanted to rotate the cube
-```
+```python
 cube.rotation.y += 5 * deltaMultiplier
+cube.updateMatrices()
 ```
 *This stops the user's computer's FPS from affecting the movement distance*
 
