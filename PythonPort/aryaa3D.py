@@ -72,7 +72,6 @@ def clearCanvas():
 
 #MATH UTILITIES
 import math
-import copy
 
 class matrix():
     data = []
@@ -126,9 +125,7 @@ class matrix():
                 a += 1
             i += 1
     def scaledUp(self, factor):
-        newMatrix = matrix()
-        for i in range(0, self.width):
-            newMatrix.addColumn(self.getColumn(i))
+        newMatrix = self.copy()
         newMatrix.scaleUp(factor)
         return newMatrix
 
@@ -142,7 +139,13 @@ class matrix():
             i += 1
 
     def copy(self):
-        return copy.deepcopy(self)
+        newMatrix = matrix() #we need to individually create the columns, without creating any references
+        for i in range(0, self.width):
+            newColumn = []
+            for a in range(0, self.height):
+                newColumn.append(self.data[i][a])
+            newMatrix.addColumn(newColumn)
+        return newMatrix
 
 def multiplyMatrixs(m1, m2):
     resultMatrix = matrix()
