@@ -133,7 +133,6 @@ Here is a preview of the project in this repo [Example.html](https://aryaask.git
 
 Here is a preview of the [Shape Builder](https://aryaask.github.io/3D-Engine/ShapeBuilder/) which you can use to build custom shapes\
 ![Shape Builder Preview](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ShapeBuilderPreview2.png?raw=true)\
-*Read [Shape Builder](Docs/buildingShapes.md). for more information*
+*Read the [Shape Builder Docs](Docs/buildingShapes.md). for more information*
 
-I also created a 3D Chess game using this library: https://aryaask.github.io/3DChess/index.html \
-The github repo is here: https://github.com/AryaaSk/3DChess
+I also created a 3D Chess game using this library: https://github.com/AryaaSk/3DChess
