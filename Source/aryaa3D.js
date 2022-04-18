@@ -89,9 +89,9 @@ const clearCanvas = () => {
 //MATH UTILITIES
 //MATRIX FUNCTIONS
 class matrix {
-    data = []; /* DO NOT SET THIS EXPLICITLY, USE THE FUNCTIONS */
-    width = 0; //num of columns
-    height = 0; //num of rows
+    data = [];
+    width = 0;
+    height = 0;
     addColumn(nums) {
         this.data.push(nums);
         this.height = nums.length;
@@ -125,7 +125,9 @@ class matrix {
         }
         console.log(finalOutput);
     }
-    getColumn(columnIndex) { return this.data[columnIndex]; }
+    getColumn(columnIndex) {
+        return this.data[columnIndex];
+    }
     getRow(rowIndex) {
         let returnArray = [];
         for (let i in this.data) {
@@ -133,14 +135,23 @@ class matrix {
         }
         return returnArray;
     }
-    setValue(columnIndex, rowIndex, value) { this.data[columnIndex][rowIndex] = value; }
-    getValue(columnIndex, rowIndex) { return this.data[columnIndex][rowIndex]; }
-    deleteColumn(columnIndex) { this.data.splice(columnIndex, 1); this.width -= 1; }
-    scaleUp(factor) { for (let i in this.data) {
-        for (let a in this.data[i]) {
-            this.data[i][a] *= factor;
+    setValue(columnIndex, rowIndex, value) {
+        this.data[columnIndex][rowIndex] = value;
+    }
+    getValue(columnIndex, rowIndex) {
+        return this.data[columnIndex][rowIndex];
+    }
+    deleteColumn(columnIndex) {
+        this.data.splice(columnIndex, 1);
+        this.width -= 1;
+    }
+    scaleUp(factor) {
+        for (let i in this.data) {
+            for (let a in this.data[i]) {
+                this.data[i][a] *= factor;
+            }
         }
-    } }
+    }
     scaledUp(factor) {
         const returnMatrix = new matrix(); //create new matrix object, and scale it up
         for (let i = 0; i != this.width; i += 1) {
@@ -148,11 +159,11 @@ class matrix {
             const columnCopy = JSON.parse(JSON.stringify(column));
             returnMatrix.addColumn(columnCopy);
         }
-        for (let i in returnMatrix.data) {
+        for (let i in returnMatrix.data) { //scale up
             for (let a in returnMatrix.data[i]) {
                 returnMatrix.data[i][a] *= factor;
             }
-        } //scale up
+        }
         return returnMatrix;
     }
     translateMatrix(x, y, z) {
@@ -209,9 +220,15 @@ const multiplyMatrixs = (m1, m2) => {
     }
     return resultMatrix;
 };
-const toRadians = (angle) => { return angle * (Math.PI / 180); };
-const sin = (num) => { return Math.sin(toRadians(num)); };
-const cos = (num) => { return Math.cos(toRadians(num)); };
+const toRadians = (angle) => {
+    return angle * (Math.PI / 180);
+};
+const sin = (num) => {
+    return Math.sin(toRadians(num));
+};
+const cos = (num) => {
+    return Math.cos(toRadians(num));
+};
 const distanceBetween = (p1, p2) => {
     //first use pythagoruses thoerm to get the bottom diagonal
     const bottomDiagonal = Math.sqrt((p2[0] - p1[0]) ** 2 + (p2[2] - p1[2]) ** 2);
@@ -237,7 +254,7 @@ const calculateRotationMatrix = (rotationX, rotationY, rotationZ) => {
 //All shapes are subclasses of class Shape, because an object is just a collection of it's points
 //When the camera renders the object is just needs its Physical Matrix (points relative to the origin), so the subclasses are purely for constructing the shape
 class Shape {
-    //Construction    
+    //Construction
     pointMatrix = new matrix(); //pointMatrix is constructed in the subclasses
     //Rotation
     rotationMatrix = new matrix();
@@ -257,7 +274,7 @@ class Shape {
     position = { x: 0, y: 0, z: 0 };
     showOutline = false;
     showPoints = false;
-    faces = []; //stores the indexes of the columns (points) in the physicalMatrix
+    faces = []; //stores the indexes of the points (columns) in the physicalMatrix
     showFaceIndexes = false;
     updateMatrices() {
         this.updateRotationMatrix();
@@ -428,6 +445,9 @@ class Camera {
             let objectFaces = [];
             //populate the array
             for (let i = 0; i != object.faces.length; i += 1) {
+                if (object.faces[i].colour == "") {
+                    continue;
+                } //if face is transparent then just don't render it
                 let points = [];
                 for (let a = 0; a != object.faces[i].pointIndexes.length; a += 1) {
                     points.push(screenPoints.getColumn(object.faces[i].pointIndexes[a]));
@@ -448,9 +468,7 @@ class Camera {
             for (let i = 0; i != sortedFaces.length; i += 1) {
                 const facePoints = sortedFaces[i].points;
                 let colour = sortedFaces[i].colour;
-                if (colour != "") {
-                    drawShape(facePoints, colour, object.showOutline);
-                } //if face is transparent then just don't render it
+                drawShape(facePoints, colour, object.showOutline);
                 if (object.showFaceIndexes == true) {
                     plotPoint(sortedFaces[i].center, "#000000", String(sortedFaces[i].faceIndex));
                 }
@@ -506,8 +524,7 @@ class Camera {
         const zoomTranslationVector = absoluteOriginObjectVector.getColumn(0);
         startPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
         endPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
-        for (let i = 0; i != startPointMatrix.width; i += 1) //draw grid lines in
-         {
+        for (let i = 0; i != startPointMatrix.width; i += 1) { //draw grid lines in
             const point1 = startPointMatrix.getColumn(i);
             const point2 = endPointMatrix.getColumn(i);
             drawLine(point1, point2, "#000000");
@@ -548,12 +565,12 @@ class Camera {
                 }
                 this.worldRotation.x -= differenceY / 5;
                 this.worldRotation.y -= differenceX / 5;
-                if (this.worldRotation.x < -90 && limitRotation == true) {
+                if (this.worldRotation.x < -90 && limitRotation == true) { //to limit rotation, user can only rotate around 90 degrees on x axis
                     this.worldRotation.x = -90;
                 }
                 else if (this.worldRotation.x > 0 && limitRotation == true) {
                     this.worldRotation.x = 0;
-                } //to limit rotation, user can only rotate around 90 degrees on x axis
+                }
                 this.updateRotationMatrix();
             }
             [previousX, previousY] = [$e.clientX, $e.clientY];

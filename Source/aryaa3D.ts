@@ -78,9 +78,9 @@ const clearCanvas = () => {
 //MATH UTILITIES
 //MATRIX FUNCTIONS
 class matrix {
-    private data: number[][] = []; /* DO NOT SET THIS EXPLICITLY, USE THE FUNCTIONS */
-    width: number = 0; //num of columns
-    height: number = 0; //num of rows
+    private data: number[][] = [];
+    width: number = 0;
+    height: number = 0;
 
     addColumn(nums: number[]) {
         this.data.push(nums);
@@ -113,34 +113,49 @@ class matrix {
         console.log(finalOutput);
     }
 
-    getColumn(columnIndex: number) { return this.data[columnIndex]; }
-    getRow(rowIndex: number) //loop through data, and get the element at rowIndex for each one
-    {
+    getColumn(columnIndex: number) { 
+        return this.data[columnIndex]; 
+    }
+    getRow(rowIndex: number) {
         let returnArray: number[] = [];
         for (let i in this.data) { returnArray.push(this.data[i][rowIndex]); }
         return returnArray;
     }
-    setValue(columnIndex: number, rowIndex: number, value: number) { this.data[columnIndex][rowIndex] = value; }
-    getValue(columnIndex: number, rowIndex: number) { return this.data[columnIndex][rowIndex]; }
-    deleteColumn(columnIndex: number) { this.data.splice(columnIndex, 1); this.width -= 1; }
+    setValue(columnIndex: number, rowIndex: number, value: number) { 
+        this.data[columnIndex][rowIndex] = value; 
+    }
+    getValue(columnIndex: number, rowIndex: number) { 
+        return this.data[columnIndex][rowIndex]; 
+    }
+    deleteColumn(columnIndex: number) { 
+        this.data.splice(columnIndex, 1); 
+        this.width -= 1; 
+    }
 
-    scaleUp(factor: number) { for (let i in this.data) { for (let a in this.data[i]) { this.data[i][a] *= factor; } } }
+    scaleUp(factor: number) { 
+        for (let i in this.data) { 
+            for (let a in this.data[i]) { 
+                this.data[i][a] *= factor; 
+            } 
+        } 
+    }
     scaledUp(factor: number) { //returns a scaled up version of the matrix, instead of directly modifying it
         const returnMatrix = new matrix(); //create new matrix object, and scale it up
-        for (let i = 0; i != this.width; i += 1 )
-        { 
+        for (let i = 0; i != this.width; i += 1 ) { 
             const column = this.getColumn(i)
             const columnCopy = JSON.parse(JSON.stringify(column))
             returnMatrix.addColumn(columnCopy); 
         }
-        for (let i in returnMatrix.data) { for (let a in returnMatrix.data[i]) { returnMatrix.data[i][a] *= factor; } }  //scale up
+        for (let i in returnMatrix.data) { //scale up
+            for (let a in returnMatrix.data[i]) { 
+                returnMatrix.data[i][a] *= factor; 
+            } 
+        }  
         return returnMatrix;
     }
 
-    translateMatrix(x: number, y: number, z: number)
-    {
-        for (let i = 0; i != this.width; i += 1 )
-        { 
+    translateMatrix(x: number, y: number, z: number) {
+        for (let i = 0; i != this.width; i += 1 ) { 
             const column = this.getColumn(i)
             this.setValue(i, 0, column[0] + x);
             this.setValue(i, 1, column[1] + y);
@@ -148,11 +163,9 @@ class matrix {
         }
     }
 
-    copy()
-    {
+    copy() {
         const copyMatrix = new matrix();
-        for (let i = 0; i != this.width; i += 1 )
-        { 
+        for (let i = 0; i != this.width; i += 1 ) { 
             const column = this.getColumn(i)
             const columnCopy = JSON.parse(JSON.stringify(column))
             copyMatrix.addColumn(columnCopy); 
@@ -172,7 +185,9 @@ const multiplyMatrixs = (m1: matrix, m2: matrix) => {
 
     for (let _ = 0; _ != rMatrixWidth; _ += 1) {
         const newColumn: number[] = [];
-        for (let __ = 0; __ != rMatrixHeight; __ += 1) { newColumn.push(0); }
+        for (let __ = 0; __ != rMatrixHeight; __ += 1) { 
+            newColumn.push(0); 
+        }
         resultMatrix.addColumn(newColumn);
     }
 
@@ -182,11 +197,14 @@ const multiplyMatrixs = (m1: matrix, m2: matrix) => {
         let rowIndex = 0;
         while (rowIndex != resultMatrix.height) {
             //these 2 should be the same length
-            const currentRow = m1.getRow(rowIndex); const currentColumn = m2.getColumn(columnIndex);
+            const currentRow = m1.getRow(rowIndex); 
+            const currentColumn = m2.getColumn(columnIndex);
 
             let value = 0;
             let i = 0;
-            while (i != currentRow.length) { value += currentRow[i] * currentColumn[i]; i += 1; }
+            while (i != currentRow.length) { 
+                value += currentRow[i] * currentColumn[i]; i += 1; 
+            }
             resultMatrix.setValue(columnIndex, rowIndex, value);
 
             rowIndex += 1;
@@ -197,9 +215,15 @@ const multiplyMatrixs = (m1: matrix, m2: matrix) => {
     return resultMatrix 
 }
 
-const toRadians = (angle: number) => { return angle * (Math.PI / 180); }
-const sin = (num: number) => { return Math.sin(toRadians(num)) }
-const cos = (num: number) => { return Math.cos(toRadians(num)) }
+const toRadians = (angle: number) => { 
+    return angle * (Math.PI / 180); 
+}
+const sin = (num: number) => { 
+    return Math.sin(toRadians(num)) 
+}
+const cos = (num: number) => { 
+    return Math.cos(toRadians(num)) 
+}
 
 const distanceBetween = (p1: number[], p2: number[]) => {
     //first use pythagoruses thoerm to get the bottom diagonal
@@ -238,7 +262,7 @@ const calculateRotationMatrix = (rotationX: number, rotationY: number, rotationZ
 //When the camera renders the object is just needs its Physical Matrix (points relative to the origin), so the subclasses are purely for constructing the shape
 class Shape
 {
-    //Construction    
+    //Construction
     pointMatrix = new matrix(); //pointMatrix is constructed in the subclasses
     
     //Rotation
@@ -258,10 +282,10 @@ class Shape
     }
 
     //Rendering
-    position: {x: number, y: number, z: number} = {x: 0, y: 0, z: 0};
+    position: { x: number, y: number, z: number } = { x: 0, y: 0, z: 0 };
     showOutline: boolean = false;
     showPoints: boolean = false;
-    faces: { pointIndexes: number[], colour: string }[]  = []; //stores the indexes of the columns (points) in the physicalMatrix
+    faces: { pointIndexes: number[], colour: string }[]  = []; //stores the indexes of the points (columns) in the physicalMatrix
     showFaceIndexes: boolean = false;
 
     updateMatrices() {
@@ -437,8 +461,7 @@ class Camera {
     render(objects: Shape[]) {  
 
         const objectData: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
-        for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1)
-        {
+        for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
             //transform the object's physicalMatrix to how the camera would see it:
             const object = objects[objectIndex];
             let cameraObjectMatrix = object.physicalMatrix.copy();
@@ -477,8 +500,7 @@ class Camera {
         const positionPoint = [0, 0, -50000];
         const sortedObjects: { object: Shape, screenPoints: matrix, center: number[] }[] = this.sortFurthestDistanceTo(objectData, "center", positionPoint);
 
-        for (let objectIndex = 0; objectIndex != sortedObjects.length; objectIndex += 1 )
-        {
+        for (let objectIndex = 0; objectIndex != sortedObjects.length; objectIndex += 1 ) {
             const object = sortedObjects[objectIndex].object;
             const screenPoints = sortedObjects[objectIndex].screenPoints;
 
@@ -486,15 +508,19 @@ class Camera {
             let objectFaces: { points: number[][], center: number[], colour: string, faceIndex: number }[] = [];
 
             //populate the array
-            for (let i = 0; i != object.faces.length; i += 1)
-            {
+            for (let i = 0; i != object.faces.length; i += 1) {
+                if (object.faces[i].colour == "") { continue; } //if face is transparent then just don't render it
+
                 let points: number[][] = [];
-                for (let a = 0; a != object.faces[i].pointIndexes.length; a += 1)
-                { points.push(screenPoints.getColumn(object.faces[i].pointIndexes[a])); }
+                for (let a = 0; a != object.faces[i].pointIndexes.length; a += 1) { 
+                    points.push(screenPoints.getColumn(object.faces[i].pointIndexes[a])); 
+                }
 
                 //find center by getting average of all points
                 let [totalX, totalY, totalZ] = [0, 0, 0];
-                for (let a = 0; a != points.length; a += 1) { totalX += points[a][0]; totalY += points[a][1]; totalZ += points[a][2]; }
+                for (let a = 0; a != points.length; a += 1) { 
+                    totalX += points[a][0]; totalY += points[a][1]; totalZ += points[a][2]; 
+                }
                 const [averageX, averageY, averageZ] = [totalX / points.length, totalY / points.length, totalZ / points.length]
                 const center = [averageX, averageY, averageZ];
                 objectFaces.push( { points: points, center: center, colour: object.faces[i].colour, faceIndex: i } );
@@ -503,21 +529,19 @@ class Camera {
             const sortedFaces = this.sortFurthestDistanceTo(objectFaces, "center", positionPoint); //sort based on distance from center to (0, 0, -50000)
 
             //draw the faces as a quadrilateral, later I will change the drawQuadrilateral function to a drawShape function, which can take as many points as it needs
-            for (let i = 0; i != sortedFaces.length; i += 1)
-            {
+            for (let i = 0; i != sortedFaces.length; i += 1) {
                 const facePoints = sortedFaces[i].points;
                 let colour = sortedFaces[i].colour;
-                if (colour != "") { drawShape(facePoints, colour, object.showOutline); } //if face is transparent then just don't render it
+                drawShape(facePoints, colour, object.showOutline);
                 
-                if (object.showFaceIndexes == true)
-                { plotPoint(sortedFaces[i].center, "#000000", String(sortedFaces[i].faceIndex)); }
+                if (object.showFaceIndexes == true) {
+                    plotPoint(sortedFaces[i].center, "#000000", String(sortedFaces[i].faceIndex)); 
+                }
             }
 
             //draw points last so you can see them through the faces
-            if (object.showPoints == true)
-            {
-                for (let i = 0; i != screenPoints.width; i += 1)
-                {
+            if (object.showPoints == true) {
+                for (let i = 0; i != screenPoints.width; i += 1) {
                     const point = screenPoints.getColumn(i);
                     plotPoint(point, "#000000", String(i));
                 }
@@ -526,12 +550,10 @@ class Camera {
 
         return sortedObjects;
     }
-    private sortFurthestDistanceTo(list: any[], positionKey: string, positionPoint: number[])
-    {
+    private sortFurthestDistanceTo(list: any[], positionKey: string, positionPoint: number[]) {
         const sortedList: any[] = [];
         const listCopy = list;
-        while (listCopy.length != 0)
-        {
+        while (listCopy.length != 0) {
             let furthestDistanceIndex = 0;
             for (let i = 0; i != listCopy.length; i += 1) {
                 if (distanceBetween(positionPoint, listCopy[i][positionKey]) > distanceBetween(positionPoint, listCopy[furthestDistanceIndex][positionKey])) { furthestDistanceIndex = i; }
@@ -542,14 +564,12 @@ class Camera {
         return sortedList
     }
 
-    updateRotationMatrix() //rotate entire world
-    {
+    updateRotationMatrix() { //rotate entire world 
         const [rX, rY, rZ] = [(this.worldRotation.x % 360), (this.worldRotation.y % 360), (this.worldRotation.z % 360)]
         this.worldRotationMatrix = calculateRotationMatrix(rX, rY, rZ);
     }
 
-    renderGrid()
-    {
+    renderGrid() {
         const gridLength = 1000 * this.zoom;
 
         //create 2 points for each axis, then transform them using the worldRotationMatrix, then just plot them
@@ -578,16 +598,14 @@ class Camera {
         startPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
         endPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
 
-        for (let i = 0; i != startPointMatrix.width; i += 1) //draw grid lines in
-        {
+        for (let i = 0; i != startPointMatrix.width; i += 1) { //draw grid lines in
             const point1 = startPointMatrix.getColumn(i);
             const point2 = endPointMatrix.getColumn(i);
             drawLine(point1, point2, "#000000");
         }
     }
 
-    enableMovementControls(canvasID: string, rotation?: boolean, movement?: boolean, zoom?: boolean, limitRotation?: boolean)
-    {
+    enableMovementControls(canvasID: string, rotation?: boolean, movement?: boolean, zoom?: boolean, limitRotation?: boolean) {
         if (rotation == undefined) { rotation = true; }
         if (movement == undefined) { movement = true; }
         if (zoom == undefined) { zoom = true; }
@@ -612,7 +630,14 @@ class Camera {
                 if (absX > 90 && absX < 270)  { differenceX *= -1; }
                 this.worldRotation.x -= differenceY / 5;
                 this.worldRotation.y -= differenceX / 5;
-                if (this.worldRotation.x < -90 && limitRotation == true) { this.worldRotation.x = -90; } else if (this.worldRotation.x > 0 && limitRotation == true) { this.worldRotation.x = 0; } //to limit rotation, user can only rotate around 90 degrees on x axis
+
+                if (this.worldRotation.x < -90 && limitRotation == true) { //to limit rotation, user can only rotate around 90 degrees on x axis
+                    this.worldRotation.x = -90; 
+                } 
+                else if (this.worldRotation.x > 0 && limitRotation == true) { 
+                    this.worldRotation.x = 0; 
+                }
+                
                 this.updateRotationMatrix()
             }
             [previousX, previousY] = [$e.clientX, $e.clientY];
