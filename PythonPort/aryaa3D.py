@@ -391,6 +391,7 @@ class Camera:
         drawLine(startPointMatrix.getColumn(2), endPointMatrix.getColumn(2), "#000000") #z axis
 
     def enableMovementControls(self, **kwargs):
+        print("Drag mouse around to rotate world\nHold right click and drag to pan\nScroll in/out to zoom in/out")
         global t
         global screen
         canvas = screen.getcanvas().winfo_toplevel()
@@ -471,8 +472,8 @@ class Camera:
 #PYTHON SPECIFIC FUNCTIONS
 import json
 
-#This function takes in the TS shape, e.g. from Shape Builder, and prints out the new Python class which you can just copy and paste
-def printPythonShape(typescriptShape: str):
+#This function takes in the TS shape, e.g. from Shape Builder, and returns the new Python class which you can wrap an exec statement around
+def convertShapeToPython(typescriptShape: str):
     name = ""
     points = []
     centering = []
@@ -497,7 +498,7 @@ def printPythonShape(typescriptShape: str):
             centeringJSON = splitLine[1]
             centering = json.loads(centeringJSON)
             dataCounter += 1
-        elif line.startswith("self.faces="):
+        elif line.startswith("this.faces="):
             splitLine = line.split("=")
             facesJSON = splitLine[1]
             facesJSON = facesJSON.replace('pointIndexes', '"pointIndexes"')
@@ -530,24 +531,17 @@ class {name}(Shape):
             self.faces.append(Face(faceObject["pointIndexes"], faceObject["colour"]))
 ''')
 
-    print(classString)
     return classString
 
-class House(Shape):
-    def __init__(self):
-        super(House, self).__init__()
 
-        points = [[0, 0, 0], [200, 0, 0], [200, 0, 100], [0, 0, 100], [0, 100, 0], [200, 100, 0], [200, 100, 100], [0, 100, 100], [40, 140, 50], [160, 140, 50], [85, 0, 0], [115, 0, 0], [85, 50, 0], [115, 50, 0], [85, 0, -10], [115, 0, -10], [85, 50, -10], [115, 50, -10], [30, 80, 0], [50, 80, 0], [30, 60, 0], [50, 60, 0], [30, 80, -10], [50, 80, -10], [30, 60, -10], [50, 60, -10], [150, 80, 0], [170, 80, 0], [150, 60, 0], [170, 60, 0], [150, 80, -10], [170, 80, -10], [150, 60, -10], [170, 60, -10]]
-        for point in points:
-            self.pointMatrix.addColumn(point)
+#Delta Time
+import time
 
-        centeringX, centeringY, centeringZ = -100, -70, -50
-        self.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ)
-
-        self.setFaces()
-        self.updateMatrices()
-
-    def setFaces(self):
-        faceDict = [{"pointIndexes": [5, 6, 2, 1], "colour": "#c2600f"}, {"pointIndexes": [6, 2, 3, 7], "colour": "#c2600f"}, {"pointIndexes": [7, 4, 0, 3], "colour": "#c2600f"}, {"pointIndexes": [5, 9, 6], "colour": "#0593ff"}, {"pointIndexes": [4, 8, 9, 5], "colour": "#0593ff"}, {"pointIndexes": [6, 9, 8, 7], "colour": "#0593ff"}, {"pointIndexes": [7, 8, 4], "colour": "#0593ff"}, {"pointIndexes": [12, 16, 14, 10], "colour": "#ffce47"}, {"pointIndexes": [12, 16, 17, 13], "colour": "#ffce47"}, {"pointIndexes": [17, 13, 11, 15], "colour": "#ffce47"}, {"pointIndexes": [16, 17, 15, 14], "colour": "#ffce47"}, {"pointIndexes": [18, 19, 23, 22], "colour": "#0b07f2"}, {"pointIndexes": [18, 22, 24, 20], "colour": "#0b07f2"}, {"pointIndexes": [24, 25, 21, 20], "colour": "#0b07f2"}, {"pointIndexes": [23, 19, 21, 25], "colour": "#0b07f2"}, {"pointIndexes": [22, 23, 25, 24], "colour": "#0b07f2"}, {"pointIndexes": [26, 27, 31, 30], "colour": "#0b07f2"}, {"pointIndexes": [31, 27, 29, 33], "colour": "#0b07f2"}, {"pointIndexes": [26, 30, 32, 28], "colour": "#0b07f2"}, {"pointIndexes": [32, 33, 29, 28], "colour": "#0b07f2"}, {"pointIndexes": [30, 31, 33, 32], "colour": "#0b07f2"}, {"pointIndexes": [4, 18, 20, 0], "colour": "#c2600f"}, {"pointIndexes": [0, 20, 21, 10], "colour": "#c2600f"}, {"pointIndexes": [21, 10, 12], "colour": "#c2600f"}, {"pointIndexes": [13, 11, 28], "colour": "#c2600f"}, {"pointIndexes": [11, 28, 29, 1], "colour": "#c2600f"}, {"pointIndexes": [1, 29, 27, 5], "colour": "#c2600f"}, {"pointIndexes": [19, 26, 28, 13, 12, 21], "colour": "#c2600f"}, {"pointIndexes": [5, 27, 26, 19, 18, 4], "colour": "#c2600f"}]
-        for faceObject in faceDict:
-            self.faces.append(Face(faceObject["pointIndexes"], faceObject["colour"]))
+previousTime = time.time()
+def deltaTime(constant: float):
+    global previousTime
+    currentTime = time.time()
+    deltaTime = currentTime - previousTime
+    previousTime = currentTime
+    deltaMultiplier = deltaTime / constant
+    return deltaMultiplier
