@@ -17,7 +17,7 @@ screen = linkCanvas(1280, 720)
 Here I am setting up a 720p window, *the user will still be able to resize it once it has opened*. You need to store the screen reference since it is required when you want to render objects later on
 
 ## Objects
-### <u>Initializing Objects:</u>
+### <ins>Initializing Objects:</ins>
 **To create and transform objects, it is very similar to how it is in javascript**
 Create a cube object:
 ```python
@@ -28,7 +28,7 @@ Transformations such as position, rotation, and scale
 ```python
 cube.rotation.x = 30
 cube.scale = 2
-cube.position = XYZ(0, 0, 200)
+cube.position.z = 200
 ```
 
 Make sure to call the updateMatrices() function if you change rotation or scale
@@ -49,7 +49,7 @@ Can also show the object's outline:
 cube.showOutline = True
 ```
 
-### <u>Importing Objects from Shape Builder/Code</u>
+### <ins>Importing Objects from Shape Builder/Code</ins>
 Unlike in javascript where you can just copy and paste the code from the Shape Builder, in python you will need to convert the JS code into python code.
 
 Luckily I have created a function which does that for you, and you just need to execute the output
@@ -99,9 +99,7 @@ shuriken.updateMatrices()
 ```
 
 ## Camera
-**The camera is quite similar to the Javascript version**
-
-### <u>Transformations</u>
+### <ins>Transformations</ins>
 Create camera object:
 ```python
 camera = Camera()
@@ -135,18 +133,19 @@ camera.enableMovementControls()
     2. Movement
     3. Zoom
     4. limitRotation
+    
 Read the main readme to learn what these arguments do, to pass them into the function you need to specify which one you are passing and then give a boolean value for it, e.g.:
 ```python
 camera.enableMovementControls(limitRotation=True)
 ```
 The controls will be printed when you call the function, unfortunately the keydown and keyup listeners weren't working, so instead of holding Alt like you do in the JS version, you have to hold the right click, and then drag to pan the world
 
+### <ins>Rendering</ins>
 You can render a grid which shows where your object's are positioned:
 ```python
 camera.renderGrid();
 ```
 
-### <u>Rendering</u>
 To render objects:
 ```python
 camera.render([cube]);
@@ -171,7 +170,7 @@ If you want to implement an animation loop, you can do something like this:
 def animationLoop():
     clearCanvas()
     camera.renderGrid()
-    camera.render([cube])
+    camera.render([cube]) #...objects
 
     screen.update()
     screen.ontimer(animationLoop, 16) #16ms, 60fps
