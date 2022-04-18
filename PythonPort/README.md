@@ -180,3 +180,7 @@ screen.mainloop()
 ```
 
 **I recommend reading the [Main README](https://github.com/AryaaSk/3D-Engine/blob/master/README.md), for more information as this readme is based on that one but just modified slightly for the python port** 
+
+## Usage
+![Python Preview](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/PythonPreview.png?raw=true)\
+Look at [example.py](example.py) for an example, you will also need to download the aryaa3D.py since the example will not function properly without it.
