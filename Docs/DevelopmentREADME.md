@@ -8,11 +8,11 @@
 
 ## Setting up local environment:
 - When developing locally you will want to use the local JS files which get compiled by the Typescript compiler, for example if I was working on the source I would use this tag:
-```
+```javascript
 <script src="/Source/aryaa3D.js"></script>
 ```
 - When you have finished developing locally, just switch the script tag to use the Github Pages link, for the source it would be this:
-```
+```javascript
 <script src="https://aryaask.github.io/3D-Engine/Source/aryaa3D.js"></script>
 ```
 - It is the same process for Shape Builder, but the tags just point to different files, use the local JS files when developing, and switch to the Github tag once you have finished

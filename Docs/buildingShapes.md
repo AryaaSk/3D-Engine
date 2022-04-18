@@ -11,7 +11,7 @@
 - It is strongly recommended to create the points first, then the faces, and then center the shape in that order, this is because the faces are dependant on the points, and the centering is easier when you can see the entire shape. You can always modify the points even after you have connected a face to them, but if you delete points which construct a face then there may be some issues.
 
 5. Finally you can just copy and paste this code into your script, and then after that you can use the shape like any other shape.
-```
+```javascript
 const pentagon = new PentagonalPrism();
 pentagon.position.x = 300;
 pentagon.position.y = 300;
