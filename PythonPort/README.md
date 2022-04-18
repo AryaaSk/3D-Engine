@@ -5,56 +5,49 @@
 To import the python library, download the [aryaa3D.py](aryaa3D.py) file, and store it in the same directory as your project.
 
 Then you can just import it into your script using the import statement:
-```
+```python
 from aryaa3D import *
 ```
-{:.language-python}
 
 ### Setup
 To initialize a window, use the linkCanvas() function, you need to do this before doing anything else. It takes in 2 arguments: **width** and **height**
-```
+```python
 screen = linkCanvas(1280, 720)
 ```
-{:.language-python}
 Here I am setting up a 720p window, *the user will still be able to resize it once it has opened*.
 
 ## Objects
 ### <u>Initializing Objects:</u>
 **To create and transform objects, it is very similar to how it is in javascript**
 Create a cube object:
-```
+```python
 cube = Box(100, 100, 100)
 ```
-{:.language-python}
 
 Transformations such as position, rotation, and scale
-```
+```python
 cube.rotation.x = 30
 cube.scale = 2
 cube.position.z = 500
 ```
-{:.language-python}
 
 Make sure to call the updateMatrices() function if you change rotation or scale
-```
+```python
 cube.updateMatrices()
 ```
-{:.language-python}
 
 **You can also change the appearance of the object inside the code itself**\
 Change the colour of the object's faces:
-```
+```python
 cube.faces[0].colour = "#ff0000" #Red
 cube.faces[2].colour = "" #Transparent
 ```
-{:.language-python}
 *Setting the colour to "", will make the face transparent*
 
 Can also show the object's outline:
-```
+```python
 cube.showOutline = True
 ```
-{:.language-python}
 
 ### <u>Importing Objects from Shape Builder/Code</u>
 Unlike in javascript where you can just copy and paste the code from the Shape Builder, in python you will need to convert the JS code into python code.
@@ -63,7 +56,7 @@ Luckily I have created a function which does that for you, and you just need to 
 
 To get the python output code, use the convertShapeToPython() function
 *In this example I am importing the Shuriken shape from [customShapes.js](ShapeBuilder/customShapes.js)*
-```
+```python
 ShurikenClassString = convertShapeToPython("""
 class Shuriken extends Shape {
     constructor () {
@@ -86,25 +79,21 @@ class Shuriken extends Shape {
 }
 """)
 ```
-{:.language-python}
 
 Once you have the output, you can either print it, and then copy and paste it into your own code:
-```
+```python
 print(ShurikenClassString)
 #... copy and paste the output here
 ```
-{:.language-python}
 
 Or you can execute it using the exec() function:
-```
+```python
 exec(ShurikenClassString)
 ```
-{:.language-python}
 
 Once you have done either of those, you can access the shape just like a regular object
-```
+```python
 shuriken = Shuriken()
 shuriken.scale = 0.5
 shuriken.updateMatrices()
 ```
-{:.language-python}
