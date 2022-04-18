@@ -1,5 +1,5 @@
 #Porting the aryaa3D.ts, into Python Turtle
-#Date: 13/04/22, self may get outdated since it is a lot of work to port the entire library from Typescript to Python
+#Date: 18/04/22, self may get outdated since it is a lot of work to port the entire library from Typescript to Python
 #There will not be many comments since the functions basically perform the same thing as in the TS/JS files
 
 #TURTLE UTILITIES
@@ -47,13 +47,17 @@ def drawShape(points, colour, outline):
     t.goto(points[0][0], points[0][1])
     t.fillcolor(colour)
     t.pencolor('black')
-    if (outline == True):
+    if outline == True:
         t.pendown()
     t.begin_fill()
     for p in points:
         t.goto(p[0], p[1])
     t.penup()
     t.end_fill();
+    if outline == True:
+        t.pendown()
+        t.goto(points[0][0], points[0][1])
+        t.penup()
 def clearCanvas():
     global t
     if t == None:
