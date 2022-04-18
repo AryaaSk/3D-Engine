@@ -179,6 +179,17 @@ animationLoop()
 screen.mainloop()
 ```
 
+Finally since python can be slow sometimes, I implemented a deltaTime() function, which is not even in the JS version
+```python
+deltaMultiplier = deltaTime(0.016) #the constant should be the same num of ms as the animation loop
+```
+
+Then you just multiply the deltaMultiplier by whatever transformations you want to do inside the animation loop, for example if I wanted to rotate the cube
+```
+cube.rotation.y += 5 * deltaMultiplier
+```
+*This stops the user's computer's FPS from affecting the movement distance*
+
 **I recommend reading the [Main README](https://github.com/AryaaSk/3D-Engine/blob/master/README.md), for more information as this readme is based on that one but just modified slightly for the python port** 
 
 ## Usage
