@@ -1,7 +1,7 @@
 # Aryaa 3D: A 3D Library which uses Parallel Projection, and comes with it's own Object Builder/Editor
 
 **I just made this to learn more about 3D rendering/modelling, and Matrix transformations**\
-If you want to know how it works go here [Rendering Pipeline](Research/Pipeline.md)
+If you want to know how it works go here [Rendering Pipeline](Docs/Pipeline.md)
 
 ## Importing
 ### CDN
@@ -29,7 +29,7 @@ linkCanvas("renderingWindow");
 
 ## Creating an Object
 I have not made a lot of inbuilt objects, however it is very easy to add/create more, to add more you can look at the [customShapes.js](ShapeBuilder/customShapes.js) file, which contains some classes of extra objects, to use them just copy and paste them into your code, and then use it like any other shape.\
-If you want to create your own custom shapes/objects read about the Shape Builder in the [Development Readme](DevelopmentREADME.md).
+If you want to create your own custom shapes/objects read about the Shape Builder in the [Shape Builder](Docs/buildingShapes.md).
 
 **In this example I will create a box, the only thing you may have to change for other objects is the dimensions you pass in when creating them**
 
@@ -133,7 +133,7 @@ Here is a preview of the project in this repo [Example.html](https://aryaask.git
 
 Here is a preview of the [Shape Builder](https://aryaask.github.io/3D-Engine/ShapeBuilder/) which you can use to build custom shapes\
 ![Shape Builder Preview](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ShapeBuilderPreview2.png?raw=true)\
-*Read the [Development Readme](DevelopmentREADME.md) for more information*
+*Read [Shape Builder](Docs/buildingShapes.md). for more information*
 
 I also created a 3D Chess game using this library: https://aryaask.github.io/3DChess/index.html \
 The github repo is here: https://github.com/AryaaSk/3DChess

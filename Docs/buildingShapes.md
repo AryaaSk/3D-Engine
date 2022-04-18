@@ -1,5 +1,5 @@
-## How to create new object:
-### Using the Shape Builder (**recommended**):
+# How to use Shape Builder
+## How to create a new object:
 1. Go to [Shape Builder](https://aryaask.github.io/3D-Engine/ShapeBuilder/), this is the Shape Builder/Editor
 2. Then add the points to construct your shape, don't worry about centering them around the origin, you can do that later with the centering inputs, the number on the point is the point's index, which will be important later when defining the faces/ Here you can see me making a Pentagonal Prism, what it looks like after I added the points:\
 ![Shape Builder Preview 1](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ShapeBuilderPreview1.png?raw=true)
@@ -17,15 +17,6 @@ pentagon.position.x = 300;
 pentagon.position.y = 300;
 camera.render([pentagon]);
 ```
-**If you want to know some good techniques and tips to create shapes, go to the [Building Shapes README](ShapeBuilder/buildingShapes.md)**
-
-### Manually setting points and faces through code (**not recommended**):
-1. Create a subclass of Shape and call it the shape you are trying to create
-2. In the construcutor take in arguments which construct the shape, such as width and height
-3. Create centering vectors, for example in a cube, the centeringX is -(width / 2)
-4. Clear the pointMatrix, and populate it with points around the origin, and then translate that matrix by the centering vectors. After this the pointMatrix should be populated with points around the origin.
-5. Create a setFaces() method, and call it + updateMatrices(); after you have setup the pointMatrix. Inside of this you just need to set the faces to the indexes of the vertexs which they are made of. For example in a cube, you may have a face object like { pointIndexes: [0, 1, 2, 3], colour: "#ff0000" }, the point 0, 1, 2, 3 refer to the vertexs of the cube. Refer to *Research/BoxLayout.png* for more info.\
-*You can look at the currently existing shapes in Source/Scene/Objects.ts for reference, it will make more sense when you see it yourself*
 
 ## How to import shapes into Shape Builder:
 1. Click on the Import Shape button next to the title in the Shape Builder
@@ -35,13 +26,25 @@ camera.render([pentagon]);
 - If you are are unsure of what arrays/data it is talking about, you can refer to this:\
 ![Shape Builder Code](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ImportCodeExplanation.png?raw=true)
 
-## Setting up local environment:
-- When developing locally you will want to use the local JS files which get compiled by the Typescript compiler, for example if I was working on the source I would use this tag:
-```
-<script src="/Source/aryaa3D.js"></script>
-```
-- When you have finished developing locally, just switch the script tag to use the Github Pages link, for the source it would be this:
-```
-<script src="https://aryaask.github.io/3D-Engine/Source/aryaa3D.js"></script>
-```
-- It is the same process for Shape Builder, but the tags just point to different files, use the local JS files when developing, and switch to the Github tag once you have finished
+## Good Shape Builder Techniques:
+### Points:
+1. You should create the points first, since they are the building blocks of all the components. 
+2. You can use the Point Commands to speed up the workflow:
+    - The Translate option will allow you to translate a group of points by a vector, this is very useful if you have some points and you want to create a shape such as a prism
+    - The Duplicate option will just duplicate a group of points, by using this and the translation, it is very quick to create a prism, just create 1 face, duplicate the points, and translate the new points by the depth of your prism.
+    - The Scale Points option takes in a scale factor vector, as well as a group of points. It will apply a scale factor in the corresponding axis to each point. For example if you input a scale factor vector of [2, 1, 2], on point (10, 0, 5), the new point will be (20, 0, 10). **Be careful of giving 0 as a scale factor, as this will just set the corresponding axis to 0**, the Shape Builder will give you a warning if you try and add 0, since you probably meant to do 1.
+
+### Faces:
+- It is important to configure the faces correctly, otherwise your shape may look weird from different angles.
+1. When you are editing the faces, **instead of manually typing out every point index, you can just click on the text input, and then start clicking on the actual points**, it will add them into the textfield for you. This speeds up the process a lot.
+2. Just like with the points, there are also face commands:
+    - The Colour Change takes in the face indexes (the number next to the face), and changes their colours based on a hex code that you give it.
+3. If you have a plane, and then you have positioned more components on top of it, it may cause some issues with the renderer, where the plane is rendered above the components, since it is so large that the center is actually closer to the position point (0, 0, -50000). To minimize this issue you need to try and keep each face as small as possible:
+    - Here is an example, I am building a house object, and the front face is covering parts of the door and windows
+    ![House Disjointed Faces](https://github.com/AryaaSk/3D-Engine/blob/master/Research/HouseJoinedFace.png?raw=true)
+
+    - Instead of creating a single face for the front wall, I have split it up between the door and the window components, this drastically helps reduce the issue of faces being wrongly placed on top of each other. This is what it looks like after I split up the faces:\
+    ![House Disjointed Faces](https://github.com/AryaaSk/3D-Engine/blob/master/Research/HouseDisjointedFaces.png?raw=true)
+
+### Centering:
+- To center the object, an easy way is to find the *upper and lower bound* of each axis, then just center it by halfing the range between them.
