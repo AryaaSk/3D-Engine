@@ -5,23 +5,28 @@
 #TURTLE UTILITIES
 import turtle
 
-#No linkCanvas() function, since we can just initialize the screen ourselves
-canvasWidth = 1000
-canvasHeight = 600
-screen = turtle.Screen()
-screen.setup(canvasWidth, canvasHeight)
-screen.tracer(False) #to enable us to get smooth 60fps animation   
-t = turtle.Turtle()
-t.hideturtle();
-t.penup();
+t: turtle.Turtle = None
+screen: turtle.Screen = None
+def linkCanvas():
+    global t
+    global screen
+    canvasWidth = 1000
+    canvasHeight = 600
+    screen = turtle.Screen()
+    screen.setup(canvasWidth, canvasHeight)
+    screen.tracer(False) #to enable us to get smooth 60fps animation   
+    t = turtle.Turtle()
+    t.hideturtle();
+    t.penup();
     
 #No gridX and gridY functions since in turtle, the center of the screen is at coordinate (0, 0)
-def plotPoint(p, colour, label):
+def plotPoint(p, colour):
+    global t
     t.penup()
     t.goto(p[0], p[1])
     t.dot(10, colour)
-    print("Will add label later")
 def drawLine(p1, p2, colour):
+    global t
     t.penup()
     t.pencolor(colour)
     t.goto(p1[0], p1[1])
@@ -29,6 +34,7 @@ def drawLine(p1, p2, colour):
     t.goto(p2[0], p2[1])
     t.penup()
 def drawShape(points, colour, outline):
+    global t
     t.penup()
     t.goto(points[0][0], points[0][1])
     t.fillcolor(colour)
@@ -41,6 +47,7 @@ def drawShape(points, colour, outline):
     t.penup()
     t.end_fill();
 def clearCanvas():
+    global t
     t.clear()
 
 
@@ -135,7 +142,7 @@ def multiplyMatrixs(m1, m2):
             currentColumn = m2.getColumn(columnIndex)
 
             value = 0
-            for i in range(0, len(currentRow)):
+            for i, _ in enumerate(currentRow):
                 value += currentRow[i] * currentColumn[i]
                 i += 1
             resultMatrix.setValue(columnIndex, rowIndex, value)
@@ -170,35 +177,49 @@ def calculateRotationMatrix(rotationX, rotationY, rotationZ):
     return rotationMatrix
 
 #OBJECTS
+class XYZ:
+    x: int
+    y: int
+    z: int
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+class Face:
+    pointIndexes: list[int]
+    colour: str
+    def __init__(self, pointIndexes, colour):
+        self.pointIndexes = pointIndexes
+        self.colour = colour
+
 class Shape:
     pointMatrix = matrix()
 
     rotationMatrix = matrix()
-    rotation = { "x": 0, "y": 0, "z": 0 }
+    rotation = XYZ(0, 0, 0)
 
     physicalMatrix = matrix()
     scale = 1
 
-    position = { "x": 0, "y": 0, "z": 0 }
+    position = XYZ(0, 0, 0)
     showOutline = False
     showPoints = False
-    faces = []
-    showFaceIndexes = False
+    faces: list[Face] = []
+    #No faceIndexes since turtle doesn't implement it without tracer, so it causes flickering
 
     def __init__(self):
         self.pointMatrix = matrix()
         self.rotationMatrix = matrix()
-        self.rotation = { "x": 0, "y": 0, "z": 0 }
+        self.rotation = XYZ(0, 0, 0)
         self.physicalMatrix = matrix()
         self.scale = 1
-        self.position = { "x": 0, "y": 0, "z": 0 }
+        self.position = XYZ(0, 0, 0)
         self.showOutline = False
         self.showPoints = False
         self.faces = []
-        self.showFaceIndexes = False
 
     def updateRotationMatrix(self):
-        rX, rY, rZ = self.rotation["x"] % 360, self.rotation["y"] % 360, self.rotation["z"] % 360
+        rX, rY, rZ = self.rotation.x % 360, self.rotation.y % 360, self.rotation.z % 360
         self.rotationMatrix = calculateRotationMatrix(rX, rY, rZ)
     def updatePhysicalMatrix(self):
         self.physicalMatrix = multiplyMatrixs(self.rotationMatrix, self.pointMatrix);
@@ -210,6 +231,8 @@ class Shape:
 
 class Box(Shape):    
     def __init__(self, width, height, depth):
+        super(Box, self).__init__()
+
         self.pointMatrix = matrix()
         self.pointMatrix.addColumn([0, 0, 0]);
         self.pointMatrix.addColumn([width, 0, 0]);
@@ -228,32 +251,29 @@ class Box(Shape):
 
     def setFaces(self):
         self.faces = [
-            { "pointIndexes": [0, 1, 2, 3], "colour": "#ff0000" },
-            { "pointIndexes": [1, 2, 6, 5], "colour": "#00ff00" },
-            { "pointIndexes": [2, 3, 7, 6], "colour": "#0000ff" },
-            
-            { "pointIndexes": [0, 1, 5, 4], "colour": "#ffff00" },
-            { "pointIndexes": [0, 3, 7, 4], "colour": "#00ffff" },
-            { "pointIndexes": [4, 5, 6, 7], "colour": "#ff00ff" },
+            Face([0, 1, 2, 3], "#ff0000"),
+            Face([1, 2, 6, 5], "#00ff00"),
+            Face([2, 3, 7, 6], "#0000ff"),
+            Face([0, 1, 5, 4], "#ffff00"),
+            Face([0, 3, 7, 4], "#00ffff"),
+            Face([4, 5, 6, 7], "#ff00ff"),
         ]
-
-#todo: add more shapes
 
 
 
 #CAMERA
 
 class Camera:
-    absPosition = { "x" : 0, "y" : 0 }
+    absPosition = XYZ(0, 0, None) #z is irrelevant but I don't want to create a new XY class
     zoom = 1
 
-    worldRotation = { "x" : 0 , "y" : 0, "z" : 0 }
+    worldRotation = XYZ(0, 0, 0)
     worldRotationMatrix = matrix()
 
     def __init__(self):
-        self.absPosition = { "x" : 0, "y" : 0 }
+        self.absPosition =XYZ(0, 0, None)
         self.zoom = 1
-        self.worldRotation = { "x" : 0 , "y" : 0, "z" : 0 }
+        self.worldRotation = XYZ(0, 0, 0)
         self.worldRotationMatrix = matrix()
         self.updateRotationMatrix()
 
@@ -262,15 +282,15 @@ class Camera:
         listCopy = list
         while (len(listCopy) != 0):
             furthestDistanceIndex = 0
-            for i in range(0, len(listCopy)):
-                if (distanceBetween(positionPoint, listCopy[i][positionKey]) > distanceBetween(positionPoint, listCopy[furthestDistanceIndex][positionKey])):
+            for i, item in enumerate(listCopy):
+                if (distanceBetween(positionPoint, item[positionKey]) > distanceBetween(positionPoint, listCopy[furthestDistanceIndex][positionKey])):
                     furthestDistanceIndex = i
             sortedList.append(listCopy[furthestDistanceIndex])
             del listCopy[furthestDistanceIndex]
         return sortedList
 
     def updateRotationMatrix(self):
-        rX, rY, rZ = self.worldRotation["x"] % 360, self.worldRotation["y"] % 360, self.worldRotation["z"] % 360
+        rX, rY, rZ = self.worldRotation.x % 360, self.worldRotation.y % 360, self.worldRotation.z % 360
         self.worldRotationMatrix = calculateRotationMatrix(rX, rY, rZ);
 
     def render(self, objects: list[Shape]):
@@ -281,14 +301,14 @@ class Camera:
             cameraObjectMatrix.scaleUp(self.zoom)
             cameraObjectMatrix = multiplyMatrixs(self.worldRotationMatrix, cameraObjectMatrix)
 
-            gridOrigin = { "x" : -(self.absPosition["x"]), "y" : -(self.absPosition["y"]), "z" : 0 }
+            gridOrigin = XYZ(-(self.absPosition.x), -(self.absPosition.y), 0)
             originObjectVector = matrix()
-            originObjectVector.addColumn([object.position["x"], object.position["y"], object.position["z"]])
+            originObjectVector.addColumn([object.position.x, object.position.y, object.position.z])
             originObjectVector = multiplyMatrixs(self.worldRotationMatrix, originObjectVector)
             originObjectTranslation = originObjectVector.getColumn(0)
 
             screenOriginObjectVector = matrix()
-            screenOriginObjectVector.addColumn([(gridOrigin["x"] + originObjectTranslation[0]), (gridOrigin["y"] + originObjectTranslation[1]), (gridOrigin["z"] + originObjectTranslation[2])])
+            screenOriginObjectVector.addColumn([(gridOrigin.x + originObjectTranslation[0]), (gridOrigin.y + originObjectTranslation[1]), (gridOrigin.z + originObjectTranslation[2])])
             screenOriginObjectVector.scaleUp(self.zoom)
 
             ultimateTranslation  = screenOriginObjectVector.getColumn(0)
@@ -306,33 +326,31 @@ class Camera:
         positionPoint = [0, 0, -50000]
         sortedObjects = self.sortFurthestDistanceTo(objectData, "center", positionPoint)
 
-        for objectIndex in range(0, len(sortedObjects)):
-            object: Shape = sortedObjects[objectIndex]["object"]
-            screenPoints: matrix = sortedObjects[objectIndex]["screenPoints"]
+        for sortedObject in sortedObjects:
+            object: Shape = sortedObject["object"]
+            screenPoints: matrix = sortedObject["screenPoints"]
 
             objectFaces = []
-            for i in range(0, len(object.faces)):
+            for i, (face) in enumerate(object.faces):
+                if face.colour == "": #avoid doing unnessecary calculations
+                    continue
                 points = []
-                for a in range(0, len(object.faces[i]["pointIndexes"])):
-                    points.append(screenPoints.getColumn(object.faces[i]["pointIndexes"][a]))
+                for a in range(0, len(face.pointIndexes)):
+                    points.append(screenPoints.getColumn(face.pointIndexes[a]))
                 
                 totalX, totalY, totalZ = 0, 0, 0
-                for a in range(0, len(points)):
-                    totalX += points[a][0]; totalY += points[a][1]; totalZ += points[a][2];
+                for point in points:
+                    totalX += point[0]; totalY += point[1]; totalZ += point[2];
                 averageX, averageY, averageZ = totalX / len(points), totalY / len(points), totalZ / len(points)
                 center = [averageX, averageY, averageZ]
-                objectFaces.append( { "points" : points, "center" : center, "colour" : object.faces[i]["colour"], "faceIndex" : i } )
+                objectFaces.append( { "points" : points, "center" : center, "colour" : face.colour, "faceIndex" : i } )
             
             sortedFaces = self.sortFurthestDistanceTo(objectFaces, "center", positionPoint)
 
-            for i in range(0, len(sortedFaces)):
-                facePoints = sortedFaces[i]["points"]
-                colour = sortedFaces[i]["colour"]
-                if colour != "":
-                    drawShape(facePoints, colour, object.showOutline)
-
-                if object.showFaceIndexes == True:
-                    plotPoint(sortedFaces[i]["center"], "#000000", str(sortedFaces[i]["faceIndex"]))
+            for sortedFace in sortedFaces:
+                facePoints = sortedFace["points"]
+                colour = sortedFace["colour"]
+                drawShape(facePoints, colour, object.showOutline)
 
             if object.showPoints == True:
                 for i in range(0, screenPoints.width):
@@ -356,9 +374,9 @@ class Camera:
         startPointMatrix = multiplyMatrixs(self.worldRotationMatrix, startPointMatrix);
         endPointMatrix = multiplyMatrixs(self.worldRotationMatrix, endPointMatrix);
 
-        gridOrigin = { "x": -(self.absPosition["x"]), "y": -(self.absPosition["y"]), "z": 0 };
+        gridOrigin = XYZ(-(self.absPosition.x), -(self.absPosition.y), 0)
         absoluteOriginObjectVector = matrix();
-        absoluteOriginObjectVector.addColumn([gridOrigin["x"], gridOrigin["y"], gridOrigin["z"]]);
+        absoluteOriginObjectVector.addColumn([gridOrigin.x, gridOrigin.y, gridOrigin.z]);
         absoluteOriginObjectVector.scaleUp(self.zoom);
         zoomTranslationVector = absoluteOriginObjectVector.getColumn(0)
 
@@ -377,8 +395,9 @@ class Camera:
 #PYTHON SPECIFIC FUNCTIONS
 import json
 
-#This is how you can use custom shapes from TS/JS, or from the Shape Builder, and add them to python
-def convertShapeToPython(typescriptShape: str):
+#This function takes in the TS shape, e.g. from Shape Builder, and prints out the new Python class which you can just copy and paste
+def printPythonShape(typescriptShape: str):
+    name = ""
     points = []
     centering = []
     faces = []
@@ -388,7 +407,11 @@ def convertShapeToPython(typescriptShape: str):
 
     lines = typescriptShape.splitlines()
     for line in lines:
-        if line.startswith("constpoints="):
+        if line.startswith("class"):
+            "classShurikenextendsShape{"
+            name = line[5: -13]
+            dataCounter += 1
+        elif line.startswith("constpoints="):
             splitLine = line.split("=")
             pointsJSON = splitLine[1]
             points = json.loads(pointsJSON)
@@ -406,74 +429,81 @@ def convertShapeToPython(typescriptShape: str):
             faces = json.loads(facesJSON)
             dataCounter += 1
 
-    if dataCounter < 3:
+    if dataCounter < 4:
         print("Unable to find required data")
         return
 
-    newShape = Shape()
-    for point in points:
-        newShape.pointMatrix.addColumn(point)
-    centeringX, centeringY, centeringZ = centering[0], centering[1], centering[2]
-    newShape.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ)
-    newShape.faces = faces
-    newShape.updateMatrices()
+    classString = (f'''
+class {name}(Shape):
+    def __init__(self):
+        super({name}, self).__init__()
 
-    return newShape
+        points = {json.dumps(points)}
+        for point in points:
+            self.pointMatrix.addColumn(point)
 
+        centeringX, centeringY, centeringZ = {centering[0]}, {centering[1]}, {centering[2]}
+        self.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ)
 
-Shuriken = convertShapeToPython('''
-class Shuriken extends Shape {
-    constructor () {
-        super();
+        self.setFaces()
+        self.updateMatrices()
 
-        this.pointMatrix = new matrix();
-        const points = [[-100,0,100],[100,0,100],[-100,0,-100],[100,0,-100],[0,0,300],[300,0,0],[0,0,-300],[-300,0,0],[0,30,0],[0,-30,0]];
-        for (let i = 0; i != points.length; i += 1)
-        { this.pointMatrix.addColumn(points[i]); }
-
-        const [centeringX, centeringY, centeringZ] = [0, 0, 0];
-        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
-
-        this.setFaces();
-        this.updateMatrices();
-    }
-    setFaces() {
-        this.faces = [{pointIndexes:[8,4,0],colour:"#c4c4c4"},{pointIndexes:[8,4,1],colour:"#000000"},{pointIndexes:[8,1,5],colour:"#c4c4c4"},{pointIndexes:[8,5,3],colour:"#000000"},{pointIndexes:[8,3,6],colour:"#c4c4c4"},{pointIndexes:[8,2,6],colour:"#000000"},{pointIndexes:[8,2,7],colour:"#c4c4c4"},{pointIndexes:[8,0,7],colour:"#000000"},{pointIndexes:[9,4,0],colour:"#c4c4c4"},{pointIndexes:[9,4,1],colour:"#000000"},{pointIndexes:[9,1,5],colour:"#c4c4c4"},{pointIndexes:[9,5,3],colour:"#000000"},{pointIndexes:[9,3,6],colour:"#c4c4c4"},{pointIndexes:[9,2,6],colour:"#000000"},{pointIndexes:[9,2,7],colour:"#c4c4c4"},{pointIndexes:[9,0,7],colour:"#050505"}];
-    }
-}
-
+    def setFaces(self):
+        faceDict = {json.dumps(faces)}
+        for faceObject in faceDict:
+            self.faces.append(Face(faceObject["pointIndexes"], faceObject["colour"]))
 ''')
 
+    print(classString)
+    return classString
 
+class House(Shape):
+    def __init__(self):
+        super(House, self).__init__()
+
+        points = [[0, 0, 0], [200, 0, 0], [200, 0, 100], [0, 0, 100], [0, 100, 0], [200, 100, 0], [200, 100, 100], [0, 100, 100], [40, 140, 50], [160, 140, 50], [85, 0, 0], [115, 0, 0], [85, 50, 0], [115, 50, 0], [85, 0, -10], [115, 0, -10], [85, 50, -10], [115, 50, -10], [30, 80, 0], [50, 80, 0], [30, 60, 0], [50, 60, 0], [30, 80, -10], [50, 80, -10], [30, 60, -10], [50, 60, -10], [150, 80, 0], [170, 80, 0], [150, 60, 0], [170, 60, 0], [150, 80, -10], [170, 80, -10], [150, 60, -10], [170, 60, -10]]
+        for point in points:
+            self.pointMatrix.addColumn(point)
+
+        centeringX, centeringY, centeringZ = -100, -70, -50
+        self.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ)
+
+        self.setFaces()
+        self.updateMatrices()
+
+    def setFaces(self):
+        faceDict = [{"pointIndexes": [5, 6, 2, 1], "colour": "#c2600f"}, {"pointIndexes": [6, 2, 3, 7], "colour": "#c2600f"}, {"pointIndexes": [7, 4, 0, 3], "colour": "#c2600f"}, {"pointIndexes": [5, 9, 6], "colour": "#0593ff"}, {"pointIndexes": [4, 8, 9, 5], "colour": "#0593ff"}, {"pointIndexes": [6, 9, 8, 7], "colour": "#0593ff"}, {"pointIndexes": [7, 8, 4], "colour": "#0593ff"}, {"pointIndexes": [12, 16, 14, 10], "colour": "#ffce47"}, {"pointIndexes": [12, 16, 17, 13], "colour": "#ffce47"}, {"pointIndexes": [17, 13, 11, 15], "colour": "#ffce47"}, {"pointIndexes": [16, 17, 15, 14], "colour": "#ffce47"}, {"pointIndexes": [18, 19, 23, 22], "colour": "#0b07f2"}, {"pointIndexes": [18, 22, 24, 20], "colour": "#0b07f2"}, {"pointIndexes": [24, 25, 21, 20], "colour": "#0b07f2"}, {"pointIndexes": [23, 19, 21, 25], "colour": "#0b07f2"}, {"pointIndexes": [22, 23, 25, 24], "colour": "#0b07f2"}, {"pointIndexes": [26, 27, 31, 30], "colour": "#0b07f2"}, {"pointIndexes": [31, 27, 29, 33], "colour": "#0b07f2"}, {"pointIndexes": [26, 30, 32, 28], "colour": "#0b07f2"}, {"pointIndexes": [32, 33, 29, 28], "colour": "#0b07f2"}, {"pointIndexes": [30, 31, 33, 32], "colour": "#0b07f2"}, {"pointIndexes": [4, 18, 20, 0], "colour": "#c2600f"}, {"pointIndexes": [0, 20, 21, 10], "colour": "#c2600f"}, {"pointIndexes": [21, 10, 12], "colour": "#c2600f"}, {"pointIndexes": [13, 11, 28], "colour": "#c2600f"}, {"pointIndexes": [11, 28, 29, 1], "colour": "#c2600f"}, {"pointIndexes": [1, 29, 27, 5], "colour": "#c2600f"}, {"pointIndexes": [19, 26, 28, 13, 12, 21], "colour": "#c2600f"}, {"pointIndexes": [5, 27, 26, 19, 18, 4], "colour": "#c2600f"}]
+        for faceObject in faceDict:
+            self.faces.append(Face(faceObject["pointIndexes"], faceObject["colour"]))
 
 #TESTING / DEMO
-#You could probably import this by downloading the file, then just calling it using open(), and using eval() to run the script before using it yourself
+linkCanvas()
 
 camera = Camera()
-camera.worldRotation["x"] = -20
-camera.worldRotation["y"] = 20
-camera.worldRotation["z"] = 0
+camera.worldRotation.x = -20
+camera.worldRotation.y = 20
+camera.worldRotation.z = 0
 camera.updateRotationMatrix()
 
 box = Box(100, 100, 100)
-box.position["x"] = 300
+box.position.x = 300
 
-shuriken = Shuriken
-shuriken.position["z"] = 300
-shuriken.showOutline = True
-shuriken.scale = 0.6
-shuriken.updateMatrices()
+box2 = Box(80, 80, 80)
+box2.position.y = 100
+box2.faces[0].colour = ""
+
+house = House()
 
 def animationLoop():
-    shuriken.rotation["y"] += 5
-    shuriken.updateMatrices()
+    house.rotation.y += 5
+    house.updateMatrices()
 
-    camera.worldRotation["y"] += 1
+    camera.worldRotation.y += 1
     camera.updateRotationMatrix()
 
     clearCanvas()
     camera.renderGrid()
-    camera.render([box, shuriken])
+    camera.render([box, box2, house])
 
     screen.update()
     screen.ontimer(animationLoop, 16) #16ms, 60fps
