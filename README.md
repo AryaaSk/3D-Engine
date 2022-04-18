@@ -11,9 +11,11 @@ To import the library with CDN, just copy this script tag into your HTML head *(
 
 <script src="yourownjsfile.js" defer></script> <!-- You should add a defer tag on your own file, since you will need to wait for the canvas element to load into the DOM -->
 ```
-
 ### Typescript
 Alternatively if you want to use typescript defenitions with this library, then you can just download the [aryaa3D Source file](Source/aryaa3D.ts), and then you can compile it into JS and use it in your projeect
+### Python
+I have ported this library over to python. To get started read the [Python README](PythonPort/README.md)
+
 
 ### Setup
 Then create a canvas element in the HTML DOM with an ID, I used "renderingWindow"
