@@ -403,7 +403,7 @@ class Camera:
         limitRotation = kwargs.get('limitRotation', False)
 
         mousedown = False
-        altDown = False
+        rightClickDown = False
         previousX, previousY = 0, 0
 
         def MouseDown(event):
@@ -417,26 +417,27 @@ class Camera:
         canvas.bind("<ButtonPress-1>", MouseDown)
         canvas.bind("<ButtonRelease-1>", MouseUp)
 
-        def AltDown(**kwargs):
-            nonlocal altDown
-            altDown = True
-        def AltUp(**kwargs):
-            nonlocal altDown
-            altDown = False
-            print(altDown)
-        
+        def RightClickDown(event):
+            nonlocal rightClickDown
+            rightClickDown = True
+        def RightClickUp(event):
+            nonlocal rightClickDown
+            rightClickDown = False
+        canvas.bind("<ButtonPress-2>", RightClickDown)
+        canvas.bind("<ButtonRelease-2>", RightClickUp)
 
         def MouveMove(event):
-            nonlocal mousedown, altDown, previousX, previousY
+            nonlocal mousedown, rightClickDown, previousX, previousY
             if mousedown == False:
                 return
             x = event.x - (canvasWidth / 2)
             y = event.y - (canvasHeight / 2)
             
             differenceX, differenceY = x - previousX, y - previousY
-            print(altDown)
-            if altDown == True and movement == True:
-                print("Move abs position")
+            if rightClickDown == True and movement == True:
+                self.absPosition.x -= differenceX / self.zoom
+                self.absPosition.y += differenceY / self.zoom
+
             elif rotation == True:
                 absX = abs(self.worldRotation.x) % 360
                 if absX > 90 and absX < 270:

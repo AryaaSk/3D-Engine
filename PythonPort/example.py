@@ -7,6 +7,9 @@ camera.worldRotation.x = -20
 camera.worldRotation.y = 20
 camera.worldRotation.z = 0
 camera.updateRotationMatrix()
+
+#I had to make the controls a bit different, since keydown and keyup werent working
+#To pan around hold the right click, and then you can drag around with the mouse
 camera.enableMovementControls() #pass in rotation, movement, zoom and limitRotation with arguments, e.g. rotation=False
 
 box = Box(100, 100, 100)
@@ -14,6 +17,7 @@ box.position.x = 300
 
 box2 = Box(80, 80, 80)
 box2.position.y = 100
+box2.position.z = 1000
 box2.faces[0].colour = ""
 
 house = House()
@@ -36,7 +40,7 @@ def animationLoop():
 
     clearCanvas()
     camera.renderGrid()
-    camera.render([house])
+    camera.render([house, box, box2])
 
     screen.update()
     screen.ontimer(animationLoop, 16) #16ms, 60fps
