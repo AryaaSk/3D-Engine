@@ -82,6 +82,7 @@ input[type=checkbox] {
 .editorInputText {
     height: 100%;
     width: 100%;
+    padding-left: 10px;
 
     border: none;
     border-left: var(--mainBorder);
@@ -95,6 +96,7 @@ input[type=checkbox] {
     background-color: transparent;
     transition: 500ms background-color;
     cursor: pointer;
+    font-size: large;
 }
 .editorInputButton:hover {
     background-color: rgb(225, 225, 225); 

@@ -237,7 +237,7 @@
         <div class="dataRow face">
             <div class="centered">  <label class="h3">${String(i)}</label>  </div>
             
-            <div class="centered"> <input type="text" class="editorInputText facePointIndexes" style="padding-left: 10px;" value="${String(face.pointIndexes)}" name="face${String(i)}" id="pointIndexes${String(i)}"> </div>
+            <div class="centered"> <input type="text" class="editorInputText facePointIndexes" value="${String(face.pointIndexes)}" name="face${String(i)}" id="pointIndexes${String(i)}"> </div>
             <div class="centered"> <input type="color" class="editorInputText" value="${String(face.colour)}" tabindex="-1" id="colour${String(i)}"> </div>
 
             <div class="centered"> <input type="button" class="editorInputButton deleteButton" style="border-left: 1px solid lightgray;" value="—" tabindex="-1" id="DeleteFace${String(i)}"> </div>
