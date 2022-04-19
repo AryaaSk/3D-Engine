@@ -178,47 +178,82 @@
         displayShape.updateMatrices();
     };
     const updateDOM = () => {
-        const pointMatrixList = document.getElementById("pointMatrixList");
-        pointMatrixList.innerText = ""; //clear the list
+        const pointList = document.getElementById("pointList");
+        pointList.innerText = ""; //clear the list
+        const pointTitleBar = document.createElement("div");
+        pointTitleBar.innerHTML = `
+    <div class="dataRow point" style="border: none; border-bottom: var(--mainBorder); background-color: transparent;">
+        <div class="centered"> <label class="h3">Index</label> </div>
+        <div class="centered"> <label class="h3">X</label> </div>
+        <div class="centered"> <label class="h3">Y</label> </div>
+        <div class="centered"> <label class="h3">Z</label> </div>
+        <div class="centered"> </div>
+    </div>
+    `;
+        pointList.appendChild(pointTitleBar);
         for (let i = 0; i != shape.pointMatrix.width; i += 1) {
             const point = shape.pointMatrix.getColumn(i);
             const pointDiv = document.createElement('div');
-            pointDiv.className = 'point';
             pointDiv.innerHTML = `
-                <div class="centered">${String(i)}</div>
-                <div class="centered"> X: <input type="text" name="pointX${String(i)}" style="width: 90%;" value="${point[0]}" id="point${String(i)}X"> </div>
-                <div class="centered"> Y: <input type="text" name="pointY${String(i)}" style="width: 90%;" value="${point[1]}" id="point${String(i)}Y"> </div>
-                <div class="centered"> Z: <input type="text" name="pointZ${String(i)}" style="width: 90%;" value="${point[2]}" id="point${String(i)}Z"> </div>
-                <div class="centered"><input type="button" tabindex="-1" class="controlButton deleteStyle" id="DeletePoint${String(i)}" value="Delete Point" style="float: right;"></div>
+        <div class="dataRow point">
+            <div class="centered">  <label class="h3">${String(i)}</label>  </div>
+            
+            <div class="centered"> <input type="text" class="editorInputText" value="${point[0]}" name="pointX${String(i)}" id="point${String(i)}X"> </div>
+            <div class="centered"> <input type="text" class="editorInputText" value="${point[1]}" name="pointY${String(i)}" id="point${String(i)}Y"> </div>
+            <div class="centered"> <input type="text" class="editorInputText" value="${point[2]}" name="pointZ${String(i)}" id="point${String(i)}Z"> </div>
+
+            <div class="centered"> <input type="button" class="editorInputButton deleteButton" style="border-left: 1px solid lightgray;" value="—" tabindex="-1" id="DeletePoint${String(i)}"> </div>
+        </div>
         `;
-            pointMatrixList.appendChild(pointDiv);
+            pointList.appendChild(pointDiv);
         }
         const pointControls = document.createElement('div');
-        pointControls.className = "centered";
         pointControls.innerHTML = `
-        <input type="button" tabindex="-1" class="controlButton" id="addPoint" value="Add Point">
-        <input type="button" tabindex="-1" style="margin-left: 20px;" class="controlButton" id="pointCommands" value="Point Commands">
+    <br>
+    <div class="centered">
+        <div class="pointFaceControlButtons">
+            <input type="button" class="editorInputButton" value="+" style="border-right: var(--mainBorder);" tabindex="-1" id="addPoint">
+            <input type="button" class="editorInputButton" value="Point Commands" tabindex="-1" id="pointCommands">
+        </div>
+    </div>
     `;
-        pointMatrixList.appendChild(pointControls);
+        pointList.appendChild(pointControls);
         const faceList = document.getElementById("faceList");
         faceList.innerText = "";
+        const faceTitleBar = document.createElement('div');
+        faceTitleBar.innerHTML = `
+    <div class="dataRow face" style="border: none; border-bottom: var(--mainBorder); background-color: transparent;">
+        <div class="centered"> <label class="h3">Index</label> </div>
+        <div class="centered"> <label class="h3">Point Indexes</label> </div>
+        <div class="centered"> <label class="h3">Colour</label> </div>
+        <div class="centered"> </div>
+    </div>
+    `;
+        faceList.appendChild(faceTitleBar);
         for (let i = 0; i != shape.faces.length; i += 1) {
             const face = shape.faces[i];
             const faceDiv = document.createElement('div');
-            faceDiv.className = "face";
             faceDiv.innerHTML = `
-            <div class="centered"> ${String(i)} </div>
-            <div class="centeredLeft"> Point Indexes: <input type="text" name="face${String(i)}" style="margin-left: 20px; width: 70%;" class="facePointIndexes" id="pointIndexes${String(i)}" value="${String(face.pointIndexes)}"> </div>
-            <div class="centeredLeft"> Colour: <input type="color" tabindex="-1" style="width: 90%;" id="colour${String(i)}" value="${String(face.colour)}"></div>
-            <div class="centeredLeft"><input type="button" tabindex="-1" class="controlButton deleteStyle" id="DeleteFace${String(i)}" value="Delete Face" style="float: right;"></div>
+        <div class="dataRow face">
+            <div class="centered">  <label class="h3">${String(i)}</label>  </div>
+            
+            <div class="centered"> <input type="text" class="editorInputText facePointIndexes" style="padding-left: 10px;" value="${String(face.pointIndexes)}" name="face${String(i)}" id="pointIndexes${String(i)}"> </div>
+            <div class="centered"> <input type="color" class="editorInputText" value="${String(face.colour)}" tabindex="-1" id="colour${String(i)}"> </div>
+
+            <div class="centered"> <input type="button" class="editorInputButton deleteButton" style="border-left: 1px solid lightgray;" value="—" tabindex="-1" id="DeleteFace${String(i)}"> </div>
+        </div>
         `;
             faceList.appendChild(faceDiv);
         }
         const faceControls = document.createElement('div');
-        faceControls.className = "centered";
         faceControls.innerHTML = `
-        <input type="button" tabindex="-1" class="controlButton" id="addFace" value="Add Face">
-        <input type="button" tabindex="-1" style="margin-left: 20px;" class="controlButton" id="faceCommands" value="Face Commands">
+    <br>
+    <div class="centered">
+        <div class="pointFaceControlButtons">
+            <input type="button" class="editorInputButton" value="+" style="border-right: var(--mainBorder);" tabindex="-1" id="addFace">
+            <input type="button" class="editorInputButton" value="Face Commands" tabindex="-1" id="faceCommands">
+        </div>
+    </div>
     `;
         faceList.appendChild(faceControls);
         startButtonListeners();
@@ -322,7 +357,7 @@
                 updateDisplayShape();
             }
         };
-        document.getElementById("uploadShape").onclick = () => {
+        document.getElementById("importShape").onclick = () => {
             importShape();
         };
         document.getElementById("addPoint").onclick = () => {

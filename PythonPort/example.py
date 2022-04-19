@@ -54,8 +54,8 @@ def animationLoop():
     shuriken.updateMatrices()
 
     clearCanvas()
-    camera.render([shuriken, box, box2])
     camera.renderGrid()
+    camera.render([shuriken, box, box2])
 
     screen.update()
     screen.ontimer(animationLoop, 16) #16ms, 60fps
