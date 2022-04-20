@@ -275,6 +275,15 @@ class Shape {
     }
     //Rendering
     position = { x: 0, y: 0, z: 0 };
+    translateLocal(x, y, z) {
+        let movementVectorMatrix = new matrix();
+        movementVectorMatrix.addColumn([x, y, z]);
+        movementVectorMatrix = multiplyMatrixs(this.rotationMatrix, movementVectorMatrix);
+        const movementVector = movementVectorMatrix.getColumn(0);
+        this.position.x += movementVector[0];
+        this.position.y += movementVector[1];
+        this.position.z += movementVector[2];
+    }
     showOutline = false;
     showPoints = false;
     faces = []; //stores the indexes of the points (columns) in the physicalMatrix
