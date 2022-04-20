@@ -1,1 +1,0 @@
-linkCanvas("renderingWindow")
