@@ -2,13 +2,15 @@
 linkCanvas("renderingWindow");
 const rotationSensitivity = 0.1;
 const speed = 10;
-const player = new Box(50, 200, 50);
+const player = new Box(50, 100, 50);
 player.updateMatrices();
 const camera = new Camera();
 camera.showScreenOrigin = true;
 camera.worldRotation.x = -20; //inital rotation to look down onto player
 camera.updateRotationMatrix();
-camera.enableMovementControls("renderingWindow", false, false, true);
+camera.zoom = 2;
+//Game Helper Functions
+enableKeyListeners();
 //Rotate player based on mouse movement
 let mousedown = false;
 document.onmousedown = () => {
@@ -54,15 +56,8 @@ setInterval(() => {
         }
         player.translateLocal(movementVector.x, movementVector.y, movementVector.z);
     });
-    syncCamera();
+    syncCamera(camera, player);
     clearCanvas();
     camera.renderGrid();
     camera.render([player]);
 }, 16);
-const syncCamera = () => {
-    const playerPosition = JSON.parse(JSON.stringify(player.position));
-    camera.position = playerPosition;
-    const playerYRotation = player.rotation.y;
-    camera.worldRotation.y = -playerYRotation;
-    camera.updateRotationMatrix();
-};
