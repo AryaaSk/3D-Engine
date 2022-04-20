@@ -1,9 +1,8 @@
 linkCanvas("renderingWindow")
 
-const rotationSpeed = 5;
+const rotationSensitivity = 0.1;
 const speed = 10;
 const player = new Box(50, 200, 50);
-player.rotation.y = 5;
 player.updateMatrices();
 
 const camera = new Camera();
@@ -12,27 +11,29 @@ camera.worldRotation.x = -20; //inital x rotation
 camera.updateRotationMatrix();
 camera.enableMovementControls("renderingWindow", false, false, true);
 
-const syncCamera = () => {
-    const playerPosition: { x: number, y: number, z: number }  = JSON.parse(JSON.stringify(player.position));
-    camera.position = playerPosition;
+//Rotate player based on mouse movement
+let mousedown = false;
+let [previousX] = [0]
+document.onmousedown = ($e) => {
+    mousedown = true;
+    [previousX] = [$e.clientX];
+}
+document.onmouseup = () => {
+    mousedown = false;
+}
+document.onmousemove = ($e) => {
+    if (mousedown == false) { return }
+    const movementX = previousX - $e.clientX;
+    previousX = $e.clientX;
 
-    const playerYRotation = player.rotation.y;
-    camera.worldRotation.y = -playerYRotation;
-    camera.updateRotationMatrix();
+    player.rotation.y -= movementX * rotationSensitivity;
+    player.updateMatrices();
 }
 
+console.log("WASD to move\nDrag mouse to rotate")
 setInterval(() => { //animation loop
     //Handle keydowns
     keysDown.forEach(key => {
-        if (key == "arrowleft") { 
-            player.rotation.y -= rotationSpeed;
-            player.updateMatrices();
-        }
-        else if (key == "arrowright") { 
-            player.rotation.y += rotationSpeed;
-            player.updateMatrices();
-        }
-
         let movementVector = { x: 0, y: 0, z: 0 }
         if (key == "w") 
             { movementVector.z += speed; }
@@ -50,3 +51,12 @@ setInterval(() => { //animation loop
     camera.renderGrid();
     camera.render([player]);
 }, 16);
+
+const syncCamera = () => {
+    const playerPosition: { x: number, y: number, z: number }  = JSON.parse(JSON.stringify(player.position));
+    camera.position = playerPosition;
+
+    const playerYRotation = player.rotation.y;
+    camera.worldRotation.y = -playerYRotation;
+    camera.updateRotationMatrix();
+}
