@@ -39,6 +39,7 @@
         camera.worldRotation.y = 20;
         camera.updateRotationMatrix();
         camera.enableMovementControls("renderingWindow");
+        camera.showScreenOrigin = true;
 
         const cube = new Box(100, 100, 100);
         cube.scale = 1;
@@ -155,8 +156,6 @@
             clearCanvas();
             camera.renderGrid();
             camera.render([cube, pyramid, triangularPrism, elongatedOctahedron, pentagon, shuriken, sphere]);
-
-            plotPoint([0, 0], "#000000"); //a visual marker of where it will zoom into
         }, 16);
     </script>
 

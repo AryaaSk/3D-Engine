@@ -78,12 +78,12 @@ To create a camera object:
 const camera = new Camera();
 ```
 
-You can then position this camera in the scene somewhere *(This doesn't change the 3D position, it is literally the 2D position from where you view the world, which is why there is no Z coordinate)*.
+You can also change the camera's position:
 ```javascript
-camera.absPosition.x = 0;
-camera.absPosition.y = 0;
+camera.position.x = 200
+camera.position.z = 200
 ```
-*To create a 3D camera, you can have one variable storing the object's actual position, and then create your own camera class which contains the actual position in 3D, then you can move the object's position relative to the camera in all 3 axis, which will basically move it on the grid, this way it actually looks like a 3D position. I may create a helper class in the future to implement this feature.*
+The way this works is just by translating the objects in the opposite direction when you render them.
 
 You can also change the world zoom:
 ```javascript
@@ -101,6 +101,11 @@ camera.updateRotationMatrix(); //make sure to call this whenever you update the 
 You can render a grid which shows where your object's are positioned:
 ```javascript
 camera.renderGrid();
+```
+
+If you want a visual marker of the center of the screen, to see rotations, positions and zooming more clearly then use:
+```javascript
+camera.showScreenOrigin = true;
 ```
 
 Finally to actually render the object to the screen use: (if you have multiple objects make sure to pass them all in the same function call)
@@ -127,6 +132,8 @@ camera.enableMovementControls(canvasID);
     3. Movement?: Optional parameter to enable movement, it is on by default
     4. Zoom?: Optional parameter to enable zoom, it is on by default
     5. limitRotation?: Optional parameter, which will limit the X Axis rotation to only 90 degrees, it is off by default.
+
+**If you are changing the camera's position, then I would recommend to disable movement, since that will change the absolute position of the objects, and then the rotation would also get messed up**
 
 ## Usage
 Here is a preview of the project in this repo [Example.html](https://aryaask.github.io/3D-Engine/Previews/example.html)\

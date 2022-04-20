@@ -20,23 +20,26 @@ This will give us our Î (iHat), Ĵ (jHat), and k̂ (kHat), unit vectors which r
 ### Rendering the Object (Transforming based on Camera's Position and World Rotation):
 1. When the render() function is called for an object, the function creates a copy of the object's PhysicalMatrix and calls it the CameraObjectMatrix, it then transforms this matrix to get the actual position of the shape's vertices on the 2D screen.
 
-2. The function transforms the object's size and rotation first, and then applies the translation transformations, this is because if you translate it first and then change the size/rotation, then it will use the origin as the point of rotation/enlargment, causing an inaccurate transformation.
+2. The function translates the object first, then applies the world rotation, so that all the objects rotate around the screen origin (center), to make it seem like the camera is in a fixed position.
 
 3. The transformation steps are in this order:
-    1. **Scale up object based on camera's zoom (will translate for zoom later)**
 
-    2. **Rotate for world rotation (when the user changes camera.rotation)**
+    1. **Translate based on object's position**:\
+    The object's position is just a vector from the origin, so we can just translate it by that first
 
-    3. **Translate based on camera position**:\
-    It calculates the vector from the (screen origin) -> (virtual origin), the virtual origin is the position of the grid's origin, it is not the same as the actual origin as the grid origin will move when the camera moves. It is just the inverse of the camera's position, and I save as **gridOrigin**. Then I just translate the object with this.
+    2. **Translate oppositely to camera's position**:\
+    This simulates the camera moving, but actually the objects are all just moving in the opposite direction.
 
-    4. **Translate based on world rotation**:\
-    The function calculates the vector from gridOrigin -> object.position, which is actually just its position because the position is saved relative the origin. Then it multiplies the RotationMatrix by this vector, and finally translates the object by this new vector relative to the gridOrigin.
+    - *Step 1 and 2 are interchangable*
 
-    5. **Translate based on zoom**:/
-    Calculates the absolute vector from (0, 0, 0) on actual screen, to the object's position. Then it multiplies this vector by the zoom, then just positions the object at this vector from the screen
+    3. **Rotate for camera's world rotation**
 
-*When I coded it, I did not translate it after each step, I calculated the translation, and added the next one each time. This is so I can skip the step of finding the difference between the current vector and the next one, and then I just apply the final translation at the end*
+    4. **Translate based on opposite of camera's *absolute* position**:\
+    The absolute position only an X and Y translation, no Z axis, it is translated on the physical screen.\
+    Since the object gets translated after the rotation, the world rotation will not reflect on this. This means that if you change the absolute position, the objects and grid will still rotate around the screen origin (camera's position), and will ignore the absolute position.
+    *This is why I recommend to disable movement in enableMovementControls(), if you are also changing the camera's position*
+
+    5. **Scale object's size and position based on camera's zoom, translation and enlargement**
 
 ### Rendering the Object (Actually drawing things on the screen):
 

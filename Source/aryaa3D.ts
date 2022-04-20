@@ -482,37 +482,31 @@ class Grid extends Shape {
 }
 
 class Camera {
-    absPosition: {x: number, y: number} = { x: 0, y: 0 };
+    private absPosition: {x: number, y: number} = { x: 0, y: 0 };
+    position: { x: number, y: number, z: number } = { x: 0, y: 0, z: 0 };
     zoom = 1;
 
     worldRotation: {x: number, y: number, z: number} = { x: 0, y: 0, z: 0 };
     worldRotationMatrix = new matrix();
 
-    render(objects: Shape[]) {  
+    showScreenOrigin: boolean = false;
 
+    render(objects: Shape[]) {  
         const objectData: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
         for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
             //transform the object's physicalMatrix to how the camera would see it:
             const object = objects[objectIndex];
             let cameraObjectMatrix = object.physicalMatrix.copy();
 
-            cameraObjectMatrix.scaleUp(this.zoom); //scale from zoom
-            cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //global world rotation
+            cameraObjectMatrix.translateMatrix(object.position.x, object.position.y, object.position.z); //translate for object's position
 
-            //translate object relative to grid origin, since the object's position is relative to the origin, it can also be considered as a vector from the origin
-            const gridOrigin = { x: -this.absPosition.x, y: -this.absPosition.y, z: 0 };
-            let originObjectVector = new matrix();
-            originObjectVector.addColumn([object.position.x, object.position.y, object.position.z]);
-            originObjectVector = multiplyMatrixs(this.worldRotationMatrix, originObjectVector);
-            const originObjectTranslation = originObjectVector.getColumn(0);
+            cameraObjectMatrix.translateMatrix(-this.position.x, -this.position.y, -this.position.z) //translating relative to camera's position
 
-            //move the object in the correct position based on zoom, calculate vector from zoom point (0, 0, 0), to object
-            const screenOriginObjectVector = new matrix();
-            screenOriginObjectVector.addColumn([(gridOrigin.x + originObjectTranslation[0]), (gridOrigin.y + originObjectTranslation[1]), (gridOrigin.z + originObjectTranslation[2])]);
-            screenOriginObjectVector.scaleUp(this.zoom);
+            cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //rotate for global world rotation
 
-            const ultimateTranslation = screenOriginObjectVector.getColumn(0); //screenOriginObjectVector contains the originObjectTranslation inside it
-            cameraObjectMatrix.translateMatrix(ultimateTranslation[0], ultimateTranslation[1], ultimateTranslation[2]);
+            cameraObjectMatrix.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0); //translate for absolute position
+
+            cameraObjectMatrix.scaleUp(this.zoom); //scale for zoom
 
             //work out center of shape by finding average of all points
             let [totalX, totalY, totalZ] = [0, 0, 0];
@@ -576,6 +570,10 @@ class Camera {
                     plotPoint(point, "#000000", String(i));
                 }
             }
+        }
+
+        if (this.showScreenOrigin == true) {
+            plotPoint([0, 0], "#000000"); //a visual marker of where it will zoom into
         }
 
         return sortedObjects;
