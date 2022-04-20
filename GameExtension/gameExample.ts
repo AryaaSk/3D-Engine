@@ -1,0 +1,1 @@
+linkCanvas("renderingWindow")
