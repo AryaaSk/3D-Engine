@@ -48,7 +48,8 @@ const drawLine = (p1: number[], p2: number[], colour: string) => {
 }
 const drawShape = (points: number[][], colour: string, outline?: boolean) => {
     if (c == undefined) { console.error("Cannot draw, canvas is not linked, please use the linkCanvas(canvasID) before rendering any shapes"); return; }
-    if (points.length < 3) { console.error("Cannot draw shape, need at least 3 points to draw a shape"); return; }
+    if (points.length == 2) { drawLine(points[0], points[1], colour) }
+    else if (points.length < 3) { console.error("Cannot draw shape, need at least 3 points to draw a shape"); return; }
     c.fillStyle = colour;
     c.beginPath();
     c.moveTo(gridX(points[0][0] * dpi), gridY(points[0][1] * dpi));
@@ -451,6 +452,35 @@ class ElongatedOctahedron extends Shape
 
  
 //CAMERA
+class Grid extends Shape {
+    constructor (length: number) {
+        super();
+        this.pointMatrix = new matrix();
+
+        this.pointMatrix.addColumn([-length, 0, 0])
+        this.pointMatrix.addColumn([length, 0, 0])
+
+        this.pointMatrix.addColumn([0, -length, 0])
+        this.pointMatrix.addColumn([0, length, 0])
+
+        this.pointMatrix.addColumn([0, 0, -length])
+        this.pointMatrix.addColumn([0, 0, length])
+
+        const [centeringX, centeringY, centeringZ] = [0, 0, 0]
+        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
+
+        this.setFaces();
+        this.updateMatrices();
+    }
+    private setFaces() {
+        this.faces = [
+            { pointIndexes: [0, 1], colour: "#ff0000" },
+            { pointIndexes: [2, 3], colour: "#00ff00" },
+            { pointIndexes: [4, 5], colour: "#0000ff" },
+        ]
+    }
+}
+
 class Camera {
     absPosition: {x: number, y: number} = { x: 0, y: 0 };
     zoom = 1;
@@ -570,39 +600,9 @@ class Camera {
     }
 
     renderGrid() {
-        const gridLength = 1000 * this.zoom;
-
-        //create 2 points for each axis, then transform them using the worldRotationMatrix, then just plot them
-        let startPointMatrix = new matrix();
-        startPointMatrix.addColumn([-gridLength, 0, 0]) //x-axis
-        startPointMatrix.addColumn([0, -gridLength, 0]) //y-axis
-        startPointMatrix.addColumn([0, 0, -gridLength]) //z-axis
-
-        let endPointMatrix = new matrix();
-        endPointMatrix.addColumn([gridLength, 0, 0])
-        endPointMatrix.addColumn([0, gridLength, 0])
-        endPointMatrix.addColumn([0, 0, gridLength])
-
-        startPointMatrix = multiplyMatrixs(this.worldRotationMatrix, startPointMatrix);
-        endPointMatrix = multiplyMatrixs(this.worldRotationMatrix, endPointMatrix);
-
-        //we also want to offset this grid by the camera's position, and also the zoom
-        const gridOrigin = { x: -this.absPosition.x, y: -this.absPosition.y, z: 0 };
-
-        //move grid based on zoom
-        const absoluteOriginObjectVector = new matrix();
-        absoluteOriginObjectVector.addColumn([gridOrigin.x, gridOrigin.y, gridOrigin.z]);
-        absoluteOriginObjectVector.scaleUp(this.zoom);
-        const zoomTranslationVector = absoluteOriginObjectVector.getColumn(0)
-
-        startPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
-        endPointMatrix.translateMatrix(zoomTranslationVector[0], zoomTranslationVector[1], zoomTranslationVector[2]);
-
-        for (let i = 0; i != startPointMatrix.width; i += 1) { //draw grid lines in
-            const point1 = startPointMatrix.getColumn(i);
-            const point2 = endPointMatrix.getColumn(i);
-            drawLine(point1, point2, "#000000");
-        }
+        const gridLength = 50000 * this.zoom;
+        const grid = new Grid(gridLength);
+        this.render([grid]);
     }
 
     enableMovementControls(canvasID: string, rotation?: boolean, movement?: boolean, zoom?: boolean, limitRotation?: boolean) {
