@@ -6,15 +6,13 @@ const player = new Box(50, 200, 50);
 player.updateMatrices();
 const camera = new Camera();
 camera.showScreenOrigin = true;
-camera.worldRotation.x = -20; //inital x rotation
+camera.worldRotation.x = -20; //inital rotation to look down onto player
 camera.updateRotationMatrix();
 camera.enableMovementControls("renderingWindow", false, false, true);
 //Rotate player based on mouse movement
 let mousedown = false;
-let [previousX] = [0];
-document.onmousedown = ($e) => {
+document.onmousedown = () => {
     mousedown = true;
-    [previousX] = [$e.clientX];
 };
 document.onmouseup = () => {
     mousedown = false;
@@ -23,11 +21,20 @@ document.onmousemove = ($e) => {
     if (mousedown == false) {
         return;
     }
-    const movementX = previousX - $e.clientX;
-    previousX = $e.clientX;
+    const movementX = -$e.movementX;
+    const movementY = -$e.movementY;
     player.rotation.y -= movementX * rotationSensitivity;
     player.updateMatrices();
+    camera.worldRotation.x += movementY * rotationSensitivity; //only rotating world and not player
+    if (camera.worldRotation.x < -90) {
+        camera.worldRotation.x = -90;
+    } //limit rotation ourselves, since we disabled rotation in enableMovementControls()
+    else if (camera.worldRotation.x > 0) {
+        camera.worldRotation.x = 0;
+    }
+    camera.updateRotationMatrix();
 };
+//can now render other objects here, just like a normal scene, the player can move around and the camera follows in third person
 console.log("WASD to move\nDrag mouse to rotate");
 setInterval(() => {
     //Handle keydowns
