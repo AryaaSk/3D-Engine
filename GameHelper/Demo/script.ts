@@ -1,3 +1,5 @@
+const localScope = () => {
+
 linkCanvas("renderingWindow")
 
 //Constants
@@ -7,14 +9,13 @@ const playerProperties = {
     jumpHeight: 30,
     jumpCurve: [5, 4, 3, 2, 1, 0.5, 0.25, 0.125], //Imagine these points plot on the y-axis, x axis is the index, I am just re-creating an animation curve
 };
-const gravityCurve = [0.25, 0.5, 1, 2, 2, 2, 2, 2, 2]
 
 const camera = new Camera();
-camera.absPosition.y = 200;
+camera.absPosition.y = 200; //to move camera up
 camera.showScreenOrigin = true;
 camera.worldRotation.x = -10; //inital rotation to look down onto player
-camera.updateRotationMatrix();
 camera.zoom = 1.5;
+camera.updateRotationMatrix();
 
 //Game Helper Functions
 enableKeyListeners();
@@ -136,3 +137,15 @@ const jumpDown = (jumpCurve: number[]) => {
     });
     return promise;
 }
+
+
+
+
+
+
+
+
+
+
+};
+localScope();
