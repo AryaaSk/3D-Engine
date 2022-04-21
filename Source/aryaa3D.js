@@ -510,7 +510,7 @@ class Camera {
             }
         }
         if (this.showScreenOrigin == true) {
-            plotPoint([0, 0], "#000000"); //a visual marker of where it will zoom into
+            plotPoint([-this.absPosition.x, -this.absPosition.y], "#000000"); //a visual marker of where it will zoom into
         }
         return sortedObjects;
     }

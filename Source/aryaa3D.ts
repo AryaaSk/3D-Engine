@@ -493,7 +493,7 @@ class Grid extends Shape {
 }
 
 class Camera {
-    private absPosition: {x: number, y: number} = { x: 0, y: 0 };
+    absPosition: {x: number, y: number} = { x: 0, y: 0 };
     position: { x: number, y: number, z: number } = { x: 0, y: 0, z: 0 };
     zoom = 1;
 
@@ -584,7 +584,7 @@ class Camera {
         }
 
         if (this.showScreenOrigin == true) {
-            plotPoint([0, 0], "#000000"); //a visual marker of where it will zoom into
+            plotPoint([-this.absPosition.x, -this.absPosition.y], "#000000"); //a visual marker of where it will zoom into
         }
 
         return sortedObjects;

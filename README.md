@@ -103,7 +103,7 @@ You can render a grid which shows where your object's are positioned:
 camera.renderGrid();
 ```
 
-If you want a visual marker of the center of the screen. The dot basically represents where the camera is located, or where the object's will rotate around:
+If you want a visual marker of the center of the screen. The dot basically represents where the camera is located, where the object's will rotate around:
 ```javascript
 camera.showScreenOrigin = true;
 ```
