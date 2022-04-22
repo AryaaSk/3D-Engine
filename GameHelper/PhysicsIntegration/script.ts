@@ -1,6 +1,40 @@
 //will be using cannonJS for physics, the world is all controlled by cannonjs, and I just use aryaa3D to actually render the world
 //I'm not sure if the object's will match up to their cannon js counterparts
 
+//Functions
+const syncObject = (cannonBody: CANNON.Body, aryaa3DBody: Shape) => {
+    aryaa3DBody.position.x = cannonBody.position.x;
+    aryaa3DBody.position.y = cannonBody.position.y;
+    aryaa3DBody.position.z = cannonBody.position.z;
+
+    //to get rotation, we need to convert the quaternion, into XYZ Euler angles
+    aryaa3DBody.rotation = quaternionToEuler( cannonBody.quaternion.x, cannonBody.quaternion.y, cannonBody.quaternion.z, cannonBody.quaternion.w );
+    aryaa3DBody.updateMatrices();
+} 
+const syncShapeRotation = ( parentShape: Shape, childShape: Shape ) => {
+    childShape.rotation.x = parentShape.rotation.x;
+    childShape.rotation.y = parentShape.rotation.y;
+    childShape.rotation.z = parentShape.rotation.z;
+    childShape.updateMatrices();
+}
+
+const quaternionToEuler = ( x: number, y: number, z: number, w: number ) => {
+    //USED THE IMPLEMENTATION HERE (LINE 810): https://github.com/infusion/Quaternion.js/blob/master/quaternion.js
+    const euler = { x: 0, y: 0, z: 0 };
+
+    const t = 2 * (w * y - z * x);
+    euler.x = toDegrees(Math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y)));
+    euler.y = toDegrees(t >= 1 ? Math.PI / 2 : (t <= -1 ? -Math.PI / 2 : Math.asin(t)));
+    euler.z = toDegrees(Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)));
+
+    return euler
+}
+
+
+
+
+
+
 //CANNONJS SETUP
 const world = new CANNON.World();
 world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
@@ -8,16 +42,15 @@ world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
 const boxSize = 100;
 const boxShape = new CANNON.Box( new CANNON.Vec3(boxSize / 2, boxSize / 2, boxSize / 2) );
 const cBox = new CANNON.Body( { mass: 1, shape: boxShape } );
-cBox.position.x = 500;
 cBox.position.y = 300;
+cBox.quaternion.setFromEuler( toRadians(45), toRadians(45), toRadians(0), 'XYZ' )
 world.addBody(cBox);
 
-const floorSize = 1000;
-const floorHeight = 100;
+const floorSize = 500;
+const floorHeight = 50;
 const floorShape = new CANNON.Box( new CANNON.Vec3(floorSize / 2, floorHeight / 2, floorSize / 2) );
 const cFloor = new CANNON.Body( { mass: 0, shape: floorShape } )
 world.addBody(cFloor);
-
 
 //ARYAA3D SETUP
 linkCanvas("renderingWindow")
@@ -26,11 +59,11 @@ const camera = new Camera();
 camera.worldRotation.x = -20;
 camera.worldRotation.y = 20;
 camera.updateRotationMatrix();
-camera.enableMovementControls("renderingWindow");
+camera.enableMovementControls("renderingWindow", true, true, true, true);
 
 const aryaaBox = new Box(boxSize, boxSize, boxSize);
 aryaaBox.showOutline = true;
-
+syncObject(cBox, aryaaBox);
 
 class FloorTop extends Shape {
     constructor () {
@@ -41,7 +74,7 @@ class FloorTop extends Shape {
         for (let i = 0; i != points.length; i += 1)
         { this.pointMatrix.addColumn(points[i]); }
 
-        const [centeringX, centeringY, centeringZ] = [-400, 0, -400];
+        const [centeringX, centeringY, centeringZ] = [-400, (floorHeight / 2) +  floorHeight * (floorSize / 800) / 2, -400];
         this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
 
         this.setFaces();
@@ -55,18 +88,49 @@ class FloorTop extends Shape {
 const aryaaFloor = new Box(floorSize, floorHeight, floorSize);
 const floorTop = new FloorTop(); 
 floorTop.position = JSON.parse(JSON.stringify(aryaaFloor.position));
-floorTop.position.y += floorHeight / 2;
 floorTop.scale = (floorSize / 800); //floor top is 800 * 800, so I need to calculate floorSize / 800, and set that as the scale
 floorTop.updateMatrices();
 
+
+
+
+
+
 document.onkeydown = ($e) => {
+    const key = $e.key.toLowerCase();
     if ($e.key == " ") {
         clearInterval(interval);
     }
+    else if (key == "arrowup") {
+        cFloor.quaternion.setFromEuler( toRadians(aryaaFloor.rotation.x + 5), toRadians(aryaaFloor.rotation.y), toRadians(aryaaFloor.rotation.z) );
+        syncObject(cFloor, aryaaFloor);
+        syncShapeRotation(aryaaFloor, floorTop);
+    }
+    else if (key == "arrowdown") {
+        cFloor.quaternion.setFromEuler( toRadians(aryaaFloor.rotation.x - 5), toRadians(aryaaFloor.rotation.y), toRadians(aryaaFloor.rotation.z) );
+        syncObject(cFloor, aryaaFloor);
+        syncShapeRotation(aryaaFloor, floorTop);
+    }
+    else if (key == "arrowleft") {
+        cFloor.quaternion.setFromEuler( toRadians(aryaaFloor.rotation.x), toRadians(aryaaFloor.rotation.y), toRadians(aryaaFloor.rotation.z + 5) );
+        syncObject(cFloor, aryaaFloor);
+        syncShapeRotation(aryaaFloor, floorTop);
+    }
+    else if (key == "arrowright") {
+        cFloor.quaternion.setFromEuler( toRadians(aryaaFloor.rotation.x), toRadians(aryaaFloor.rotation.y), toRadians(aryaaFloor.rotation.z - 5) );
+        syncObject(cFloor, aryaaFloor);
+        syncShapeRotation(aryaaFloor, floorTop);
+    }
+
 }
 
+
+
+
+
+
 const interval = setInterval(() => { //animation loop
-    world.step(16 / 1000);
+    updateWorld(world);
 
     //now sync cannon object with aryaa3D object
     syncObject(cBox, aryaaBox)
@@ -74,28 +138,11 @@ const interval = setInterval(() => { //animation loop
 
     clearCanvas();
     camera.renderGrid();
-    camera.render([aryaaFloor, floorTop, aryaaBox]);
+    camera.render([aryaaFloor, floorTop]);
+    camera.render([aryaaBox]);
     camera.render([]);
 }, 16);
 
-const syncObject = (cannonBody: CANNON.Body, aryaa3DBody: Shape) => {
-    aryaa3DBody.position.x = cannonBody.position.x;
-    aryaa3DBody.position.y = cannonBody.position.y;
-    aryaa3DBody.position.z = cannonBody.position.z;
-
-    //to get rotation, we need to convert the quaternion, into XYZ Euler angles
-    aryaa3DBody.rotation = quaternionToEuler( cannonBody.quaternion.x, cannonBody.quaternion.y, cannonBody.quaternion.z, cannonBody.quaternion.w );
-    aryaa3DBody.updateMatrices();
-} 
-
-const quaternionToEuler = ( x: number, y: number, z: number, w: number ) => {
-    //USED THE IMPLEMENTATION HERE (LINE 810): https://github.com/infusion/Quaternion.js/blob/master/quaternion.js
-    const euler = { x: 0, y: 0, z: 0 };
-
-    const t = 2 * (w * y - z * x);
-    euler.x = toDegrees(Math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y)));
-    euler.y = toDegrees(t >= 1 ? Math.PI / 2 : (t <= -1 ? -Math.PI / 2 : Math.asin(t)));
-    euler.z = toDegrees(Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)));
-
-    return euler
+const updateWorld = (cannonWorld: CANNON.World) => {
+    cannonWorld.step(16 / 1000);
 }
