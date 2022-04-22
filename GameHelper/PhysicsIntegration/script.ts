@@ -18,19 +18,6 @@ const syncShapeRotation = ( parentShape: Shape, childShape: Shape ) => {
     childShape.updateMatrices();
 }
 
-const quaternionToEuler = ( x: number, y: number, z: number, w: number ) => {
-    //USED THE IMPLEMENTATION HERE (LINE 810): https://github.com/infusion/Quaternion.js/blob/master/quaternion.js
-    const euler = { x: 0, y: 0, z: 0 };
-
-    const t = 2 * (w * y - z * x);
-    euler.x = toDegrees(Math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y)));
-    euler.y = toDegrees(t >= 1 ? Math.PI / 2 : (t <= -1 ? -Math.PI / 2 : Math.asin(t)));
-    euler.z = toDegrees(Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)));
-
-    return euler
-}
-
-
 
 
 
@@ -42,8 +29,9 @@ world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
 const boxSize = 100;
 const boxShape = new CANNON.Box( new CANNON.Vec3(boxSize / 2, boxSize / 2, boxSize / 2) );
 const cBox = new CANNON.Body( { mass: 1, shape: boxShape } );
+const cQuaternion = eulerToQuaternion( { x: 45, y: 45, z: 45 } );
+cBox.quaternion.set( cQuaternion.x, cQuaternion.y, cQuaternion.z, cQuaternion.w );
 cBox.position.y = 300;
-cBox.quaternion.setFromEuler( toRadians(45), toRadians(45), toRadians(0), 'XYZ' )
 world.addBody(cBox);
 
 const floorSize = 500;
@@ -138,9 +126,7 @@ const interval = setInterval(() => { //animation loop
 
     clearCanvas();
     camera.renderGrid();
-    camera.render([aryaaFloor, floorTop]);
-    camera.render([aryaaBox]);
-    camera.render([]);
+    camera.render([aryaaFloor, floorTop, aryaaBox]);
 }, 16);
 
 const updateWorld = (cannonWorld: CANNON.World) => {

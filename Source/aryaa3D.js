@@ -89,8 +89,7 @@ const clearCanvas = () => {
     }
     c.clearRect(0, 0, canvas.width, canvas.height);
 };
-//MATH UTILITIES
-//MATRIX FUNCTIONS
+;
 class matrix {
     data = [];
     width = 0;
@@ -256,6 +255,25 @@ const calculateRotationMatrix = (rotationX, rotationY, rotationZ) => {
     rotationMatrix.addColumn(kHat);
     return rotationMatrix;
 };
+const eulerToQuaternion = (euler) => {
+    //USED THIS FORMULA: https://automaticaddison.com/how-to-convert-euler-angles-to-quaternions-using-python/
+    const [eX, eY, eZ] = [toRadians(euler.x), toRadians(euler.y), toRadians(euler.z)];
+    const qx = Math.sin(eX / 2) * Math.cos(eY / 2) * Math.cos(eZ / 2) - Math.cos(eX / 2) * Math.sin(eY / 2) * Math.sin(eZ / 2);
+    const qy = Math.cos(eX / 2) * Math.sin(eY / 2) * Math.cos(eZ / 2) + Math.sin(eX / 2) * Math.cos(eY / 2) * Math.sin(eZ / 2);
+    const qz = Math.cos(eX / 2) * Math.cos(eY / 2) * Math.sin(eZ / 2) - Math.sin(eX / 2) * Math.sin(eY / 2) * Math.cos(eZ / 2);
+    const qw = Math.cos(eX / 2) * Math.cos(eY / 2) * Math.cos(eZ / 2) + Math.sin(eX / 2) * Math.sin(eY / 2) * Math.sin(eZ / 2);
+    const quaternion = { x: qx, y: qy, z: qz, w: qw };
+    return quaternion;
+};
+const quaternionToEuler = (x, y, z, w) => {
+    //USED THE IMPLEMENTATION HERE (LINE 810): https://github.com/infusion/Quaternion.js/blob/master/quaternion.js
+    const euler = { x: 0, y: 0, z: 0 };
+    const t = 2 * (w * y - z * x);
+    euler.x = toDegrees(Math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y)));
+    euler.y = toDegrees(t >= 1 ? Math.PI / 2 : (t <= -1 ? -Math.PI / 2 : Math.asin(t)));
+    euler.z = toDegrees(Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)));
+    return euler;
+};
 //OBJECTS
 //All shapes are subclasses of class Shape, because an object is just a collection of it's points
 //When the camera renders the object is just needs its Physical Matrix (points relative to the origin), so the subclasses are purely for constructing the shape
@@ -265,15 +283,19 @@ class Shape {
     //Rotation
     rotationMatrix = new matrix();
     rotation = { x: 0, y: 0, z: 0 };
-    updateRotationMatrix() {
+    quaternion = { x: 0, y: 0, z: 0, w: 0 };
+    updateRotation() {
         const [rX, rY, rZ] = [(this.rotation.x % 360), (this.rotation.y % 360), (this.rotation.z % 360)];
         this.rotationMatrix = calculateRotationMatrix(rX, rY, rZ);
+        this.quaternion = eulerToQuaternion(this.rotation);
     }
     //Physical (as if the shape was being rendered around the origin)
     physicalMatrix = new matrix();
     scale = 1;
     updatePhysicalMatrix() {
-        this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix);
+        //rotate pointMatrix around origin with quaternion
+        //READ: https://math.stackexchange.com/questions/40164/how-do-you-rotate-a-vector-by-a-unit-quaternion
+        this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix); //old, will implement quaternion multiplication later
         this.physicalMatrix.scaleUp(this.scale);
     }
     //Rendering
@@ -292,7 +314,7 @@ class Shape {
     faces = []; //stores the indexes of the points (columns) in the physicalMatrix
     showFaceIndexes = false;
     updateMatrices() {
-        this.updateRotationMatrix();
+        this.updateRotation();
         this.updatePhysicalMatrix();
     }
 }

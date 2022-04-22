@@ -76,8 +76,19 @@ const clearCanvas = () => {
 
 
  
-//MATH UTILITIES
-//MATRIX FUNCTIONS
+//MATH UTILITIES - I always try and stay in degrees instead of radians, you can assume that all functions will take in and return in degrees
+interface XYZ {
+    x: number,
+    y: number,
+    z: number
+};
+interface XYZW {
+    x: number,
+    y: number,
+    z: number,
+    w: number
+}
+
 class matrix {
     private data: number[][] = [];
     width: number = 0;
@@ -256,6 +267,31 @@ const calculateRotationMatrix = (rotationX: number, rotationY: number, rotationZ
     return rotationMatrix;
 }
 
+const eulerToQuaternion = (euler: XYZ ) => {
+    //USED THIS FORMULA: https://automaticaddison.com/how-to-convert-euler-angles-to-quaternions-using-python/
+    const [eX, eY, eZ] = [toRadians(euler.x), toRadians(euler.y), toRadians(euler.z)];
+
+    const qx = Math.sin(eX/2) * Math.cos(eY/2) * Math.cos(eZ/2) - Math.cos(eX/2) * Math.sin(eY/2) * Math.sin(eZ/2);
+    const qy = Math.cos(eX/2) * Math.sin(eY/2) * Math.cos(eZ/2) + Math.sin(eX/2) * Math.cos(eY/2) * Math.sin(eZ/2);
+    const qz = Math.cos(eX/2) * Math.cos(eY/2) * Math.sin(eZ/2) - Math.sin(eX/2) * Math.sin(eY/2) * Math.cos(eZ/2);
+    const qw = Math.cos(eX/2) * Math.cos(eY/2) * Math.cos(eZ/2) + Math.sin(eX/2) * Math.sin(eY/2) * Math.sin(eZ/2);
+
+    const quaternion: XYZW = { x: qx, y: qy, z: qz, w: qw };
+    return quaternion;
+}
+const quaternionToEuler = ( x: number, y: number, z: number, w: number ) => { //not reliable as there are 2 euler solutions for a quaternion
+    //USED THE IMPLEMENTATION HERE (LINE 810): https://github.com/infusion/Quaternion.js/blob/master/quaternion.js
+    const euler = { x: 0, y: 0, z: 0 };
+
+    const t = 2 * (w * y - z * x);
+    euler.x = toDegrees(Math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y)));
+    euler.y = toDegrees(t >= 1 ? Math.PI / 2 : (t <= -1 ? -Math.PI / 2 : Math.asin(t)));
+    euler.z = toDegrees(Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)));
+
+    return euler
+}
+
+
 
 
 
@@ -271,22 +307,28 @@ class Shape
     
     //Rotation
     rotationMatrix = new matrix();
-    rotation: { x: number, y: number, z: number } = { x: 0, y: 0, z: 0 };
-    updateRotationMatrix() {
+    rotation: XYZ = { x: 0, y: 0, z: 0 };
+    quaternion: XYZW = { x: 0, y: 0, z: 0, w: 0 };
+    updateRotation() {
         const [rX, rY, rZ] = [(this.rotation.x % 360), (this.rotation.y % 360), (this.rotation.z % 360)]
         this.rotationMatrix = calculateRotationMatrix(rX, rY, rZ);
+        this.quaternion = eulerToQuaternion( this.rotation );
     }
 
     //Physical (as if the shape was being rendered around the origin)
     physicalMatrix = new matrix();
     scale = 1;
     updatePhysicalMatrix() {
-        this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix);
+        //rotate pointMatrix around origin with quaternion
+        //READ: https://math.stackexchange.com/questions/40164/how-do-you-rotate-a-vector-by-a-unit-quaternion
+
+
+        this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix); //old, will implement quaternion multiplication later
         this.physicalMatrix.scaleUp(this.scale);
     }
 
     //Rendering
-    position: { x: number, y: number, z: number } = { x: 0, y: 0, z: 0 };
+    position: XYZ = { x: 0, y: 0, z: 0 };
     translateLocal( x: number, y: number, z: number ) { //translates position, based on local rotation
         let movementVectorMatrix = new matrix();
         movementVectorMatrix.addColumn([x, y, z]);
@@ -304,7 +346,7 @@ class Shape
     showFaceIndexes: boolean = false;
 
     updateMatrices() {
-        this.updateRotationMatrix();
+        this.updateRotation();
         this.updatePhysicalMatrix();
     }
 }
@@ -497,10 +539,10 @@ class Grid extends Shape {
 
 class Camera {
     absPosition: {x: number, y: number} = { x: 0, y: 0 };
-    position: { x: number, y: number, z: number } = { x: 0, y: 0, z: 0 };
+    position: XYZ = { x: 0, y: 0, z: 0 };
     zoom = 1;
 
-    worldRotation: {x: number, y: number, z: number} = { x: 0, y: 0, z: 0 };
+    worldRotation: XYZ = { x: 0, y: 0, z: 0 };
     worldRotationMatrix = new matrix();
 
     showScreenOrigin: boolean = false;
