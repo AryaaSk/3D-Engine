@@ -84,4 +84,18 @@ const syncObject = (cannonBody: CANNON.Body, aryaa3DBody: Shape) => {
     aryaa3DBody.position.z = cannonBody.position.z;
 
     //to get rotation, we need to convert the quaternion, into XYZ Euler angles
+    aryaa3DBody.rotation = quaternionToEuler( cannonBody.quaternion.x, cannonBody.quaternion.y, cannonBody.quaternion.z, cannonBody.quaternion.w );
+    aryaa3DBody.updateMatrices();
+} 
+
+const quaternionToEuler = ( x: number, y: number, z: number, w: number ) => {
+    //USED THE IMPLEMENTATION HERE (LINE 810): https://github.com/infusion/Quaternion.js/blob/master/quaternion.js
+    const euler = { x: 0, y: 0, z: 0 };
+
+    const t = 2 * (w * y - z * x);
+    euler.x = toDegrees(Math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y)));
+    euler.y = toDegrees(t >= 1 ? Math.PI / 2 : (t <= -1 ? -Math.PI / 2 : Math.asin(t)));
+    euler.z = toDegrees(Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)));
+
+    return euler
 }

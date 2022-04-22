@@ -226,6 +226,9 @@ const multiplyMatrixs = (m1, m2) => {
 const toRadians = (angle) => {
     return angle * (Math.PI / 180);
 };
+const toDegrees = (angle) => {
+    return angle * 57.2958;
+};
 const sin = (num) => {
     return Math.sin(toRadians(num));
 };
