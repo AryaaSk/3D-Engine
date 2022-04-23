@@ -90,6 +90,9 @@ const clearCanvas = () => {
     c.clearRect(0, 0, canvas.width, canvas.height);
 };
 ;
+const Vector = (x, y, z) => {
+    return { x: x, y: y, z: z };
+};
 class matrix {
     data = [];
     width = 0;
@@ -274,6 +277,21 @@ const quaternionToEuler = (x, y, z, w) => {
     euler.z = toDegrees(Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)));
     return euler;
 };
+const multiplyQuaternions = (q1, q2) => {
+    const [x1, y1, z1, w1] = [q1.x, q1.y, q1.z, q1.w];
+    const [x2, y2, z2, w2] = [q2.x, q2.y, q2.z, q2.w];
+    const w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2;
+    const x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2;
+    const y = w1 * y2 + y1 * w2 + z1 * x2 - x1 * z2;
+    const z = w1 * z2 + z1 * w2 + x1 * y2 - y1 * x2;
+    return { x: x, y: y, z: z, w: w };
+};
+const multiplyQuaternionVector = (q, v) => {
+    const qConjugate = { x: -q.x, y: -q.y, z: -q.z, w: q.w };
+    const q2 = { x: v.x, y: v.y, z: v.z, w: 0 };
+    const resQ = multiplyQuaternions(multiplyQuaternions(q, q2), qConjugate);
+    return { x: resQ.x, y: resQ.y, z: resQ.z };
+};
 //OBJECTS
 //All shapes are subclasses of class Shape, because an object is just a collection of it's points
 //When the camera renders the object is just needs its Physical Matrix (points relative to the origin), so the subclasses are purely for constructing the shape
@@ -281,40 +299,42 @@ class Shape {
     //Construction
     pointMatrix = new matrix(); //pointMatrix is constructed in the subclasses
     //Rotation
-    rotationMatrix = new matrix();
     rotation = { x: 0, y: 0, z: 0 };
-    quaternion = { x: 0, y: 0, z: 0, w: 0 };
-    updateRotation() {
+    quaternion = { x: 0, y: 0, z: 0, w: 1 };
+    updateQuaternion() {
         const [rX, rY, rZ] = [(this.rotation.x % 360), (this.rotation.y % 360), (this.rotation.z % 360)];
-        this.rotationMatrix = calculateRotationMatrix(rX, rY, rZ);
-        this.quaternion = eulerToQuaternion(this.rotation);
+        this.quaternion = eulerToQuaternion(Vector(rX, rY, rZ));
     }
     //Physical (as if the shape was being rendered around the origin)
     physicalMatrix = new matrix();
     scale = 1;
     updatePhysicalMatrix() {
         //rotate pointMatrix around origin with quaternion
-        //READ: https://math.stackexchange.com/questions/40164/how-do-you-rotate-a-vector-by-a-unit-quaternion
-        this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix); //old, will implement quaternion multiplication later
+        //READ: https://stackoverflow.com/questions/4870393/rotating-coordinate-system-via-a-quaternion
+        this.physicalMatrix = new matrix();
+        for (let i = 0; i != this.pointMatrix.width; i += 1) {
+            const point = this.pointMatrix.getColumn(i);
+            const pointVector = { x: point[0], y: point[1], z: point[2] };
+            const rotatedVector = multiplyQuaternionVector(this.quaternion, pointVector);
+            const rotatedPoint = [rotatedVector.x, rotatedVector.y, rotatedVector.z];
+            this.physicalMatrix.addColumn(rotatedPoint);
+        }
         this.physicalMatrix.scaleUp(this.scale);
     }
     //Rendering
     position = { x: 0, y: 0, z: 0 };
     translateLocal(x, y, z) {
-        let movementVectorMatrix = new matrix();
-        movementVectorMatrix.addColumn([x, y, z]);
-        movementVectorMatrix = multiplyMatrixs(this.rotationMatrix, movementVectorMatrix);
-        const movementVector = movementVectorMatrix.getColumn(0);
-        this.position.x += movementVector[0];
-        this.position.y += movementVector[1];
-        this.position.z += movementVector[2];
+        let movementVector = Vector(x, y, z);
+        let translationVector = multiplyQuaternionVector(this.quaternion, movementVector);
+        this.position.x += translationVector.x;
+        this.position.y += translationVector.y;
+        this.position.z += translationVector.z;
     }
     showOutline = false;
     showPoints = false;
     faces = []; //stores the indexes of the points (columns) in the physicalMatrix
     showFaceIndexes = false;
     updateMatrices() {
-        this.updateRotation();
         this.updatePhysicalMatrix();
     }
 }

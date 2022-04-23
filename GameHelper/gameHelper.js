@@ -23,4 +23,3 @@ const syncCamera = (camera, object) => {
     camera.worldRotation.y = -objectYRotation;
     camera.updateRotationMatrix();
 };
-const gravityCurve = [0.25, 0.5, 1, 2, 2, 2, 2, 2, 2];

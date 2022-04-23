@@ -9,6 +9,7 @@ const playerProperties = {
     jumpHeight: 30,
     jumpCurve: [5, 4, 3, 2, 1, 0.5, 0.25, 0.125], //Imagine these points plot on the y-axis, x axis is the index, I am just re-creating an animation curve
 };
+const gravityCurve = [0.25, 0.5, 1, 2, 2, 2, 2, 2, 2]
 
 const camera = new Camera();
 camera.absPosition.y = 200; //to move camera up
@@ -56,6 +57,7 @@ document.onmousemove = ($e) => {
     if (mousedown == false) { return }
 
     player.rotation.y += $e.movementX * playerProperties.rotationSensitivity;
+    player.updateQuaternion();
     player.updateMatrices();
 
     camera.worldRotation.x -= $e.movementY * playerProperties.rotationSensitivity; //only rotating world and not player

@@ -89,6 +89,10 @@ interface XYZW {
     w: number
 }
 
+const Vector = (x: number, y: number, z: number): XYZ => {
+    return { x: x, y: y, z: z };
+}
+
 class matrix {
     private data: number[][] = [];
     width: number = 0;
@@ -291,6 +295,23 @@ const quaternionToEuler = ( x: number, y: number, z: number, w: number ) => { //
     return euler
 }
 
+const multiplyQuaternions = (q1: XYZW, q2: XYZW) : XYZW => {
+    const [x1, y1, z1, w1] = [q1.x, q1.y, q1.z, q1.w];
+    const [x2, y2, z2, w2] = [q2.x, q2.y, q2.z, q2.w];
+
+    const w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2;
+    const x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2;
+    const y = w1 * y2 + y1 * w2 + z1 * x2 - x1 * z2;
+    const z = w1 * z2 + z1 * w2 + x1 * y2 - y1 * x2;
+    
+    return { x: x, y: y, z: z, w: w };
+}
+const multiplyQuaternionVector = (q: XYZW, v: XYZ): XYZ => {
+    const qConjugate = { x: -q.x, y: -q.y, z: -q.z, w: q.w };
+    const q2 = { x: v.x, y: v.y, z: v.z, w: 0 };
+    const resQ =  multiplyQuaternions( multiplyQuaternions(q, q2), qConjugate );
+    return { x: resQ.x, y: resQ.y, z: resQ.z };
+}
 
 
 
@@ -306,13 +327,13 @@ class Shape
     pointMatrix = new matrix(); //pointMatrix is constructed in the subclasses
     
     //Rotation
-    rotationMatrix = new matrix();
     rotation: XYZ = { x: 0, y: 0, z: 0 };
-    quaternion: XYZW = { x: 0, y: 0, z: 0, w: 0 };
-    updateRotation() {
+    quaternion: XYZW = { x: 0, y: 0, z: 0, w: 1 };
+
+    updateQuaternion() {
+
         const [rX, rY, rZ] = [(this.rotation.x % 360), (this.rotation.y % 360), (this.rotation.z % 360)]
-        this.rotationMatrix = calculateRotationMatrix(rX, rY, rZ);
-        this.quaternion = eulerToQuaternion( this.rotation );
+        this.quaternion = eulerToQuaternion( Vector(rX, rY, rZ) );
     }
 
     //Physical (as if the shape was being rendered around the origin)
@@ -320,24 +341,28 @@ class Shape
     scale = 1;
     updatePhysicalMatrix() {
         //rotate pointMatrix around origin with quaternion
-        //READ: https://math.stackexchange.com/questions/40164/how-do-you-rotate-a-vector-by-a-unit-quaternion
-
-
-        this.physicalMatrix = multiplyMatrixs(this.rotationMatrix, this.pointMatrix); //old, will implement quaternion multiplication later
+        //READ: https://stackoverflow.com/questions/4870393/rotating-coordinate-system-via-a-quaternion
+        this.physicalMatrix = new matrix();
+        for (let i = 0; i != this.pointMatrix.width; i += 1) {
+            const point = this.pointMatrix.getColumn(i);
+            const pointVector = { x: point[0], y: point[1], z: point[2] };
+            const rotatedVector = multiplyQuaternionVector(this.quaternion, pointVector);
+            const rotatedPoint = [ rotatedVector.x, rotatedVector.y, rotatedVector.z ];
+            this.physicalMatrix.addColumn(rotatedPoint);
+        }
+        
         this.physicalMatrix.scaleUp(this.scale);
     }
 
     //Rendering
     position: XYZ = { x: 0, y: 0, z: 0 };
     translateLocal( x: number, y: number, z: number ) { //translates position, based on local rotation
-        let movementVectorMatrix = new matrix();
-        movementVectorMatrix.addColumn([x, y, z]);
-        movementVectorMatrix = multiplyMatrixs(this.rotationMatrix, movementVectorMatrix);
-        const movementVector = movementVectorMatrix.getColumn(0);
+        let movementVector = Vector(x, y, z);
+        let translationVector = multiplyQuaternionVector(this.quaternion, movementVector);
 
-        this.position.x += movementVector[0];
-        this.position.y += movementVector[1];
-        this.position.z += movementVector[2];
+        this.position.x += translationVector.x;
+        this.position.y += translationVector.y;
+        this.position.z += translationVector.z;
     }
 
     showOutline: boolean = false;
@@ -346,7 +371,6 @@ class Shape
     showFaceIndexes: boolean = false;
 
     updateMatrices() {
-        this.updateRotation();
         this.updatePhysicalMatrix();
     }
 }

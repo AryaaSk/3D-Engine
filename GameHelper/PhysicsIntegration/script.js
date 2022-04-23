@@ -7,13 +7,11 @@ const syncObject = (cannonBody, aryaa3DBody) => {
     aryaa3DBody.position.y = cannonBody.position.y;
     aryaa3DBody.position.z = cannonBody.position.z;
     //to get rotation, we need to convert the quaternion, into XYZ Euler angles
-    aryaa3DBody.rotation = quaternionToEuler(cannonBody.quaternion.x, cannonBody.quaternion.y, cannonBody.quaternion.z, cannonBody.quaternion.w);
+    aryaa3DBody.quaternion = { x: cannonBody.quaternion.x, y: cannonBody.quaternion.y, z: cannonBody.quaternion.z, w: cannonBody.quaternion.w };
     aryaa3DBody.updateMatrices();
 };
 const syncShapeRotation = (parentShape, childShape) => {
-    childShape.rotation.x = parentShape.rotation.x;
-    childShape.rotation.y = parentShape.rotation.y;
-    childShape.rotation.z = parentShape.rotation.z;
+    childShape.quaternion = parentShape.quaternion;
     childShape.updateMatrices();
 };
 //CANNONJS SETUP
@@ -22,7 +20,7 @@ world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
 const boxSize = 100;
 const boxShape = new CANNON.Box(new CANNON.Vec3(boxSize / 2, boxSize / 2, boxSize / 2));
 const cBox = new CANNON.Body({ mass: 1, shape: boxShape });
-const cQuaternion = eulerToQuaternion({ x: 45, y: 45, z: 45 });
+const cQuaternion = eulerToQuaternion(Vector(35, 0, 0));
 cBox.quaternion.set(cQuaternion.x, cQuaternion.y, cQuaternion.z, cQuaternion.w);
 cBox.position.y = 300;
 world.addBody(cBox);
@@ -69,25 +67,20 @@ document.onkeydown = ($e) => {
         clearInterval(interval);
     }
     else if (key == "arrowup") {
-        cFloor.quaternion.setFromEuler(toRadians(aryaaFloor.rotation.x + 5), toRadians(aryaaFloor.rotation.y), toRadians(aryaaFloor.rotation.z));
-        syncObject(cFloor, aryaaFloor);
-        syncShapeRotation(aryaaFloor, floorTop);
+        aryaaFloor.rotation.x += 5;
     }
     else if (key == "arrowdown") {
-        cFloor.quaternion.setFromEuler(toRadians(aryaaFloor.rotation.x - 5), toRadians(aryaaFloor.rotation.y), toRadians(aryaaFloor.rotation.z));
-        syncObject(cFloor, aryaaFloor);
-        syncShapeRotation(aryaaFloor, floorTop);
+        aryaaFloor.rotation.x -= 5;
     }
     else if (key == "arrowleft") {
-        cFloor.quaternion.setFromEuler(toRadians(aryaaFloor.rotation.x), toRadians(aryaaFloor.rotation.y), toRadians(aryaaFloor.rotation.z + 5));
-        syncObject(cFloor, aryaaFloor);
-        syncShapeRotation(aryaaFloor, floorTop);
+        aryaaFloor.rotation.z += 5;
     }
     else if (key == "arrowright") {
-        cFloor.quaternion.setFromEuler(toRadians(aryaaFloor.rotation.x), toRadians(aryaaFloor.rotation.y), toRadians(aryaaFloor.rotation.z - 5));
-        syncObject(cFloor, aryaaFloor);
-        syncShapeRotation(aryaaFloor, floorTop);
+        aryaaFloor.rotation.z -= 5;
     }
+    aryaaFloor.updateQuaternion();
+    syncShapeRotation(aryaaFloor, floorTop);
+    cFloor.quaternion = new CANNON.Quaternion(aryaaFloor.quaternion.x, aryaaFloor.quaternion.y, aryaaFloor.quaternion.z, aryaaFloor.quaternion.w);
 };
 const interval = setInterval(() => {
     updateWorld(world);
