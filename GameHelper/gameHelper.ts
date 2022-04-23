@@ -20,3 +20,15 @@ const syncCamera = (camera: Camera, object: Shape) => { //Syncs camera to third 
     camera.worldRotation.y = -objectYRotation;
     camera.updateRotationMatrix();
 }
+
+
+//CannonJS Physics Functions, import cannonjs before using any of these
+const syncObject = (cannonBody: CANNON.Body, aryaa3DBody: Shape) => {
+    aryaa3DBody.position.x = cannonBody.position.x;
+    aryaa3DBody.position.y = cannonBody.position.y;
+    aryaa3DBody.position.z = cannonBody.position.z;
+
+    //to get rotation, we need to convert the quaternion, into XYZ Euler angles
+    aryaa3DBody.quaternion = { x: cannonBody.quaternion.x, y: cannonBody.quaternion.y, z: cannonBody.quaternion.z, w: cannonBody.quaternion.w };
+    aryaa3DBody.updateMatrices();
+} 
