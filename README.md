@@ -69,7 +69,7 @@ cube.faces[0].colour = "#ff0000";
 
 You can also make a face transparent:
 ```javascript
-cube.faces[5].colour = "#ff0000";
+cube.faces[5].colour = "";
 ```
 Here you changed the back-facing face to transparent, so you can see through it and see the other faces.
 
@@ -88,8 +88,8 @@ const camera = new Camera();
 
 You can also change the camera's position:
 ```javascript
-camera.position.x = 200
-camera.position.z = 200
+camera.position.x = 200;
+camera.position.z = 200;
 ```
 The way this works is just by translating the objects in the opposite direction when you render them.
 
@@ -142,6 +142,8 @@ camera.enableMovementControls(canvasID);
     5. limitRotation?: Optional parameter, which will limit the X Axis rotation to only 90 degrees, it is off by default.
 
 **If you are changing the camera's position, then I would recommend to disable movement, since that will change the absolute position of the objects, and then the rotation would also get messed up**
+
+You can download the [Quick Start Template](template.html) to get started straight away
 
 ## Usage
 Here is a preview of the project in this repo [Example.html](https://aryaask.github.io/3D-Engine/Previews/example.html)\

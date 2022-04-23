@@ -1,0 +1,60 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://aryaask.github.io/3D-Engine/Source/aryaa3D.js"></script>
+
+    <title>Quick Start Template</title>
+
+    <style>
+        body {
+            margin: 0;
+        }
+        #renderingWindow {
+            height: 100vh;
+            width: 100vw;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="renderingWindow"></canvas>
+
+    <script>
+        linkCanvas("renderingWindow");
+
+        //OBJECTS GO HERE...
+        const cube = new Box(100, 100, 100);
+        cube.rotation = { x: 40, y: -40, z: 0 };
+        cube.updateQuaternion(); //remember to call this if you update the rotation property
+        cube.updateMatrices();
+
+
+
+
+
+        //CAMERA GOES HERE...
+        const camera = new Camera();
+        camera.worldRotation = { x: -20, y: 20, z: 0 };
+        camera.updateRotationMatrix();
+        camera.enableMovementControls("renderingWindow");
+
+
+
+
+
+        //RENDERING / ANIMATION LOOP HERE...
+        setInterval(() => {
+            //Animation loop logic here...
+
+
+            clearCanvas();
+            camera.renderGrid();
+            camera.render([cube]);
+        }, 16);
+    </script>
+
+
+</body>
+</html>
