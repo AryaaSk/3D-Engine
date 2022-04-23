@@ -48,6 +48,14 @@ cube.scale = 2;
 cube.position = { x: 200, y: 0, z: 0 };
 ```
 
+You can set the rotation using Euler Angles or Quaternions
+```javascript
+cube.rotation = { x: -20, y: -20, z: 0};
+cube.updateQuaternion(); //If you change using Euler Angles, then make sure to call the updateQuaternion() function
+
+cube.quaternion = { x: -0.171, y: -0.171, z: 0.0302, w: 0.970 };
+```
+
 If you change the rotation or scale then you need to apply the changes using:
 ```javascript
 cube.updateMatrices();

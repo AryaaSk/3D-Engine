@@ -144,13 +144,16 @@
         setInterval(() => { //animation loop
             cube.rotation.y += 1;
             cube.rotation.z += 1;
+            cube.updateQuaternion();
             cube.updateMatrices();
 
             shuriken.rotation.y += 3;
+            shuriken.updateQuaternion();
             shuriken.updateMatrices();
 
             sphere.rotation.x += 1;
             sphere.rotation.y += 1;
+            sphere.updateQuaternion();
             sphere.updateMatrices();
 
             clearCanvas();

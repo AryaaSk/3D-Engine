@@ -340,8 +340,8 @@ class Shape
     physicalMatrix = new matrix();
     scale = 1;
     updatePhysicalMatrix() {
-        //rotate pointMatrix around origin with quaternion
-        //READ: https://stackoverflow.com/questions/4870393/rotating-coordinate-system-via-a-quaternion
+        //Rotate pointMatrix around origin with quaternion, https://stackoverflow.com/questions/4870393/rotating-coordinate-system-via-a-quaternion
+        
         this.physicalMatrix = new matrix();
         for (let i = 0; i != this.pointMatrix.width; i += 1) {
             const point = this.pointMatrix.getColumn(i);
