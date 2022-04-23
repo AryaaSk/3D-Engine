@@ -24,10 +24,10 @@ const syncShapeRotation = ( parentShape: Shape, childShape: Shape ) => {
 const world = new CANNON.World();
 world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
 
-const boxSize = 100;
+const boxSize = 50;
 const boxShape = new CANNON.Box( new CANNON.Vec3(boxSize / 2, boxSize / 2, boxSize / 2) );
 const cBox = new CANNON.Body( { mass: 1, shape: boxShape } );
-const cQuaternion = eulerToQuaternion( Vector(35, 0, 0) );
+const cQuaternion = eulerToQuaternion( Vector(35, 45, 0) );
 cBox.quaternion.set( cQuaternion.x, cQuaternion.y, cQuaternion.z, cQuaternion.w );
 cBox.position.y = 300;
 world.addBody(cBox);
@@ -120,7 +120,8 @@ const interval = setInterval(() => { //animation loop
 
     clearCanvas();
     camera.renderGrid();
-    camera.render([aryaaFloor, floorTop, aryaaBox]);
+    camera.render([aryaaFloor, floorTop]);
+    camera.render([aryaaBox]);
 }, 16);
 
 const updateWorld = (cannonWorld: CANNON.World) => {
