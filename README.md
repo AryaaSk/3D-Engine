@@ -4,11 +4,11 @@
 If you want to know how it works go here [Rendering Pipeline](Docs/Pipeline.md)
 
 ### Table of Contents
-[Importing](##Importing)
-[Setup](##Setup)
-[Creating Objects](##Creating-an-Object)
-[Camera and Rendering](##Camera)
-[Usage](##Usage)
+- [Importing](#Importing)
+- [Setup](#Setup)
+- [Creating Objects](#Creating-an-Object)
+- [Camera and Rendering](#Camera)
+- [Usage](#Usage)
 
 ## Importing
 ### CDN
