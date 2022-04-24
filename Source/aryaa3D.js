@@ -304,6 +304,7 @@ class Shape {
     updateQuaternion() {
         const [rX, rY, rZ] = [(this.rotation.x % 360), (this.rotation.y % 360), (this.rotation.z % 360)];
         this.quaternion = eulerToQuaternion(Vector(rX, rY, rZ));
+        this.updateMatrices();
     }
     //Physical (as if the shape was being rendered around the origin)
     physicalMatrix = new matrix();

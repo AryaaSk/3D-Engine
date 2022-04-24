@@ -15,13 +15,6 @@ const syncShapeRotation = ( parentShape: Shape, childShape: Shape ) => {
 const world = new CANNON.World();
 world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
 
-const boxSize = 50;
-const boxShape = new CANNON.Box( new CANNON.Vec3(boxSize / 2, boxSize / 2, boxSize / 2) );
-const cBox = new CANNON.Body( { mass: 1, shape: boxShape } );
-const cQuaternion = eulerToQuaternion( Vector(35, 45, 0) );
-cBox.quaternion.set( cQuaternion.x, cQuaternion.y, cQuaternion.z, cQuaternion.w );
-cBox.position.y = 300;
-world.addBody(cBox);
 
 const floorSize = 500;
 const floorHeight = 50;
@@ -38,16 +31,18 @@ camera.worldRotation.y = 20;
 camera.updateRotationMatrix();
 camera.enableMovementControls("renderingWindow", true, true, true, true);
 
-const aryaaBox = new Box(boxSize, boxSize, boxSize);
-aryaaBox.showOutline = true;
-syncObject(cBox, aryaaBox);
+
+const cubeShape = new Box(100, 100, 100);
+cubeShape.showOutline = true;
+cubeShape.position = { x: 0, y: 300, z: 0 };
+cubeShape.rotation = { x: -30, y: 30, z: 0 };
+cubeShape.updateQuaternion();
+cubeShape.updateMatrices();
+const cube = new PhysicsObject( world, cubeShape );
 
 
 
-
-
-
-class FloorTop extends Shape {
+class Plane extends Shape {
     constructor () {
         super();
 
@@ -67,14 +62,8 @@ class FloorTop extends Shape {
     }
 }
 
-const aryaaFloor = new Box(floorSize, floorHeight, floorSize);
-const floorTop = new FloorTop(); 
-floorTop.position = JSON.parse(JSON.stringify(aryaaFloor.position));
-floorTop.scale = (floorSize / 800); //floor top is 800 * 800, so I need to calculate floorSize / 800, and set that as the scale
-floorTop.updateMatrices();
-
-
-
+const planeShape = new Plane();
+const plane = new PhysicsObject( world, planeShape );
 
 
 
@@ -84,22 +73,21 @@ document.onkeydown = ($e) => {
         clearInterval(interval);
     }
     else if (key == "arrowup") {
-        aryaaFloor.rotation.x += 5;
+        plane.aShape.rotation.x += 5;
     }
     else if (key == "arrowdown") {
-        aryaaFloor.rotation.x -= 5;
+        plane.aShape.rotation.x -= 5;
     }
     else if (key == "arrowleft") {
-        aryaaFloor.rotation.z += 5;
+        plane.aShape.rotation.z += 5;
     }
     else if (key == "arrowright") {
-        aryaaFloor.rotation.z -= 5;
+        plane.aShape.rotation.z -= 5;
     }
 
-    aryaaFloor.updateQuaternion();
-    syncShapeRotation(aryaaFloor, floorTop);
-    cFloor.quaternion = new CANNON.Quaternion( aryaaFloor.quaternion.x, aryaaFloor.quaternion.y, aryaaFloor.quaternion.z, aryaaFloor.quaternion.w );
-
+    plane.aShape.updateQuaternion();
+    console.log(plane.aShape.quaternion);
+    plane.syncCBody();
 }
 
 
@@ -110,14 +98,13 @@ document.onkeydown = ($e) => {
 const interval = setInterval(() => { //animation loop
     updateWorld(world);
 
-    //now sync cannon object with aryaa3D object
-    syncObject(cBox, aryaaBox)
-    syncObject(cFloor, aryaaFloor)
+    //sync aryaa3D objects with cannon objects
+    cube.syncAShape();
 
     clearCanvas();
     camera.renderGrid();
-    camera.render([aryaaFloor, floorTop]);
-    camera.render([aryaaBox]);
+    camera.render([plane.aShape]);
+    camera.render([cube.aShape]);
 }, 16);
 
 const updateWorld = (cannonWorld: CANNON.World) => {

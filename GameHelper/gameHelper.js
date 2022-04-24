@@ -23,7 +23,6 @@ const syncCamera = (camera, object) => {
     camera.worldRotation.y = -objectYRotation;
     camera.updateRotationMatrix();
 };
-
 //CannonJS Physics Functions, import cannonjs before using any of these
 const syncObject = (cannonBody, aryaa3DBody) => {
     aryaa3DBody.position.x = cannonBody.position.x;
@@ -33,11 +32,11 @@ const syncObject = (cannonBody, aryaa3DBody) => {
     aryaa3DBody.quaternion = { x: cannonBody.quaternion.x, y: cannonBody.quaternion.y, z: cannonBody.quaternion.z, w: cannonBody.quaternion.w };
     aryaa3DBody.updateMatrices();
 };
-class physicsObject {
+class PhysicsObject {
     aShape = new Shape(); //aryaa3D Shape
     cShape = new CANNON.Shape(); //cannonJS shape, try to match to aryaa3D shape
     cBody = new CANNON.Body(); //cannonJS body
-    constructor(aryaa3DShape, cannonJSShape, cannonJSBody) {
+    constructor(world, aryaa3DShape, cannonJSShape, cannonJSBody) {
         if (aryaa3DShape == undefined) {
             console.error("Cannot create object without aryaa3D Shape");
             return;
@@ -60,13 +59,13 @@ class physicsObject {
                 if (point[1] < minY) {
                     minY = point[1];
                 }
-                else if (point[1] < maxY) {
+                else if (point[1] > maxY) {
                     maxY = point[1];
                 }
                 if (point[2] < minZ) {
                     minZ = point[2];
                 }
-                else if (point[2] < maxZ) {
+                else if (point[2] > maxZ) {
                     maxZ = point[2];
                 }
             }
@@ -86,15 +85,17 @@ class physicsObject {
         else {
             this.cBody = cannonJSBody;
         }
-        this.cBody.quaternion.x = this.aShape.quaternion.x; //sync object's rotations
-        this.cBody.quaternion.y = this.aShape.quaternion.y;
-        this.cBody.quaternion.z = this.aShape.quaternion.z;
-        this.cBody.quaternion.w = this.aShape.quaternion.w;
+        this.syncCBody();
+        world.addBody(this.cBody);
     }
     syncAShape() {
         syncObject(this.cBody, this.aShape);
     }
-    visualiseCShape(camera) {
-        console.log(this.cShape);
+    syncCBody() {
+        this.cBody.position = new CANNON.Vec3(this.aShape.position.x, this.aShape.position.y, this.aShape.position.z);
+        this.cBody.quaternion.x = this.aShape.quaternion.x; //sync object's rotations
+        this.cBody.quaternion.y = this.aShape.quaternion.y;
+        this.cBody.quaternion.z = this.aShape.quaternion.z;
+        this.cBody.quaternion.w = this.aShape.quaternion.w;
     }
 }
