@@ -323,6 +323,8 @@ const multiplyQuaternionVector = (q: XYZW, v: XYZ): XYZ => {
 //When the camera renders the object is just needs its Physical Matrix (points relative to the origin), so the subclasses are purely for constructing the shape
 class Shape
 {
+    name?: string = undefined;
+
     //Construction
     pointMatrix = new matrix(); //pointMatrix is constructed in the subclasses
     
