@@ -19,7 +19,7 @@ Alternatively if you want to use typescript defenitions with this library, then 
 I have ported this library over to python. To get started go to the [PythonPort](PythonPort) Folder, and read the README
 
 
-### Setup
+## Setup
 Then create a canvas element in the HTML DOM with an ID, I used "renderingWindow"
 ```javascript
 <canvas id="renderingWindow"></canvas>

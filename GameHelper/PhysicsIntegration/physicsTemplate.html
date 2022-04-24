@@ -25,55 +25,55 @@
 
     <canvas id="renderingWindow"></canvas>
     <script>
-//Setup
-//CannonJS Setup
-const world = new CANNON.World();
-world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
+        //Setup
+        //CannonJS Setup
+        const world = new CANNON.World();
+        world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
 
-//Aryaa3D Setup
-linkCanvas("renderingWindow")
-const camera = new Camera();
-camera.worldRotation.x = -20; //optional - just configuring camera
-camera.worldRotation.y = 20;
-camera.updateRotationMatrix();
-camera.enableMovementControls("renderingWindow");
-
-
-
-
-
-
-//OBJECTS GO HERE...
-const cubeShape = new Box(100, 100, 100);
-cubeShape.position = { x: 0, y: 300, z: -200 }; //changing position and rotation of aryaa3D object
-cubeShape.rotation = { x: -40, y: 30, z: 0 };
-cubeShape.updateQuaternion();
-const cube = new PhysicsObject(world, cubeShape, undefined, undefined); //didn't pass CannonJSShape or CannonJSBody, so GameHelper will automatically create them.
+        //Aryaa3D Setup
+        linkCanvas("renderingWindow")
+        const camera = new Camera();
+        camera.worldRotation.x = -20; //optional - just configuring camera
+        camera.worldRotation.y = 20;
+        camera.updateRotationMatrix();
+        camera.enableMovementControls("renderingWindow");
 
 
 
 
 
 
-//ANIMATION LOOP GOES HERE...
-setInterval(() => {
+        //OBJECTS GO HERE...
+        const cubeShape = new Box(100, 100, 100);
+        cubeShape.position = { x: 0, y: 300, z: -200 }; //changing position and rotation of aryaa3D object
+        cubeShape.rotation = { x: -40, y: 30, z: 0 };
+        cubeShape.updateQuaternion();
+        const cube = new PhysicsObject(world, cubeShape, undefined, undefined); //didn't pass CannonJSShape or CannonJSBody, so GameHelper will automatically create them.
 
-    //Animation loop logic / operations...
-    cube.aShape.rotation.x += 5; //rotating cube
-    cube.aShape.rotation.y += 5; 
-    cube.aShape.updateQuaternion();
-    cube.syncCBody();
 
-    world.step(16 / 1000); //Updating the cannonJS world
 
-    //Sync aryaa3D Shapes to CannonJS Bodies...
-    cube.syncAShape();
 
-    //Render objects...
-    clearCanvas();
-    camera.renderGrid();
-    camera.render([cube.aShape]);
-}, 16);
+
+
+        //ANIMATION LOOP GOES HERE...
+        setInterval(() => {
+
+            //Animation loop logic / operations...
+            cube.aShape.rotation.x += 5; //rotating cube
+            cube.aShape.rotation.y += 5; 
+            cube.aShape.updateQuaternion();
+            cube.syncCBody();
+
+            world.step(16 / 1000); //Updating the cannonJS world
+
+            //Sync aryaa3D Shapes to CannonJS Bodies...
+            cube.syncAShape();
+
+            //Render objects...
+            clearCanvas();
+            camera.renderGrid();
+            camera.render([cube.aShape]);
+        }, 16);
     </script>
 
 </body>
