@@ -48,8 +48,9 @@ class PhysicsObject {
             let [minX, minY, minZ] = [9999, 9999, 9999];
             let [maxX, maxY, maxZ] = [0, 0, 0];
 
-            for (let i = 0; i != this.aShape.pointMatrix.width; i += 1) { 
-                const point = this.aShape.pointMatrix.getColumn(i);
+            const pointMatrixScaled = this.aShape.pointMatrix.scaledUp(this.aShape.scale);
+            for (let i = 0; i != pointMatrixScaled.width; i += 1) { 
+                const point = pointMatrixScaled.getColumn(i);
 
                 if (point[0] < minX) { minX = point[0]; }
                 else if (point[0] > maxX) { maxX = point[0]; }
@@ -67,8 +68,8 @@ class PhysicsObject {
             if (halfHeight == 0) { halfHeight = 1; }
             if (halfDepth == 0) { halfDepth = 1; }
 
-            const generatedBox = new CANNON.Box( new CANNON.Vec3(halfWidth, halfHeight, halfDepth) );
-            this.cShape = generatedBox;
+            const boundingBox = new CANNON.Box( new CANNON.Vec3(halfWidth, halfHeight, halfDepth) );
+            this.cShape = boundingBox;
         } 
         else { this.cShape = cannonJSShape; }
 

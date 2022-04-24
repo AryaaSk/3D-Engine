@@ -24,7 +24,7 @@ keysDown.forEach(key => {
 - **syncCamera()**: This function takes in 2 parameters: The Camera, and an Object. Then it will position the camera at the same position and rotate the world inversly to the object's y-rotation, which makes a third-person view of the object you are following. You can look in the [ThirdPersonDemo](https://github.com/AryaaSk/3D-Engine/blob/master/GameHelper/ThirdPersonDemo) for more info.
 
 
-# Physical Integration with CannonJS
+# Physics Integration with CannonJS
 
 ## Getting Started
 I used CannonJS to integrate phyiscs into my 3D Engine, the basic idea is that there is a physics world, and then you just use aryaa3D to render the objects in that physics world.
@@ -100,7 +100,7 @@ class PentagonalPrism extends Shape {
 const pentagonalPrismShape = new PentagonalPrism(); //create aryaa3D object with the newly created class
 const pentagonalPrism = new PhysicsObject(world, pentagonalPrismShape); //add like above
 ```
-*If you have a custom object then I wouldn't recommend to let GameHelper create the CannonJSShape, since it creates a bounding box, which may not be ideal for your object. I would recommend reading the [CannonJS Docs](https://github.com/schteppe/cannon.js), on how to create custom Shapes.*
+*If you have a custom object then I wouldn't recommend letting GameHelper create the CannonJSShape, since it creates a bounding box, which may not be ideal for your object. I would recommend reading the [CannonJS Docs](https://github.com/schteppe/cannon.js), on how to create custom Shapes.*
 
 ### Editing Objects
 To edit the objects once you have initialized them, you can use the cBody, or the aShape (not recommended).
