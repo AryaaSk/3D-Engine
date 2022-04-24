@@ -11,9 +11,23 @@ Each number represents the (index of the corner)+1, the +1 is because I didn't w
 
 * Since we know where each corner is located in relation to the others, we can hardcode the faces and therefore the edges, each face is comprised of 4 vertexes (in a cube). These are useful later on when we render the shape.
 
+3. Once we have the pointMatrix, we need to rotate with the XYZ Euler Angles or the Quaternion the user has given us:
+    1. If the user gives Euler Angles then they also need to call the updateQuaternion() function, which will convert the **Euler to Quaternion** using this formula:\
+    ![Euler to Quaternion](https://github.com/AryaaSk/3D-Engine/blob/master/Docs/ResearchImages/EulerToQuaternion.png?raw=true)\
+
+    2. Once you have converted to quaternion, we can rotate the points in the pointMatrix using the quaternion, to do this just multiply the **Quaternion * Vector**, the vector is the point, by using these steps:
+
+        1. **Convert vector to quaternion**:\
+        This is quite simple, to convert a vector -> quaternion, you just keep all the x, y, z the same, and set the w to 0
+
+        2. **Multiply rotation quaternion by vector quaterion**:\
+        Use the quaternion multiplication formula:\
+        ![Quaternion Multiplication](https://github.com/AryaaSk/3D-Engine/blob/master/Docs/ResearchImages/QuaternionMultiplication.png?raw=true)\
+
+        3. conjugate
+
+
 3. Once we have created the pointMatrix, we need to rotate the object with the XYZ rotations the user has given us, to do this we create a RotationMatrix, to calculate this I used the XYZ Rotation Matrix formula:\
-![Box Layout](https://github.com/AryaaSk/3D-Engine/blob/master/Docs/ResearchImages/xyzrotationmatrix.jpeg?raw=true)\
-This will give us our Î (iHat), Ĵ (jHat), and k̂ (kHat), unit vectors which represent the XYZ Axis. For example when there are no rotations, the iHat will point in the vector (1, 0, 0) from the origin, however when we rotate the object 90 degrees clockwise on the Y-Axis, the iHat will no point in the vector (0, 0, -1) from the origin.
 
 4. Once we have our RotationMatrix, we can find the physcial location of the points around the origin by doing **RotationMatrix * PointMatrix**, this tells us the location of all points relative to the origin, and then finally we scale the object by just multiplying each vector (column), by the scale. We store this in a matrix called PhysicalMatrix.
 
@@ -32,7 +46,11 @@ This will give us our Î (iHat), Ĵ (jHat), and k̂ (kHat), unit vectors which r
 
     - *Step 1 and 2 are interchangable*
 
-    3. **Rotate for camera's world rotation**
+    3. **Rotate for camera's world rotation**:\
+    Converts the camera's world rotation from Euler Angles, to a rotation matrix, using this formula:
+    ![XYZ Rotation Matrix](https://github.com/AryaaSk/3D-Engine/blob/master/Docs/ResearchImages/xyzrotationmatrix.jpeg?raw=true)\
+    This will give us our Î (iHat), Ĵ (jHat), and k̂ (kHat), unit vectors which represent the XYZ Axis. For example when there are no rotations, the iHat will point in the vector (1,  0, 0) from the origin, however when we rotate the object 90 degrees clockwise on the Y-Axis, the iHat will no point in the vector (0, 0, -1) from the origin. Then just multiply **RotationMatrix * CameraObjectMatrix**.
+
 
     4. **Translate based on opposite of camera's *absolute* position**:\
     The absolute position only an X and Y translation, no Z axis, it is translated on the physical screen.\
