@@ -42,6 +42,11 @@ const aryaaBox = new Box(boxSize, boxSize, boxSize);
 aryaaBox.showOutline = true;
 syncObject(cBox, aryaaBox);
 
+
+
+
+
+
 class FloorTop extends Shape {
     constructor () {
         super();

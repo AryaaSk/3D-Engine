@@ -2,14 +2,6 @@
 //will be using cannonJS for physics, the world is all controlled by cannonjs, and I just use aryaa3D to actually render the world
 //I'm not sure if the object's will match up to their cannon js counterparts
 //Functions
-const syncObject = (cannonBody, aryaa3DBody) => {
-    aryaa3DBody.position.x = cannonBody.position.x;
-    aryaa3DBody.position.y = cannonBody.position.y;
-    aryaa3DBody.position.z = cannonBody.position.z;
-    //to get rotation, we need to convert the quaternion, into XYZ Euler angles
-    aryaa3DBody.quaternion = { x: cannonBody.quaternion.x, y: cannonBody.quaternion.y, z: cannonBody.quaternion.z, w: cannonBody.quaternion.w };
-    aryaa3DBody.updateMatrices();
-};
 const syncShapeRotation = (parentShape, childShape) => {
     childShape.quaternion = parentShape.quaternion;
     childShape.updateMatrices();
