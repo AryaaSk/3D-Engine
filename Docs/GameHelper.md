@@ -1,5 +1,5 @@
 # Game Helper
-### The game helper is just a collection of functions, to help you create games using aryaa3D.\ 
+### The game helper is just a collection of functions, to help you create games using aryaa3D.
 
 ## Setup
 To import it just add this script tag after importing aryaa3D:

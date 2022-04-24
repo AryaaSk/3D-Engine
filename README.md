@@ -3,6 +3,13 @@
 **I just made this to learn more about 3D rendering/modelling, and Matrix transformations**\
 If you want to know how it works go here [Rendering Pipeline](Docs/Pipeline.md)
 
+### Table of Contents
+[Importing](##Importing)
+[Setup](##Setup)
+[Creating Objects](##Creating-an-Object)
+[Camera and Rendering](##Camera)
+[Usage](##Usage)
+
 ## Importing
 ### CDN
 To import the library with CDN, just copy this script tag into your HTML head *(Make sure to do this before using it in another JS file)*.
@@ -147,9 +154,10 @@ camera.enableMovementControls(canvasID);
 
 You can download the [Quick Start Template](template.html) to get started straight away
 
-### If you want to create games with this, read the [Game Helper README](Docs/GameHelper.md)
-
 ## Usage
+
+### If you want to create games with this, read the [Game Helper Docs](Docs/GameHelper.md)
+
 Here is a preview of the project in this repo [Example.html](https://aryaask.github.io/3D-Engine/Previews/example.html)\
 ![Preview Gif](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/3DEngineDemo.gif?raw=true)
 
