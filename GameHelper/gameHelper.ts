@@ -23,7 +23,7 @@ const syncCamera = (camera: Camera, object: Shape) => { //Syncs camera to third 
 
 
 //CannonJS Physics Functions, import cannonjs before using any of these
-const syncObject = (cannonBody: CANNON.Body, aryaa3DBody: Shape) => {
+const syncShape = (cannonBody: CANNON.Body, aryaa3DBody: Shape) => {
     aryaa3DBody.position.x = cannonBody.position.x;
     aryaa3DBody.position.y = cannonBody.position.y;
     aryaa3DBody.position.z = cannonBody.position.z;
@@ -63,7 +63,11 @@ class PhysicsObject {
             }
 
             const [xRange, yRange, zRange] = [maxX - minX, maxY - minY, maxZ - minZ];
-            const [halfWidth, halfHeight, halfDepth] = [xRange / 2, yRange / 2, zRange / 2];
+            let [halfWidth, halfHeight, halfDepth] = [xRange / 2, yRange / 2, zRange / 2];
+            if (halfWidth == 0) { halfWidth = 1; } //to prevent other objects from not colliding with them
+            if (halfHeight == 0) { halfHeight = 1; }
+            if (halfDepth == 0) { halfDepth = 1; }
+
             const generatedBox = new CANNON.Box( new CANNON.Vec3(halfWidth, halfHeight, halfDepth) );
             this.cShape = generatedBox;
         } 
@@ -74,14 +78,18 @@ class PhysicsObject {
             cBody.addShape(this.cShape);
             this.cBody = cBody;
         } 
-        else { this.cBody = cannonJSBody; }
+        else { 
+            this.cBody = cannonJSBody; 
+            this.cBody.addShape(this.cShape);
+        }
+
         
         this.syncCBody();
         world.addBody(this.cBody);
     }
 
     syncAShape() {
-        syncObject(this.cBody, this.aShape);
+        syncShape(this.cBody, this.aShape);
     }
     syncCBody() {
         this.cBody.position = new CANNON.Vec3( this.aShape.position.x, this.aShape.position.y, this.aShape.position.z );
