@@ -24,12 +24,15 @@ Each number represents the (index of the corner)+1, the +1 is because I didn't w
         Use the quaternion multiplication formula:\
         ![Quaternion Multiplication](https://github.com/AryaaSk/3D-Engine/blob/master/Docs/ResearchImages/QuaternionMultiplication.png?raw=true)\
 
-        3. conjugate
+        3. **Multiply the result quaternion by the conjugate**:\
+        Get the conjugate of the rotation quaternion, which is just the same but multiply the x, y, and z by -1. Then multiply the result of the previous calculation with this
 
+        4. **Convert back to vector**
+        To convert back to vector, just remove the w from the result, and this is your new point rotated with the quaternion.
 
-3. Once we have created the pointMatrix, we need to rotate the object with the XYZ rotations the user has given us, to do this we create a RotationMatrix, to calculate this I used the XYZ Rotation Matrix formula:\
+    3. Save these new points in a new matrix called physicalMatrix, which basically represents the shape around the origin, with all it's local transformations applied to it. The position is applied when it is rendered, since it is relative to the camera.
 
-4. Once we have our RotationMatrix, we can find the physcial location of the points around the origin by doing **RotationMatrix * PointMatrix**, this tells us the location of all points relative to the origin, and then finally we scale the object by just multiplying each vector (column), by the scale. We store this in a matrix called PhysicalMatrix.
+4. Once we have the physicalMatrix, you also need to apply the object's scale, so just multiply all points in the physicalMatrix by the scale.
 
 ### Rendering the Object (Transforming based on Camera's Position and World Rotation):
 1. When the render() function is called for an object, the function creates a copy of the object's PhysicalMatrix and calls it the CameraObjectMatrix, it then transforms this matrix to get the actual position of the shape's vertices on the 2D screen.
@@ -61,14 +64,14 @@ Each number represents the (index of the corner)+1, the +1 is because I didn't w
 
 ### Rendering the Object (Actually drawing things on the screen):
 
-- A list of objects is passed into the camera.render() function, I loop through that list and calculate all the transformations above, then once I have done that I calculate the center of the object in the Absolute 3D World, then just sort the objects based on distance to (0, 0, -50000), *similar to how I sort the faces below*, and I just render each object individually in order of furthest first, using the steps below:
+- A list of objects is passed into the camera.render() function, I loop through that list and calculate all the transformations above, then once I have done that I calculate the center of the object in the 3D world, then just sort the objects based on distance to (0, 0, -50000), *similar to how I sort the faces below*, and I just render each object individually in order of furthest first, using the steps below:
 
-1. Now we have the CameraObjectMatrix which has the points of the object in the correct position in the Absolute 3D World, we just need to draw the physical points, lines and quadrilaterals onto the canvas:
+1. Now we have the CameraObjectMatrix which has the points of the object in the correct position in the 3D World, we just need to draw the physical points, lines and shapes onto the canvas:
 
 2. We need to determine the order in which to draw the faces, otherwise we would get something like this:
     ![Wrong Face Order](https://github.com/AryaaSk/3D-Engine/blob/master/Docs/ResearchImages/WrongFaceOrder.png?raw=true)\
 
-    1. First it calculates the center of each face, we know where the faces are located because we can hardcode the corners which construct each face, because we have a specific order of points, refer to the Creating the Object section for more info. To calculate the center you just find the average of all 4 points of the face (in a cube).
+    1. First it calculates the center of each face, we know where the faces are located because we can hardcode the corners which construct each face, because we have a specific order of points, refer to the *Creating the Object* section for more info. To calculate the center you just find the average of all 4 points of the face (in a cube).
 
     2. Once you have the centers of the faces, it calculates the distance of each center to the point (0, 0, -50000), the reason I used this point was because it negates the differences between individual object's positions, which would be an issue if I used the camera's position. Then just sort based on the distance between both points.
 
@@ -76,8 +79,3 @@ Each number represents the (index of the corner)+1, the +1 is because I didn't w
 The reason this works is because although you are rotating and translating the shape, the corners don't actually move in relation to each other
 
 4. If the user wanted to also show border lines (edges) then we just render the lines at the same time as drawing the faces, this means I don't have to worry about the wrong edges being shown as the faces will be in the correct order so the edges will be too.
-
-*The Absolute 3D World refers to a point's position on the actual screen, but if you consider the screen as 3D, you just can't see the Z-Axis. This means when I actually draw the point on the screen I just ignore the Z position, and just use the X and Y position*
-
-**This was created before when the box was the only object available, however the main concept is still the same, except I don't calculate the centers of the objects and faces with a diagonal anymore (I don't use diagonals anymore), instead I just calculate the average of the points of the object/face, and that is my center. I also created a drawShape() function to replace drawQuadrilateral() for shapes where the sides can also be triangles, e.g. a square-based pyramid.**
-
