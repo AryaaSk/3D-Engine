@@ -37,7 +37,6 @@ cubeShape.showOutline = true;
 cubeShape.position = { x: 0, y: 300, z: 0 };
 cubeShape.rotation = { x: -30, y: 30, z: 0 };
 cubeShape.updateQuaternion();
-cubeShape.updateMatrices();
 const cube = new PhysicsObject( world, cubeShape );
 
 
