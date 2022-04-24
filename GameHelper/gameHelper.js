@@ -37,13 +37,7 @@ class PhysicsObject {
     cShape = new CANNON.Shape(); //cannonJS shape, try to match to aryaa3D shape
     cBody = new CANNON.Body(); //cannonJS body
     constructor(world, aryaa3DShape, cannonJSShape, cannonJSBody) {
-        if (aryaa3DShape == undefined) {
-            console.error("Cannot create object without aryaa3D Shape");
-            return;
-        }
-        else {
-            this.aShape = aryaa3DShape;
-        }
+        this.aShape = aryaa3DShape;
         if (cannonJSShape == undefined) {
             //create a box object using the range of x, y, and z axis
             let [minX, minY, minZ] = [9999, 9999, 9999];

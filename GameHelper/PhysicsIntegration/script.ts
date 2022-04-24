@@ -13,6 +13,7 @@ camera.updateRotationMatrix();
 camera.enableMovementControls("renderingWindow", true, true, true, true);
 
 
+//Objects:
 const cubeShape = new Box(100, 100, 100);
 cubeShape.position = { x: 0, y: 300, z: -200 };
 cubeShape.rotation = { x: -40, y: 30, z: 0 };
@@ -26,7 +27,6 @@ const cube2 = new PhysicsObject(world, cubeShape2);
 const cuboidShape = new Box(100, 50, 25)
 cuboidShape.position = { x: -200, y: 300, z: -100 };
 const cuboid = new PhysicsObject(world, cuboidShape);
-
 
 
 //Custom Object, the hitbox will not match exactly since it forms a bounding box around the object
@@ -56,9 +56,6 @@ pentagonalPrismShape.updateQuaternion();
 const pentagonalPrism = new PhysicsObject(world, pentagonalPrismShape);
 
 
-
-
-
 //Plane
 class Plane extends Shape {
     constructor () {
@@ -85,27 +82,24 @@ plane.aShape.showOutline = true;
 
 document.onkeydown = ($e) => {
     const key = $e.key.toLowerCase();
-    if ($e.key == " ") {
-        clearInterval(interval);
-    }
-    else if (key == "arrowup") {
-        plane.aShape.rotation.x += 5;
-    }
-    else if (key == "arrowdown") {
-        plane.aShape.rotation.x -= 5;
-    }
-    else if (key == "arrowleft") {
-        plane.aShape.rotation.z += 5;
-    }
-    else if (key == "arrowright") {
-        plane.aShape.rotation.z -= 5;
-    }
+    if ($e.key == " ") { clearInterval(interval); }
+
+    else if (key == "arrowup") { plane.aShape.rotation.x += 5;}
+    else if (key == "arrowdown") {plane.aShape.rotation.x -= 5; } 
+    else if (key == "arrowleft") {plane.aShape.rotation.z += 5; }
+    else if (key == "arrowright") {plane.aShape.rotation.z -= 5;}
+
+    else if (key == "w") {cube.cBody.applyImpulse( new CANNON.Vec3(0, 0, 50), cube.cBody.position ); }
+    else if (key == "s") {cube.cBody.applyImpulse( new CANNON.Vec3(0, 0, -50), cube.cBody.position ); } 
+    else if (key == "a") { cube.cBody.applyImpulse( new CANNON.Vec3(-50, 0, 0), cube.cBody.position ); }
+    else if (key == "d") { cube.cBody.applyImpulse( new CANNON.Vec3(50, 0, 0), cube.cBody.position ); }
 
     plane.aShape.updateQuaternion();
     plane.syncCBody(); //sync cannon body with aryaa3D shape's rotation
 }
+console.log("Press space to stop the animation");
 console.log("Press arrow keys to rotate plane and move objects");
-
+console.log("Press WASD to apply impulses to the cube in the respective directions")
 
 const interval = setInterval(() => { //animation loop
     world.step(16 / 1000);

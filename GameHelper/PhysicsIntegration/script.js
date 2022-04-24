@@ -9,6 +9,7 @@ camera.worldRotation.x = -20;
 camera.worldRotation.y = 20;
 camera.updateRotationMatrix();
 camera.enableMovementControls("renderingWindow", true, true, true, true);
+//Objects:
 const cubeShape = new Box(100, 100, 100);
 cubeShape.position = { x: 0, y: 300, z: -200 };
 cubeShape.rotation = { x: -40, y: 30, z: 0 };
@@ -80,10 +81,24 @@ document.onkeydown = ($e) => {
     else if (key == "arrowright") {
         plane.aShape.rotation.z -= 5;
     }
+    else if (key == "w") {
+        cube.cBody.applyImpulse(new CANNON.Vec3(0, 0, 50), cube.cBody.position);
+    }
+    else if (key == "s") {
+        cube.cBody.applyImpulse(new CANNON.Vec3(0, 0, -50), cube.cBody.position);
+    }
+    else if (key == "a") {
+        cube.cBody.applyImpulse(new CANNON.Vec3(-50, 0, 0), cube.cBody.position);
+    }
+    else if (key == "d") {
+        cube.cBody.applyImpulse(new CANNON.Vec3(50, 0, 0), cube.cBody.position);
+    }
     plane.aShape.updateQuaternion();
     plane.syncCBody(); //sync cannon body with aryaa3D shape's rotation
 };
+console.log("Press space to stop the animation");
 console.log("Press arrow keys to rotate plane and move objects");
+console.log("Press WASD to apply impulses to the cube in the respective directions");
 const interval = setInterval(() => {
     world.step(16 / 1000);
     //sync aryaa3D objects with cannon objects

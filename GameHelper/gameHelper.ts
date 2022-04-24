@@ -39,9 +39,8 @@ class PhysicsObject {
     private cShape: CANNON.Shape = new CANNON.Shape(); //cannonJS shape, try to match to aryaa3D shape
     cBody: CANNON.Body = new CANNON.Body(); //cannonJS body
 
-    constructor (world: CANNON.World, aryaa3DShape?: Shape, cannonJSShape?: CANNON.Shape, cannonJSBody?: CANNON.Body) {
-        if (aryaa3DShape == undefined) {  console.error("Cannot create object without aryaa3D Shape"); return; } 
-        else { this.aShape = aryaa3DShape; }
+    constructor (world: CANNON.World, aryaa3DShape: Shape, cannonJSShape?: CANNON.Shape, cannonJSBody?: CANNON.Body) {
+        this.aShape = aryaa3DShape;
 
         if (cannonJSShape == undefined) {
 
