@@ -32,63 +32,61 @@ const syncShape = (cannonBody, aryaa3DBody) => {
     aryaa3DBody.quaternion = { x: cannonBody.quaternion.x, y: cannonBody.quaternion.y, z: cannonBody.quaternion.z, w: cannonBody.quaternion.w };
     aryaa3DBody.updateMatrices();
 };
+const createCANNONBoundingBox = (aShape) => {
+    //create a box object using the range of x, y, and z axis
+    let [minX, minY, minZ] = [9999, 9999, 9999];
+    let [maxX, maxY, maxZ] = [0, 0, 0];
+    const pointMatrixScaled = aShape.pointMatrix.scaledUp(aShape.scale);
+    for (let i = 0; i != pointMatrixScaled.width; i += 1) {
+        const point = pointMatrixScaled.getColumn(i);
+        if (point[0] < minX) {
+            minX = point[0];
+        }
+        else if (point[0] > maxX) {
+            maxX = point[0];
+        }
+        if (point[1] < minY) {
+            minY = point[1];
+        }
+        else if (point[1] > maxY) {
+            maxY = point[1];
+        }
+        if (point[2] < minZ) {
+            minZ = point[2];
+        }
+        else if (point[2] > maxZ) {
+            maxZ = point[2];
+        }
+    }
+    const [xRange, yRange, zRange] = [maxX - minX, maxY - minY, maxZ - minZ];
+    let [halfWidth, halfHeight, halfDepth] = [xRange / 2, yRange / 2, zRange / 2];
+    if (halfWidth == 0) {
+        halfWidth = 1;
+    } //to prevent other objects from not colliding with them
+    if (halfHeight == 0) {
+        halfHeight = 1;
+    }
+    if (halfDepth == 0) {
+        halfDepth = 1;
+    }
+    const boundingBox = new CANNON.Box(new CANNON.Vec3(halfWidth, halfHeight, halfDepth));
+    return boundingBox;
+};
 class PhysicsObject {
     aShape = new Shape(); //aryaa3D Shape
-    cShape = new CANNON.Shape(); //cannonJS shape, try to match to aryaa3D shape
     cBody = new CANNON.Body(); //cannonJS body
-    constructor(world, aryaa3DShape, cannonJSShape, cannonJSBody) {
+    constructor(world, aryaa3DShape, cannonJSBody) {
         this.aShape = aryaa3DShape;
-        if (cannonJSShape == undefined) {
-            //create a box object using the range of x, y, and z axis
-            let [minX, minY, minZ] = [9999, 9999, 9999];
-            let [maxX, maxY, maxZ] = [0, 0, 0];
-            const pointMatrixScaled = this.aShape.pointMatrix.scaledUp(this.aShape.scale);
-            for (let i = 0; i != pointMatrixScaled.width; i += 1) {
-                const point = pointMatrixScaled.getColumn(i);
-                if (point[0] < minX) {
-                    minX = point[0];
-                }
-                else if (point[0] > maxX) {
-                    maxX = point[0];
-                }
-                if (point[1] < minY) {
-                    minY = point[1];
-                }
-                else if (point[1] > maxY) {
-                    maxY = point[1];
-                }
-                if (point[2] < minZ) {
-                    minZ = point[2];
-                }
-                else if (point[2] > maxZ) {
-                    maxZ = point[2];
-                }
-            }
-            const [xRange, yRange, zRange] = [maxX - minX, maxY - minY, maxZ - minZ];
-            let [halfWidth, halfHeight, halfDepth] = [xRange / 2, yRange / 2, zRange / 2];
-            if (halfWidth == 0) {
-                halfWidth = 1;
-            } //to prevent other objects from not colliding with them
-            if (halfHeight == 0) {
-                halfHeight = 1;
-            }
-            if (halfDepth == 0) {
-                halfDepth = 1;
-            }
-            const boundingBox = new CANNON.Box(new CANNON.Vec3(halfWidth, halfHeight, halfDepth));
-            this.cShape = boundingBox;
-        }
-        else {
-            this.cShape = cannonJSShape;
-        }
         if (cannonJSBody == undefined) {
             const cBody = new CANNON.Body({ mass: 1 });
-            cBody.addShape(this.cShape);
             this.cBody = cBody;
         }
         else {
             this.cBody = cannonJSBody;
-            this.cBody.addShape(this.cShape);
+        }
+        if (this.cBody.shapes.length == 0) {
+            const boundingBox = createCANNONBoundingBox(this.aShape);
+            this.cBody.addShape(boundingBox);
         }
         this.syncCBody();
         world.addBody(this.cBody);

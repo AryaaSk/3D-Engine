@@ -57,11 +57,10 @@ camera.enableMovementControls("renderingWindow"); //optional - just configuring 
 ## Objects
 
 ### Adding Objects 
-To add objects, you use the PhysicsObject class, it will take in 2 required parameters, and 2 optional parameters:
+To add objects, you use the PhysicsObject class, it will take in 2 required parameters, and 1 optional parameter:
 1. **CannonJSWorld**: This is the CannonJS world in which we will add all the objects, we defined this above as simply **world**, so just pass that in first.
 2. **Aryaa3DShape**: The aryaa3D object, such as a Box(), or a custom object you built in the Shape Builder
-3. **CannonJSShape (optional)**: This will serve as the hitbox of your object, if you don't pass anything then the GameHelper will automatically create a bounding box, and set that as your hitbox, it is of type CANNON.Shape.
-4. **CannonJSBody (optional)**: The body, of your objects, which contains information such as its mass. If you leave this as undefined then GameHelper will automatically set the mass of the object as 1.
+3. **CannonJSBody (optional)**: The CannonJS object, this includes the hitbox and other info such as the mass. If you leave this as undefined, then it will create a hitbox for your aryaa3D shape, by getting it's bounding box, and also set its mass to 1.
 
 Here is how you would make a simple cube object:
 ```javascript
@@ -70,7 +69,7 @@ cubeShape.position = { x: 0, y: 300, z: -200 }; //changing position and rotation
 cubeShape.rotation = { x: -40, y: 30, z: 0 };
 cubeShape.updateQuaternion();
 
-const cube = new PhysicsObject(world, cubeShape, undefined, undefined); //didn't pass CannonJSShape or CannonJSBody, so GameHelper will automatically create them.
+const cube = new PhysicsObject(world, cubeShape, undefined); //didn't pass theCannonJSBody, so GameHelper will automatically create them.
 ```
 
 ### Custom Objects
@@ -98,9 +97,14 @@ class PentagonalPrism extends Shape {
 }
 
 const pentagonalPrismShape = new PentagonalPrism(); //create aryaa3D object with the newly created class
-const pentagonalPrism = new PhysicsObject(world, pentagonalPrismShape); //add like above
+pentagonalPrismShape.position = { x: 0, y: 300, z: 200 }; //make sure to edit the position and rotation of the aShape, not cBody, since when initializing the cBody is synced to the aShape
+
+const pentagonalPrismCannonBody = new CANNON.Body( { mass: 1 } ); //custom CannonJS Body
+pentagonalPrismCannonBody.addShape( new CANNON.Sphere(75) ); //Custom Shape, which gives it a hitbox of a sphere
+
+const pentagonalPrism = new PhysicsObject(world, pentagonalPrismShape, pentagonalPrismCannonBody);
 ```
-*If you have a custom object then I wouldn't recommend letting GameHelper create the CannonJSShape, since it creates a bounding box, which may not be ideal for your object. I would recommend reading the [CannonJS Docs](https://github.com/schteppe/cannon.js), on how to create custom Shapes.*
+*If you have a custom object then I wouldn't recommend letting GameHelper create the hitbox in the CannonJSBody, since it creates a bounding box, which may not be ideal for your object. I would recommend reading the [CannonJS Docs](https://github.com/schteppe/cannon.js), on how to create custom Shapes.*
 
 ### Editing Objects
 To edit the objects once you have initialized them, you can use the cBody, or the aShape (not recommended).

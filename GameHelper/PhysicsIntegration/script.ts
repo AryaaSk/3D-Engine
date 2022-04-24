@@ -28,7 +28,6 @@ const cuboidShape = new Box(100, 50, 25)
 cuboidShape.position = { x: -200, y: 300, z: -100 };
 const cuboid = new PhysicsObject(world, cuboidShape);
 
-
 //Custom Object, the hitbox will not match exactly since it forms a bounding box around the object
 class PentagonalPrism extends Shape {
     constructor () {
@@ -49,12 +48,11 @@ class PentagonalPrism extends Shape {
         this.faces = [{pointIndexes:[0,1,6,5],colour:"#ff2600"},{pointIndexes:[1,2,7,6],colour:"#ff9300"},{pointIndexes:[2,3,8,7],colour:"#fffb00"},{pointIndexes:[3,4,9,8],colour:"#00f900"},{pointIndexes:[0,4,9,5],colour:"#00fdff"},{pointIndexes:[0,1,2,3,4],colour:"#0433ff"},{pointIndexes:[5,6,7,8,9],colour:"#ff40ff"}];
     }
 }
-const pentagonalPrismShape = new PentagonalPrism();
+const pentagonalPrismShape = new PentagonalPrism(); //create aryaa3D object with the newly created class
 pentagonalPrismShape.position = { x: 0, y: 300, z: 200 };
-pentagonalPrismShape.rotation = { x: 40, y: 30, z: 0 };
-pentagonalPrismShape.updateQuaternion();
-const pentagonalPrism = new PhysicsObject(world, pentagonalPrismShape);
-
+const pentagonalPrismCannonBody = new CANNON.Body( { mass: 1 } );
+pentagonalPrismCannonBody.addShape( new CANNON.Sphere(75) );
+const pentagonalPrism = new PhysicsObject(world, pentagonalPrismShape, pentagonalPrismCannonBody);
 
 //Plane
 class Plane extends Shape {
@@ -76,7 +74,7 @@ class Plane extends Shape {
         this.faces = [{pointIndexes:[0,1,2,3],colour:"#e6e6e6"},{pointIndexes:[1,18,21,2],colour:"#e6e6e6"},{pointIndexes:[18,19,20,21],colour:"#e6e6e6"},{pointIndexes:[19,36,39,20],colour:"#e6e6e6"},{pointIndexes:[36,37,38,39],colour:"#e6e6e6"},{pointIndexes:[37,54,57,38],colour:"#e6e6e6"},{pointIndexes:[54,55,56,57],colour:"#e6e6e6"},{pointIndexes:[55,72,73,56],colour:"#e6e6e6"},{pointIndexes:[3,2,5,4],colour:"#e6e6e6"},{pointIndexes:[2,21,22,5],colour:"#e6e6e6"},{pointIndexes:[21,20,23,22],colour:"#e6e6e6"},{pointIndexes:[20,39,40,23],colour:"#e6e6e6"},{pointIndexes:[39,38,41,40],colour:"#e6e6e6"},{pointIndexes:[38,57,58,41],colour:"#e6e6e6"},{pointIndexes:[57,56,59,58],colour:"#e6e6e6"},{pointIndexes:[56,73,74,59],colour:"#e6e6e6"},{pointIndexes:[4,5,6,7],colour:"#e6e6e6"},{pointIndexes:[5,22,25,6],colour:"#e6e6e6"},{pointIndexes:[22,23,24,25],colour:"#e6e6e6"},{pointIndexes:[23,40,43,24],colour:"#e6e6e6"},{pointIndexes:[40,41,42,43],colour:"#e6e6e6"},{pointIndexes:[41,58,61,42],colour:"#e6e6e6"},{pointIndexes:[58,59,60,61],colour:"#e6e6e6"},{pointIndexes:[59,74,75,60],colour:"#e6e6e6"},{pointIndexes:[7,6,9,8],colour:"#e6e6e6"},{pointIndexes:[6,25,26,9],colour:"#e6e6e6"},{pointIndexes:[25,24,27,26],colour:"#e6e6e6"},{pointIndexes:[24,43,44,27],colour:"#e6e6e6"},{pointIndexes:[43,42,45,44],colour:"#e6e6e6"},{pointIndexes:[42,61,62,45],colour:"#e6e6e6"},{pointIndexes:[61,60,63,62],colour:"#e6e6e6"},{pointIndexes:[60,75,76,63],colour:"#e6e6e6"},{pointIndexes:[8,9,10,11],colour:"#e6e6e6"},{pointIndexes:[9,26,29,10],colour:"#e6e6e6"},{pointIndexes:[26,27,28,29],colour:"#e6e6e6"},{pointIndexes:[27,44,47,28],colour:"#e6e6e6"},{pointIndexes:[44,45,46,47],colour:"#e6e6e6"},{pointIndexes:[45,62,65,46],colour:"#e6e6e6"},{pointIndexes:[62,63,64,65],colour:"#e6e6e6"},{pointIndexes:[63,76,77,64],colour:"#e6e6e6"},{pointIndexes:[11,10,13,12],colour:"#e6e6e6"},{pointIndexes:[10,29,30,13],colour:"#e6e6e6"},{pointIndexes:[29,28,31,30],colour:"#e6e6e6"},{pointIndexes:[28,47,48,31],colour:"#e6e6e6"},{pointIndexes:[47,46,49,48],colour:"#e6e6e6"},{pointIndexes:[46,65,66,49],colour:"#e6e6e6"},{pointIndexes:[65,64,67,66],colour:"#e6e6e6"},{pointIndexes:[64,77,78,67],colour:"#e6e6e6"},{pointIndexes:[12,13,14,15],colour:"#e6e6e6"},{pointIndexes:[13,30,33,14],colour:"#e6e6e6"},{pointIndexes:[30,31,32,33],colour:"#e6e6e6"},{pointIndexes:[31,48,51,32],colour:"#e6e6e6"},{pointIndexes:[48,49,50,51],colour:"#e6e6e6"},{pointIndexes:[49,66,69,50],colour:"#e6e6e6"},{pointIndexes:[66,67,68,69],colour:"#e6e6e6"},{pointIndexes:[67,78,79,68],colour:"#e6e6e6"},{pointIndexes:[15,14,17,16],colour:"#e6e6e6"},{pointIndexes:[14,33,34,17],colour:"#e6e6e6"},{pointIndexes:[33,32,35,34],colour:"#e6e6e6"},{pointIndexes:[32,51,52,35],colour:"#e6e6e6"},{pointIndexes:[51,50,53,52],colour:"#e6e6e6"},{pointIndexes:[50,69,70,53],colour:"#e6e6e6"},{pointIndexes:[69,68,71,70],colour:"#e6e6e6"},{pointIndexes:[68,79,80,71],colour:"#e6e6e6"}];
     }
 }
-const plane = new PhysicsObject( world, new Plane(), undefined, new CANNON.Body({ mass: 0 }));
+const plane = new PhysicsObject( world, new Plane(), new CANNON.Body({ mass: 0 }));
 plane.aShape.showOutline = true;
 
 
