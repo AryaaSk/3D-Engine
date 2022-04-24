@@ -24,7 +24,6 @@ world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
 
 //Aryaa3D Setup
 linkCanvas("renderingWindow")
-
 const camera = new Camera();
 camera.enableMovementControls("renderingWindow"); //optional - just configuring camera
 ```
@@ -121,3 +120,6 @@ setInterval(() => {
 ```
 
 You can get quickly get started with the [physicsTemplate.html](https://github.com/AryaaSk/3D-Engine/tree/master/GameHelper/PhysicsIntegration/physicsTemplate.html)
+
+Here is a demo of the [example.html](https://github.com/AryaaSk/3D-Engine/tree/master/GameHelper/PhysicsIntegration/example.html)\
+![Preview Gif](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/PhysicsDemo.gif?raw=true)

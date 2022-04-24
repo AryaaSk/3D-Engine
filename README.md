@@ -147,6 +147,8 @@ camera.enableMovementControls(canvasID);
 
 You can download the [Quick Start Template](template.html) to get started straight away
 
+If you want to create games with this, read the [Game Helper README](Docs/GameHelper.md)
+
 ## Usage
 Here is a preview of the project in this repo [Example.html](https://aryaask.github.io/3D-Engine/Previews/example.html)\
 ![Preview Gif](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/3DEngineDemo.gif?raw=true)
