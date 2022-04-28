@@ -62,6 +62,7 @@ const drawShape = (points, colour, outline) => {
     }
     if (points.length == 2) {
         drawLine(points[0], points[1], colour);
+        return;
     }
     else if (points.length < 3) {
         console.error("Cannot draw shape, need at least 3 points to draw a shape");
@@ -331,7 +332,19 @@ class Shape {
         this.position.y += translationVector.y;
         this.position.z += translationVector.z;
     }
-    showOutline = false;
+    set showOutline(value) {
+        //loop through faces and set outline to true / false
+        if (value == true) {
+            for (let i = 0; i != this.faces.length; i += 1) {
+                this.faces[i].outline = true;
+            }
+        }
+        else if (value == false) {
+            for (let i = 0; i != this.faces.length; i += 1) {
+                this.faces[i].outline = false;
+            }
+        }
+    }
     showPoints = false;
     faces = []; //stores the indexes of the points (columns) in the physicalMatrix
     showFaceIndexes = false;
@@ -346,7 +359,6 @@ class Shape {
         newShape.scale = this.scale;
         newShape.physicalMatrix = this.physicalMatrix.copy();
         newShape.position = JSON.parse(JSON.stringify(this.position));
-        newShape.showOutline = this.showOutline;
         newShape.showPoints = this.showPoints;
         newShape.faces = JSON.parse(JSON.stringify(this.faces));
         newShape.showFaceIndexes = this.showFaceIndexes;
@@ -554,13 +566,14 @@ class Camera {
                 }
                 const [averageX, averageY, averageZ] = [totalX / points.length, totalY / points.length, totalZ / points.length];
                 const center = [averageX, averageY, averageZ];
-                objectFaces.push({ points: points, center: center, colour: object.faces[i].colour, faceIndex: i });
+                objectFaces.push({ points: points, center: center, colour: object.faces[i].colour, faceIndex: i, outline: object.faces[i].outline });
             }
             const sortedFaces = this.sortFurthestDistanceTo(objectFaces, "center", positionPoint); //sort based on distance from center to (0, 0, -50000)
             for (let i = 0; i != sortedFaces.length; i += 1) {
                 const facePoints = sortedFaces[i].points;
                 let colour = sortedFaces[i].colour;
-                drawShape(facePoints, colour, object.showOutline);
+                //find if the face has outline == true, or if it is false / undefined.
+                drawShape(facePoints, colour, sortedFaces[i].outline);
                 if (object.showFaceIndexes == true) {
                     plotPoint(sortedFaces[i].center, "#000000", String(sortedFaces[i].faceIndex));
                 }
