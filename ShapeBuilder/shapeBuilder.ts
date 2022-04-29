@@ -172,6 +172,7 @@ const updateDisplayShape = () => {
     displayShape.faces = shape.faces;
     displayShape.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
     displayShape.updateMatrices();
+    displayShape.showOutline = true;
 }
 
 const updateDOM = () => { //updates the data from the shape, to display in the DOM
@@ -489,7 +490,6 @@ updateDOM();
 updateDisplayShape();
 document.getElementById("exportCode")!.innerText = generateExportCode();
 
-displayShape.showOutline = true;
 displayShape.showPoints = true;
 (<HTMLInputElement>document.getElementById("showPoints")).checked = true;
 (<HTMLInputElement>document.getElementById("showFaces")).checked = false;
