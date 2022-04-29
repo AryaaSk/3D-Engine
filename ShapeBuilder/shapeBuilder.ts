@@ -172,7 +172,7 @@ const updateDisplayShape = () => {
     displayShape.faces = shape.faces;
     displayShape.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
     displayShape.updateMatrices();
-    displayShape.showOutline = true;
+    displayShape.showOutline();
 }
 
 const updateDOM = () => { //updates the data from the shape, to display in the DOM

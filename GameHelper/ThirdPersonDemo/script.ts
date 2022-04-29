@@ -44,7 +44,7 @@ class PlayerObject extends Shape {
     }
 }
 const player = new PlayerObject();
-player.showOutline = true;
+player.showOutline();
 
 //Houses
 class House extends Shape {
@@ -98,9 +98,9 @@ const planeSize = 1500;
 const planeHeight = 25;
 const plane = new Box(planeSize, planeHeight, planeSize);
 plane.position.y = -(planeHeight / 2);
-plane.showOutline = true;
+plane.showOutline();
 const planeTop = new PlaneTop();
-planeTop.showOutline = true;
+planeTop.showOutline();
 planeTop.scale = planeSize / 800;
 planeTop.updateMatrices();
 

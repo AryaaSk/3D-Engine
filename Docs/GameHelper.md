@@ -127,7 +127,7 @@ cube.syncCBody(); //sync cannon body with aryaa3D shape's rotation, will also sy
 
 You can also just edit all the apperance properties as usual:
 ```javascript
-cube.aShape.showOutline = true;
+cube.aShape.showOutline();
 ```
 
 ## Animation/Simulation Loop

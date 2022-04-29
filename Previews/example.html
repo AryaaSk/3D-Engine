@@ -50,16 +50,16 @@
         const pyramid = new SquareBasedPyramid(50, 100);
         pyramid.position.x = -300;
         pyramid.scale = 2;
-        pyramid.showOutline = true;
+        pyramid.showOutline();
         pyramid.showFaceIndexes = true;
         pyramid.updateMatrices();
 
         const triangularPrism = new TriangularPrism(100, 100, 400);
-        triangularPrism.showOutline = true;
+        triangularPrism.showOutline();
         triangularPrism.position.z = 600;
 
         const elongatedOctahedron = new ElongatedOctahedron(200, 200, 200);
-        elongatedOctahedron.showOutline = true;
+        elongatedOctahedron.showOutline();
         elongatedOctahedron.faces[8].colour = ""; //top half is transparent, now it looks like a bowl
         elongatedOctahedron.faces[9].colour = "";
         elongatedOctahedron.faces[10].colour = "";
@@ -88,7 +88,7 @@
         const pentagon = new PentagonalPrism()
         pentagon.position.x = -300;
         pentagon.position.y = 300;
-        pentagon.showOutline = true;
+        pentagon.showOutline();
 
         class Shuriken extends Shape {
             constructor () {
@@ -139,7 +139,7 @@
         sphere.position.x = 300;
         sphere.position.y = 300;
         sphere.position.z = -300;
-        sphere.showOutline = true;
+        sphere.showOutline();
 
         setInterval(() => { //animation loop
             cube.rotation.y += 1;

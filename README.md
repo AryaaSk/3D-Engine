@@ -82,9 +82,11 @@ cube.faces[5].colour = "";
 ```
 Here you changed the back-facing face to transparent, so you can see through it and see the other faces.
 
-Finally if you want to show the outline:
+As well as show and hide the outline for individual faces, or you can show / hide the outline for the entire shape:
 ```javascript
-cube.showOutline = true;
+cube.faces[0].outline = true;
+cube.showOutline(); //sets every face's outline to true, hideOutline() sets to false
+cube.hideOutline();
 ```
 
 ## Camera

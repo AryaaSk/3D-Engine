@@ -176,7 +176,7 @@
         displayShape.faces = shape.faces;
         displayShape.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
         displayShape.updateMatrices();
-        displayShape.showOutline = true;
+        displayShape.showOutline();
     };
     const updateDOM = () => {
         const pointList = document.getElementById("pointList");

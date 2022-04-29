@@ -37,7 +37,7 @@ const localScope = () => {
         }
     }
     const player = new PlayerObject();
-    player.showOutline = true;
+    player.showOutline();
     //Houses
     class House extends Shape {
         constructor() {
@@ -84,9 +84,9 @@ const localScope = () => {
     const planeHeight = 25;
     const plane = new Box(planeSize, planeHeight, planeSize);
     plane.position.y = -(planeHeight / 2);
-    plane.showOutline = true;
+    plane.showOutline();
     const planeTop = new PlaneTop();
-    planeTop.showOutline = true;
+    planeTop.showOutline();
     planeTop.scale = planeSize / 800;
     planeTop.updateMatrices();
     //Rotate player based on mouse movement

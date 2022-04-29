@@ -63,7 +63,7 @@ class Plane extends Shape {
     }
 }
 const plane = new PhysicsObject(world, new Plane(), new CANNON.Body({ mass: 0 }));
-plane.aShape.showOutline = true;
+plane.aShape.showOutline();
 document.onkeydown = ($e) => {
     const key = $e.key.toLowerCase();
     if ($e.key == " ") {
