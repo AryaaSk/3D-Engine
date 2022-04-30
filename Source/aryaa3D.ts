@@ -377,6 +377,11 @@ class Shape
             this.faces[i].outline = false;
         }
     }
+    setColour = (colour: string) => {
+        for (let i = 0; i != this.faces.length; i += 1) {
+            this.faces[i].colour = colour;
+        }
+    }
 
     showPoints: boolean = false;
     faces: { pointIndexes: number[], colour: string, outline?: boolean }[]  = []; //stores the indexes of the points (columns) in the physicalMatrix
@@ -713,9 +718,10 @@ class Camera {
         this.worldRotationMatrix = calculateRotationMatrix(rX, rY, rZ);
     }
 
-    renderGrid() {
+    renderGrid(colour?: boolean) {
         const gridLength = 50000 * this.zoom;
         const grid = new Grid(gridLength);
+        if (colour != true) { grid.setColour("#000000"); }
         this.render([grid]);
     }
 

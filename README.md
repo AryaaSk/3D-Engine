@@ -73,6 +73,7 @@ cube.updateMatrices();
 You can also change the appearance of the object using the faces property. Each faces each have their own index, if you are not sure which index is what face, you can set the showFaceIndexes property to true, and then you will be able to see which index is which face, making it easy to set the correct colour to the correct face:
 ```javascript
 cube.showFaceIndexes = true;
+cube.setColour("#0000ff"); //makes the shape blue
 cube.faces[0].colour = "#ff0000";
 ```
 
@@ -82,11 +83,12 @@ cube.faces[5].colour = "";
 ```
 Here you changed the back-facing face to transparent, so you can see through it and see the other faces.
 
-As well as show and hide the outline for individual faces, or you can show / hide the outline for the entire shape:
+Show/Hide the shape's outline, or you could control the outline for individidual faces
+Show and hide the outline for individual faces, or you can show / hide the outline for the entire shape:
 ```javascript
-cube.faces[0].outline = true;
 cube.showOutline(); //sets every face's outline to true, hideOutline() sets to false
 cube.hideOutline();
+cube.faces[0].outline = true;
 ```
 
 ## Camera
