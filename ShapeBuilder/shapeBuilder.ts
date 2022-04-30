@@ -445,8 +445,8 @@ const startButtonListeners = () => {
         let clickedPoint = undefined;
 
         //we need to convert these click X and Y coordinates into the coordinates on the grid
-        const gridX = ($e.clientX - (canvasWidth / 2)) / dpi;
-        const gridY = ((canvasHeight / 2) - $e.clientY) / dpi;
+        const gridX = $e.clientX - (canvasWidth / 2);
+        const gridY = (canvasHeight / 2) - $e.clientY;
         const cursorPoint = [gridX, gridY];
 
         const distanceBetween2D = (p1: number[], p2: number[]) => { return Math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2); }

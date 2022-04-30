@@ -135,7 +135,7 @@ camera.render([cube]);
 
 camera.render([cube, cube2, cube3]); //If you have multiple objects
 ```
-This function will also return the objects with their respective screen points, if you want to setup an interactive system where the user can select points/faces directly from the canvas, I have used this in the Shape Builder when you select the points indexes for the faces. Be aware that these points will be multiplied by the device's DPI, so if you want to use them you should first divide the points by the devices DPI, which is stored in a variable called **dpi**.
+This function will also return the objects with their respective screen points, if you want to setup an interactive system where the user can select points/faces directly from the canvas, I have used this in the Shape Builder when you select the points indexes for the faces.
 
 You may also want to clear the page before rendering again, since otherwise there will be a copy created
 ```javascript

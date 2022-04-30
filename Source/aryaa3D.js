@@ -36,10 +36,10 @@ const plotPoint = (p, colour, label) => {
     }
     //point will be in format: [x, y]
     c.fillStyle = colour;
-    c.fillRect(gridX(p[0] * dpi), gridY(p[1] * dpi), 10, 10);
+    c.fillRect(gridX(p[0]), gridY(p[1]), 10, 10);
     if (label != undefined) {
         c.font = `${20 * dpi}px Arial`;
-        c.fillText(label, gridX(p[0] * dpi) + 10, gridY(p[1] * dpi) + 10);
+        c.fillText(label, gridX(p[0]) + 10, gridY(p[1]) + 10);
     }
 };
 const drawLine = (p1, p2, colour) => {
@@ -51,8 +51,8 @@ const drawLine = (p1, p2, colour) => {
     //I need to convert the javascript x and y into actual grid x and y
     c.strokeStyle = colour;
     c.beginPath();
-    c.moveTo(gridX(p1[0] * dpi), gridY(p1[1] * dpi));
-    c.lineTo(gridX(p2[0] * dpi), gridY(p2[1] * dpi));
+    c.moveTo(gridX(p1[0]), gridY(p1[1]));
+    c.lineTo(gridX(p2[0]), gridY(p2[1]));
     c.stroke();
 };
 const drawShape = (points, colour, outline) => {
@@ -70,9 +70,9 @@ const drawShape = (points, colour, outline) => {
     }
     c.fillStyle = colour;
     c.beginPath();
-    c.moveTo(gridX(points[0][0] * dpi), gridY(points[0][1] * dpi));
+    c.moveTo(gridX(points[0][0]), gridY(points[0][1]));
     for (let pointsIndex = 1; pointsIndex != points.length; pointsIndex += 1) {
-        c.lineTo(gridX(points[pointsIndex][0] * dpi), gridY(points[pointsIndex][1] * dpi));
+        c.lineTo(gridX(points[pointsIndex][0]), gridY(points[pointsIndex][1]));
     }
     c.closePath();
     c.fill();

@@ -463,8 +463,8 @@
         document.getElementById("renderingWindow").onclick = ($e) => {
             let clickedPoint = undefined;
             //we need to convert these click X and Y coordinates into the coordinates on the grid
-            const gridX = ($e.clientX - (canvasWidth / 2)) / dpi;
-            const gridY = ((canvasHeight / 2) - $e.clientY) / dpi;
+            const gridX = $e.clientX - (canvasWidth / 2);
+            const gridY = (canvasHeight / 2) - $e.clientY;
             const cursorPoint = [gridX, gridY];
             const distanceBetween2D = (p1, p2) => { return Math.sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2); };
             //now we need to loop through the screenPoints, check which point is the closests to the pointer's x and y, and return undefined if that distance is bigger than 100
