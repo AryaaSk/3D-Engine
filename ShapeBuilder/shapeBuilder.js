@@ -328,6 +328,7 @@
                 }
                 facesJSON = facesJSON.replaceAll('pointIndexes', '"pointIndexes"');
                 facesJSON = facesJSON.replaceAll('colour', '"colour"');
+                facesJSON = facesJSON.replaceAll('outline', '"outline"');
                 faces = JSON.parse(facesJSON);
                 found += 1;
             }
