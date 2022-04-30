@@ -49,7 +49,7 @@ const drawLine = (p1, p2, colour) => {
     }
     //points will be in format: [x, y]
     //I need to convert the javascript x and y into actual grid x and y
-    c.fillStyle = colour;
+    c.strokeStyle = colour;
     c.beginPath();
     c.moveTo(gridX(p1[0] * dpi), gridY(p1[1] * dpi));
     c.lineTo(gridX(p2[0] * dpi), gridY(p2[1] * dpi));
