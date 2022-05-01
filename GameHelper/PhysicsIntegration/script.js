@@ -107,9 +107,11 @@ doubleBoxHitbox.aShape.showOutline();
 const doubleBox = new PhysicsObject( world, doubleBoxHitbox.aShape, doubleBoxHitbox.cBody );
 */
 //The reason this is because the cylinder object is rotated wrong in cannon-js
+//I had to manually go to the source code of https://github.com/pmndrs/cannon-es/pull/30/commits/3767192096ff0207f79352f0f90e16c01de7426f, and copy the changes over from cannon-es
 const cylinderShape = new Cylinder(100, 300);
-cylinderShape.pointMatrix.printMatrix();
-const cylinderBody = new CANNON.Body({ mass: 1, shape: new CANNON.Cylinder(100, 100, 150, 8) });
+const cylinderBody = new CANNON.Body({ mass: 1, shape: new CANNON.Cylinder(100, 100, 300, 8) });
+cylinderShape.rotation.z = 90;
+cylinderShape.updateQuaternion();
 const cylinder = new PhysicsObject(world, cylinderShape, cylinderBody);
 const interval = setInterval(() => {
     world.step(16 / 1000);
