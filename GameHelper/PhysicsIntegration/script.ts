@@ -42,7 +42,7 @@ planeShape.showOutline();
 planeShape.setColour("efefef");
 const plane = new PhysicsObject( world, planeShape, new CANNON.Body( { mass: 0 } ) );
 
-
+/*
 //REGULAR ASHAPE, REGULAR CBODY:
 const cubeShape = new Box(100, 100, 100);
 cubeShape.position = { x: 300, y: 0, z: 300 };
@@ -112,6 +112,18 @@ doubleBoxHitbox.aShape.position = { x: 150, y: 200, z: 0 };
 doubleBoxHitbox.aShape.showOutline();
 
 const doubleBox = new PhysicsObject( world, doubleBoxHitbox.aShape, doubleBoxHitbox.cBody );
+*/
+
+//The reason this is because the cylinder object is rotated wrong in cannon-js
+
+const cylinderShape = new Cylinder( 100, 300 );
+cylinderShape.pointMatrix.printMatrix();
+const cylinderBody = new CANNON.Body( { mass: 1, shape: new CANNON.Cylinder(100, 100, 150, 8) } )
+const cylinder = new PhysicsObject( world, cylinderShape, cylinderBody )
+
+
+
+
 
 
 
@@ -123,14 +135,18 @@ const interval = setInterval(() => { //animation loop
 
     //sync aryaa3D objects with cannon objects
     plane.syncAShape();
+    /*
     cube.syncAShape();
     pentagonalPrism.syncAShape();
     boxSphere.syncAShape();
     doubleBox.syncAShape();
+    */
+    cylinder.syncAShape()
 
     clearCanvas();
     camera.render([plane.aShape]);
-    camera.render([cube.aShape, pentagonalPrism.aShape, boxSphere.aShape, doubleBox.aShape]);
+    //camera.render([cube.aShape, pentagonalPrism.aShape, boxSphere.aShape, doubleBox.aShape]);
+    camera.render([cylinder.aShape]);
 }, 16);
 
 
