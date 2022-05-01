@@ -169,4 +169,14 @@ Here is a preview of the [Shape Builder](https://aryaask.github.io/3D-Engine/Sha
 ![Shape Builder Preview](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ShapeBuilderPreview2.png?raw=true)\
 *Read the [Shape Builder Docs](Docs/buildingShapes.md). for more information*
 
-I also created a 3D Chess game using this library: https://github.com/AryaaSk/3DChess
+I created a 3D Chess game using this library: https://github.com/AryaaSk/3DChess
+As well as a Lego Builder: https://github.com/AryaaSk/LegoBuilder
+
+### Limitations
+There are some limitations to this engine:
+- No perspective projection, this is quite a big feature, but unfortunately this engine can only support parallel projection.
+- Sorting order, sometimes at weird angles, some shapes will be rendered in front of another shape, even if it was meant to be the other way round. This is usually caused by have shapes too large, due to how the engine calculates render order.
+- Performance, when you start to add many points and shapes, the performance does start to drop quite a bit, this can be seen in the chess game, which only runs at about 40fps on average.
+- No .obj files or textures, you have to make all custom shapes inside the Shape Builder, and you can't project images (textures) onto objects.
+
+*This was just a project for fun and education*
