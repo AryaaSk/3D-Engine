@@ -169,7 +169,7 @@ Here is a preview of the [Shape Builder](https://aryaask.github.io/3D-Engine/Sha
 ![Shape Builder Preview](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/ShapeBuilderPreview2.png?raw=true)\
 *Read the [Shape Builder Docs](Docs/buildingShapes.md). for more information*
 
-I created a 3D Chess game using this library: https://github.com/AryaaSk/3DChess
+I created a 3D Chess game using this library: https://github.com/AryaaSk/3DChess \
 As well as a Lego Builder: https://github.com/AryaaSk/LegoBuilder
 
 ### Limitations
