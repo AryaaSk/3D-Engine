@@ -104,6 +104,41 @@ pentagonalPrismCannonBody.addShape( new CANNON.Sphere(75) ); //Custom Shape, whi
 
 const pentagonalPrism = new PhysicsObject(world, pentagonalPrismShape, pentagonalPrismCannonBody);
 ```
+
+### Custom Hitboxes
+To create a custom hitbox, you will need to make use of the Primative system, CannonJS requires you to construct a hitbox using primative shapes such as a cube, sphere, cylinder, to construct a compound shape. Luckily I have created a fucntion called *constructObjectFromPrimatives()*, will takes in Primatives Shapes, with their offsets to the center, as well a mass for the entire object.
+
+Here is an example creating an object with 2 Spheres and a Cuboid connecting them:
+```javascript
+const boxSphereHitbox = constructObjectFromPrimatives([
+    new PrimativeSphere( { radius: 50 }, Vector(0, -90, 0) ),
+    new PrimativeBox( { width: 50, height: 100, depth: 50 }, Vector(0, 0, 0) ),
+    new PrimativeSphere( { radius: 50 }, Vector(0, 90, 0) )
+], 1);
+
+//That will return an aShape, and a cBody, you can then edit these however you want, and then create a PhysicsObject with them
+boxSphereHitbox.aShape.rotation.z = 90;
+boxSphereHitbox.aShape.updateQuaternion();
+boxSphereHitbox.aShape.setColour("#ff8000");
+boxSphereHitbox.aShape.faces.map( (face, index) => { if (index == 56 || index == 57 || index == 60 || index == 61)  { face.colour = "#87deeb"; } } );
+```
+
+Right now there are only 2 primative shapes avaiable to use:
+```javascript
+PrimativeBox( { width, height, depth }, Vector(x, y, z) ) //takes in dimensions, and offset (represented by vector)
+PrimativeSphere( { radius }, Vector(x, y, z) )
+```
+
+The function will take in the primatives, and merge them all together, and output an aShape and cBody, which you can then use to create a phyiscal object.
+```javascript
+const boxSphere = new PhysicsObject(world, boxSphereHitbox.aShape, boxSphereHitbox.cBody);
+boxSphereHitbox.aShape.showOutline();
+```
+**This is mainly meant to be used to create hitboxes, once you are happy with a hitbox, you can replace the *boxSphereHitbox.aShape* with your actual aryaa3D shape**
+
+Then you can just use this PhysicsObject like any other one.
+
+
 *If you have a custom object then I wouldn't recommend letting GameHelper create the hitbox in the CannonJSBody, since it creates a bounding box, which may not be ideal for your object. I would recommend reading the [CannonJS Docs](https://github.com/schteppe/cannon.js), on how to create custom Shapes.*
 
 ### Editing Objects
