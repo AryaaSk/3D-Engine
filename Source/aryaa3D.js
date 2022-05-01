@@ -419,6 +419,25 @@ class Box extends Shape {
         ];
     }
 }
+//not a proper sphere, I just tried to create it using the Shape Builder.
+class Sphere extends Shape {
+    constructor(radius) {
+        super();
+        this.pointMatrix = new matrix();
+        const points = [[-60, -82.5, 20], [-20, -82.5, 60], [20, -82.5, 60], [60, -82.5, 20], [60, -82.5, -20], [20, -82.5, -60], [-20, -82.5, -60], [-60, -82.5, -20], [-84, -49.50000000000001, 28], [-28, -49.50000000000001, 84], [28, -49.50000000000001, 84], [84, -49.50000000000001, 28], [84, -49.50000000000001, -28], [28, -49.50000000000001, -84], [-28, -49.50000000000001, -84], [-84, -49.50000000000001, -28], [-100, -16.5, 33.6], [-33.6, -16.5, 100], [33.6, -16.5, 100], [100, -16.5, 33.6], [100, -16.5, -33.6], [33.6, -16.5, -100], [-33.6, -16.5, -100], [-100, -16.5, -33.6], [-84, 49.50000000000001, 28], [-28, 49.50000000000001, 84], [28, 49.50000000000001, 84], [84, 49.50000000000001, 28], [84, 49.50000000000001, -28], [28, 49.50000000000001, -84], [-28, 49.50000000000001, -84], [-84, 49.50000000000001, -28], [-60, 82.5, 20], [-20, 82.5, 60], [20, 82.5, 60], [60, 82.5, 20], [60, 82.5, -20], [20, 82.5, -60], [-20, 82.5, -60], [-60, 82.5, -20], [-100, 16.5, 33.6], [-33.6, 16.5, 100], [33.6, 16.5, 100], [100, 16.5, 33.6], [100, 16.5, -33.6], [33.6, 16.5, -100], [-33.6, 16.5, -100], [-100, 16.5, -33.6], [0, -104.50000000000001, 0], [0, 104.50000000000001, 0]];
+        for (let i = 0; i != points.length; i += 1) {
+            this.pointMatrix.addColumn(points[i]);
+        }
+        const [centeringX, centeringY, centeringZ] = [0, 0, 0];
+        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
+        this.setFaces();
+        this.pointMatrix.scaleUp(radius / 104.5); //The model has a radius of 104.5
+        this.updateMatrices();
+    }
+    setFaces() {
+        this.faces = [{ pointIndexes: [0, 8, 15, 7], colour: "#c4c4c4" }, { pointIndexes: [7, 6, 14, 15], colour: "#c4c4c4" }, { pointIndexes: [6, 5, 13, 14], colour: "#c4c4c4" }, { pointIndexes: [5, 4, 12, 13], colour: "#c4c4c4" }, { pointIndexes: [4, 3, 11, 12], colour: "#c4c4c4" }, { pointIndexes: [3, 2, 10, 11], colour: "#c4c4c4" }, { pointIndexes: [2, 1, 9, 10], colour: "#c4c4c4" }, { pointIndexes: [1, 0, 8, 9], colour: "#c4c4c4" }, { pointIndexes: [9, 8, 16, 17], colour: "#c4c4c4" }, { pointIndexes: [8, 15, 23, 16], colour: "#c4c4c4" }, { pointIndexes: [15, 14, 22, 23], colour: "#c4c4c4" }, { pointIndexes: [14, 13, 21, 22], colour: "#c4c4c4" }, { pointIndexes: [13, 12, 20, 21], colour: "#c4c4c4" }, { pointIndexes: [12, 11, 19, 20], colour: "#c4c4c4" }, { pointIndexes: [11, 10, 18, 19], colour: "#c4c4c4" }, { pointIndexes: [10, 9, 17, 18], colour: "#c4c4c4" }, { pointIndexes: [18, 17, 41, 42], colour: "#c4c4c4" }, { pointIndexes: [17, 16, 40, 41], colour: "#c4c4c4" }, { pointIndexes: [16, 23, 47, 40], colour: "#c4c4c4" }, { pointIndexes: [23, 22, 46, 47], colour: "#c4c4c4" }, { pointIndexes: [22, 21, 45, 46], colour: "#c4c4c4" }, { pointIndexes: [21, 20, 44, 45], colour: "#c4c4c4" }, { pointIndexes: [20, 19, 43, 44], colour: "#c4c4c4" }, { pointIndexes: [19, 18, 42, 43], colour: "#c4c4c4" }, { pointIndexes: [44, 28, 27, 43], colour: "#c4c4c4" }, { pointIndexes: [43, 27, 26, 42], colour: "#c4c4c4" }, { pointIndexes: [42, 26, 25, 41], colour: "#c4c4c4" }, { pointIndexes: [41, 25, 24, 40], colour: "#c4c4c4" }, { pointIndexes: [40, 24, 31, 47], colour: "#c4c4c4" }, { pointIndexes: [47, 31, 30, 46], colour: "#c4c4c4" }, { pointIndexes: [46, 30, 29, 45], colour: "#c4c4c4" }, { pointIndexes: [45, 29, 28, 44], colour: "#c4c4c4" }, { pointIndexes: [30, 29, 37, 38], colour: "#c4c4c4" }, { pointIndexes: [29, 28, 36, 37], colour: "#c4c4c4" }, { pointIndexes: [28, 27, 35, 36], colour: "#c4c4c4" }, { pointIndexes: [27, 26, 34, 35], colour: "#c4c4c4" }, { pointIndexes: [26, 25, 33, 34], colour: "#c4c4c4" }, { pointIndexes: [25, 24, 32, 33], colour: "#c4c4c4" }, { pointIndexes: [24, 31, 39, 32], colour: "#c4c4c4" }, { pointIndexes: [31, 30, 38, 39], colour: "#c4c4c4" }, { pointIndexes: [7, 48, 6], colour: "#c4c4c4" }, { pointIndexes: [6, 48, 5], colour: "#c4c4c4" }, { pointIndexes: [5, 48, 4], colour: "#c4c4c4" }, { pointIndexes: [4, 48, 3], colour: "#c4c4c4" }, { pointIndexes: [3, 48, 2], colour: "#c4c4c4" }, { pointIndexes: [2, 48, 1], colour: "#c4c4c4" }, { pointIndexes: [1, 48, 0], colour: "#c4c4c4" }, { pointIndexes: [0, 48, 7], colour: "#c4c4c4" }, { pointIndexes: [38, 49, 39], colour: "#c4c4c4" }, { pointIndexes: [49, 38, 37], colour: "#c4c4c4" }, { pointIndexes: [37, 49, 36], colour: "#c4c4c4" }, { pointIndexes: [36, 49, 35], colour: "#c4c4c4" }, { pointIndexes: [35, 49, 34], colour: "#c4c4c4" }, { pointIndexes: [34, 49, 33], colour: "#c4c4c4" }, { pointIndexes: [33, 49, 32], colour: "#c4c4c4" }, { pointIndexes: [49, 32, 39], colour: "#c4c4c4" }];
+    }
+}
 class SquareBasedPyramid extends Shape {
     constructor(bottomSideLength, height) {
         super();
@@ -502,25 +521,6 @@ class ElongatedOctahedron extends Shape {
             { pointIndexes: [9, 7, 8], colour: "#ffffff" },
             { pointIndexes: [9, 8, 5], colour: "#c4c4c4" }
         ];
-    }
-}
-//not a proper sphere, I just tried to create it using the Shape Builder.
-class SphereShape extends Shape {
-    constructor(radius) {
-        super();
-        this.pointMatrix = new matrix();
-        const points = [[-60, -82.5, 20], [-20, -82.5, 60], [20, -82.5, 60], [60, -82.5, 20], [60, -82.5, -20], [20, -82.5, -60], [-20, -82.5, -60], [-60, -82.5, -20], [-84, -49.50000000000001, 28], [-28, -49.50000000000001, 84], [28, -49.50000000000001, 84], [84, -49.50000000000001, 28], [84, -49.50000000000001, -28], [28, -49.50000000000001, -84], [-28, -49.50000000000001, -84], [-84, -49.50000000000001, -28], [-100, -16.5, 33.6], [-33.6, -16.5, 100], [33.6, -16.5, 100], [100, -16.5, 33.6], [100, -16.5, -33.6], [33.6, -16.5, -100], [-33.6, -16.5, -100], [-100, -16.5, -33.6], [-84, 49.50000000000001, 28], [-28, 49.50000000000001, 84], [28, 49.50000000000001, 84], [84, 49.50000000000001, 28], [84, 49.50000000000001, -28], [28, 49.50000000000001, -84], [-28, 49.50000000000001, -84], [-84, 49.50000000000001, -28], [-60, 82.5, 20], [-20, 82.5, 60], [20, 82.5, 60], [60, 82.5, 20], [60, 82.5, -20], [20, 82.5, -60], [-20, 82.5, -60], [-60, 82.5, -20], [-100, 16.5, 33.6], [-33.6, 16.5, 100], [33.6, 16.5, 100], [100, 16.5, 33.6], [100, 16.5, -33.6], [33.6, 16.5, -100], [-33.6, 16.5, -100], [-100, 16.5, -33.6], [0, -104.50000000000001, 0], [0, 104.50000000000001, 0]];
-        for (let i = 0; i != points.length; i += 1) {
-            this.pointMatrix.addColumn(points[i]);
-        }
-        const [centeringX, centeringY, centeringZ] = [0, 0, 0];
-        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
-        this.setFaces();
-        this.pointMatrix.scaleUp(radius / 104.5); //The model has a radius of 104.5
-        this.updateMatrices();
-    }
-    setFaces() {
-        this.faces = [{ pointIndexes: [0, 8, 15, 7], colour: "#c4c4c4" }, { pointIndexes: [7, 6, 14, 15], colour: "#c4c4c4" }, { pointIndexes: [6, 5, 13, 14], colour: "#c4c4c4" }, { pointIndexes: [5, 4, 12, 13], colour: "#c4c4c4" }, { pointIndexes: [4, 3, 11, 12], colour: "#c4c4c4" }, { pointIndexes: [3, 2, 10, 11], colour: "#c4c4c4" }, { pointIndexes: [2, 1, 9, 10], colour: "#c4c4c4" }, { pointIndexes: [1, 0, 8, 9], colour: "#c4c4c4" }, { pointIndexes: [9, 8, 16, 17], colour: "#c4c4c4" }, { pointIndexes: [8, 15, 23, 16], colour: "#c4c4c4" }, { pointIndexes: [15, 14, 22, 23], colour: "#c4c4c4" }, { pointIndexes: [14, 13, 21, 22], colour: "#c4c4c4" }, { pointIndexes: [13, 12, 20, 21], colour: "#c4c4c4" }, { pointIndexes: [12, 11, 19, 20], colour: "#c4c4c4" }, { pointIndexes: [11, 10, 18, 19], colour: "#c4c4c4" }, { pointIndexes: [10, 9, 17, 18], colour: "#c4c4c4" }, { pointIndexes: [18, 17, 41, 42], colour: "#c4c4c4" }, { pointIndexes: [17, 16, 40, 41], colour: "#c4c4c4" }, { pointIndexes: [16, 23, 47, 40], colour: "#c4c4c4" }, { pointIndexes: [23, 22, 46, 47], colour: "#c4c4c4" }, { pointIndexes: [22, 21, 45, 46], colour: "#c4c4c4" }, { pointIndexes: [21, 20, 44, 45], colour: "#c4c4c4" }, { pointIndexes: [20, 19, 43, 44], colour: "#c4c4c4" }, { pointIndexes: [19, 18, 42, 43], colour: "#c4c4c4" }, { pointIndexes: [44, 28, 27, 43], colour: "#c4c4c4" }, { pointIndexes: [43, 27, 26, 42], colour: "#c4c4c4" }, { pointIndexes: [42, 26, 25, 41], colour: "#c4c4c4" }, { pointIndexes: [41, 25, 24, 40], colour: "#c4c4c4" }, { pointIndexes: [40, 24, 31, 47], colour: "#c4c4c4" }, { pointIndexes: [47, 31, 30, 46], colour: "#c4c4c4" }, { pointIndexes: [46, 30, 29, 45], colour: "#c4c4c4" }, { pointIndexes: [45, 29, 28, 44], colour: "#c4c4c4" }, { pointIndexes: [30, 29, 37, 38], colour: "#c4c4c4" }, { pointIndexes: [29, 28, 36, 37], colour: "#c4c4c4" }, { pointIndexes: [28, 27, 35, 36], colour: "#c4c4c4" }, { pointIndexes: [27, 26, 34, 35], colour: "#c4c4c4" }, { pointIndexes: [26, 25, 33, 34], colour: "#c4c4c4" }, { pointIndexes: [25, 24, 32, 33], colour: "#c4c4c4" }, { pointIndexes: [24, 31, 39, 32], colour: "#c4c4c4" }, { pointIndexes: [31, 30, 38, 39], colour: "#c4c4c4" }, { pointIndexes: [7, 48, 6], colour: "#c4c4c4" }, { pointIndexes: [6, 48, 5], colour: "#c4c4c4" }, { pointIndexes: [5, 48, 4], colour: "#c4c4c4" }, { pointIndexes: [4, 48, 3], colour: "#c4c4c4" }, { pointIndexes: [3, 48, 2], colour: "#c4c4c4" }, { pointIndexes: [2, 48, 1], colour: "#c4c4c4" }, { pointIndexes: [1, 48, 0], colour: "#c4c4c4" }, { pointIndexes: [0, 48, 7], colour: "#c4c4c4" }, { pointIndexes: [38, 49, 39], colour: "#c4c4c4" }, { pointIndexes: [49, 38, 37], colour: "#c4c4c4" }, { pointIndexes: [37, 49, 36], colour: "#c4c4c4" }, { pointIndexes: [36, 49, 35], colour: "#c4c4c4" }, { pointIndexes: [35, 49, 34], colour: "#c4c4c4" }, { pointIndexes: [34, 49, 33], colour: "#c4c4c4" }, { pointIndexes: [33, 49, 32], colour: "#c4c4c4" }, { pointIndexes: [49, 32, 39], colour: "#c4c4c4" }];
     }
 }
 //CAMERA

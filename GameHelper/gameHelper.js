@@ -72,12 +72,13 @@ const createCANNONBoundingBox = (aShape) => {
     const boundingBox = new CANNON.Box(new CANNON.Vec3(halfWidth, halfHeight, halfDepth));
     return boundingBox;
 };
+//Primatives, used for creating custom hitboxes
 class primative {
     dimensions;
     type = "";
     offset = Vector(0, 0, 0);
 }
-class primativeBox extends primative {
+class PrimativeBox extends primative {
     dimensions;
     constructor(dimensions, offset) {
         super();
@@ -86,7 +87,7 @@ class primativeBox extends primative {
         this.offset = offset;
     }
 }
-class primativeSphere extends primative {
+class PrimativeSphere extends primative {
     dimensions;
     constructor(dimensions, offset) {
         super();
@@ -112,7 +113,7 @@ const constructObjectFromPrimatives = (primatives, mass) => {
             body.addShape(cShape, new CANNON.Vec3(offset.x, offset.y, offset.z));
         }
         else if (primative.type == "sphere") {
-            const aShape = new SphereShape(dimensions.radius);
+            const aShape = new Sphere(dimensions.radius);
             aShape.pointMatrix.translateMatrix(offset.x, offset.y, offset.z);
             aShape.updateMatrices();
             const cShape = new CANNON.Sphere(dimensions.radius);
