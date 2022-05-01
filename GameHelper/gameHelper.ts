@@ -22,6 +22,10 @@ const syncCamera = (camera: Camera, object: Shape) => { //Syncs camera to third 
 }
 
 
+
+
+
+
 //CannonJS Physics Functions, import cannonjs before using any of these
 const syncShape = (cannonBody: CANNON.Body, aryaa3DBody: Shape) => {
     aryaa3DBody.position.x = cannonBody.position.x;
@@ -60,6 +64,66 @@ const createCANNONBoundingBox = (aShape: Shape): CANNON.Box => {
 
     const boundingBox = new CANNON.Box( new CANNON.Vec3(halfWidth, halfHeight, halfDepth) );
     return boundingBox
+}
+
+
+class primative {
+    dimensions: any;
+    type: string = "";
+    offset: XYZ = Vector(0, 0, 0);
+}
+class primativeBox extends primative{
+    dimensions: { width: number, height: number, depth: number };
+
+    constructor(dimensions: { width: number, height: number, depth: number }, offset: XYZ) {
+        super();
+        this.type = "box";
+        this.dimensions = dimensions;
+        this.offset = offset;
+    }
+}
+class primativeSphere extends primative {
+    dimensions: { radius: number };
+
+    constructor(dimensions: { radius: number }, offset: XYZ) {
+        super();
+        this.type = "sphere";
+        this.dimensions = dimensions;
+        this.offset = offset;
+    }
+}
+//will add cylinder and cone later
+
+const constructObjectFromPrimatives = (primatives: primative[], mass: number) => {
+    //takes in aryaa3D shapes (must be a primative, e.g. box, sphere, cylinder, cone)
+    let shape = new Shape();
+    const body = new CANNON.Body( { mass: mass } );
+
+    for (const primative of primatives) {
+        const dimensions = primative.dimensions;
+        const offset = primative.offset;
+
+        if (primative.type == "box") {
+            const aShape = new Box( dimensions.width, dimensions.height, dimensions.depth );
+            aShape.pointMatrix.translateMatrix(offset.x, offset.y, offset.z);
+            aShape.updateMatrices();
+            const cShape = new CANNON.Box( new CANNON.Vec3( dimensions.width / 2, dimensions.height / 2, dimensions.depth / 2 ) );
+
+            shape = mergeShapes(shape, aShape);
+            body.addShape(cShape, new CANNON.Vec3(offset.x, offset.y, offset.z) );
+        }
+        else if (primative.type == "sphere") {
+            const aShape = new SphereShape( dimensions.radius );
+            aShape.pointMatrix.translateMatrix(offset.x, offset.y, offset.z);
+            aShape.updateMatrices();
+            const cShape = new CANNON.Sphere( dimensions.radius );
+
+            shape = mergeShapes(shape, aShape);
+            body.addShape(cShape, new CANNON.Vec3(offset.x, offset.y, offset.z) );
+        }
+    }
+
+    return { aShape: shape, cBody: body };
 }
 
 class PhysicsObject {

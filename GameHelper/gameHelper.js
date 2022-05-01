@@ -72,6 +72,56 @@ const createCANNONBoundingBox = (aShape) => {
     const boundingBox = new CANNON.Box(new CANNON.Vec3(halfWidth, halfHeight, halfDepth));
     return boundingBox;
 };
+class primative {
+    dimensions;
+    type = "";
+    offset = Vector(0, 0, 0);
+}
+class primativeBox extends primative {
+    dimensions;
+    constructor(dimensions, offset) {
+        super();
+        this.type = "box";
+        this.dimensions = dimensions;
+        this.offset = offset;
+    }
+}
+class primativeSphere extends primative {
+    dimensions;
+    constructor(dimensions, offset) {
+        super();
+        this.type = "sphere";
+        this.dimensions = dimensions;
+        this.offset = offset;
+    }
+}
+//will add cylinder and cone later
+const constructObjectFromPrimatives = (primatives, mass) => {
+    //takes in aryaa3D shapes (must be a primative, e.g. box, sphere, cylinder, cone)
+    let shape = new Shape();
+    const body = new CANNON.Body({ mass: mass });
+    for (const primative of primatives) {
+        const dimensions = primative.dimensions;
+        const offset = primative.offset;
+        if (primative.type == "box") {
+            const aShape = new Box(dimensions.width, dimensions.height, dimensions.depth);
+            aShape.pointMatrix.translateMatrix(offset.x, offset.y, offset.z);
+            aShape.updateMatrices();
+            const cShape = new CANNON.Box(new CANNON.Vec3(dimensions.width / 2, dimensions.height / 2, dimensions.depth / 2));
+            shape = mergeShapes(shape, aShape);
+            body.addShape(cShape, new CANNON.Vec3(offset.x, offset.y, offset.z));
+        }
+        else if (primative.type == "sphere") {
+            const aShape = new SphereShape(dimensions.radius);
+            aShape.pointMatrix.translateMatrix(offset.x, offset.y, offset.z);
+            aShape.updateMatrices();
+            const cShape = new CANNON.Sphere(dimensions.radius);
+            shape = mergeShapes(shape, aShape);
+            body.addShape(cShape, new CANNON.Vec3(offset.x, offset.y, offset.z));
+        }
+    }
+    return { aShape: shape, cBody: body };
+};
 class PhysicsObject {
     aShape = new Shape(); //aryaa3D Shape
     cBody = new CANNON.Body(); //cannonJS body
