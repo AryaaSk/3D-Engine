@@ -5799,6 +5799,23 @@ Body.prototype.updateInertiaWorld = function(force){
 };
 
 /**
+   * Apply torque to the body.
+   * @param {Vec3} torque The amount of torque to add.
+   */
+Body.prototype.applyTorque = function(torque) {
+    if (this.type !== Body.DYNAMIC) {
+        return;
+    }
+
+    if (this.sleepState === Body.SLEEPING) {
+        this.wakeUp();
+    } // Add rotational force
+
+    this.torque.vadd(torque, this.torque);
+}
+
+
+/**
  * Apply force to a world point. This could for example be a point on the Body surface. Applying force this way will add to Body.force and Body.torque.
  * @method applyForce
  * @param  {Vec3} force The amount of force to add.
