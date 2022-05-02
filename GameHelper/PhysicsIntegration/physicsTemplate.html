@@ -48,7 +48,7 @@
         cubeShape.position = { x: 0, y: 300, z: -200 }; //changing position and rotation of aryaa3D object
         cubeShape.rotation = { x: -40, y: 30, z: 0 };
         cubeShape.updateQuaternion();
-        const cube = new PhysicsObject(world, cubeShape, undefined, undefined); //didn't pass CannonJSShape or CannonJSBody, so GameHelper will automatically create them.
+        const cube = new PhysicsObject(world, cubeShape, undefined); //didn't pass CannonJSBody, so GameHelper will automatically create them.
 
 
 

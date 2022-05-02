@@ -109,6 +109,15 @@ const pentagonalPrism = new PhysicsObject(world, pentagonalPrismShape, pentagona
 ### Custom Hitboxes
 To create a custom hitbox, you will need to make use of the Primative system, CannonJS requires you to construct a hitbox using primative shapes such as a cube, sphere, cylinder, to construct a compound shape. Luckily I have created a fucntion called *constructObjectFromPrimatives()*, will takes in Primatives Shapes, with their offsets to the center, an optional rotation paramter, as well a mass for the entire object.
 
+Right now there are only 4 primative shapes avaiable to use:
+```javascript
+PrimativeBox( { width, height, depth }, offset, rotation? ) //takes in dimensions, and offset (represented by vector), and optional rotation, represented with Euler Angles
+PrimativeSphere( { radius }, offset, rotation?  )
+PrimativeCylinder( { radius, height }, offset, rotation? )
+PrimativeCone( { radius, height }, offset, rotation? )
+```
+*The rotation paramter should only be used relative to the rest of the object, don't use it to just rotate the shape before creating a physics object, that should be done on the aShape which gets returned from the function*
+
 Here is an example creating an object with 2 Spheres and a Cylinder connecting them:
 ```javascript
 const boxSphereHitbox = constructObjectFromPrimatives([
@@ -124,24 +133,14 @@ boxSphereHitbox.aShape.setColour("#ff8000");
 boxSphereHitbox.aShape.faces.map( (face, index) => { if (index >= 58 && index <= 65)  { face.colour = "#87deeb"; } } ); //changing the colour of the cylinder
 ```
 
-Right now there are only 4 primative shapes avaiable to use:
-```javascript
-PrimativeBox( { width, height, depth }, offset, rotation? ) //takes in dimensions, and offset (represented by vector), and optional rotation, represented with Euler Angles
-PrimativeSphere( { radius }, offset, rotation?  )
-PrimativeCylinder( { radius, height }, offset, rotation? )
-PrimativeCone( { radius, height }, offset, rotation? )
-```
-*The rotation paramter should only be used relative to the rest of the object, don't use it to just rotate the shape before creating a physics object, that should be done on the aShape which gets returned from the function*
-
 The function will take in the primatives, and merge them all together, and output an aShape and cBody, which you can then use to create a phyiscal object.
 ```javascript
 const boxSphere = new PhysicsObject(world, boxSphereHitbox.aShape, boxSphereHitbox.cBody);
-boxSphereHitbox.aShape.showOutline();
+boxSphere.aShape.showOutline();
 ```
 **This is mainly meant to be used to create hitboxes, once you are happy with a hitbox, you can replace the *boxSphereHitbox.aShape* with your actual aryaa3D shape**
 
 Then you can just use this PhysicsObject like any other one.
-
 
 ### Modifying Objects
 To edit the objects once you have initialized them, you can use the cBody, or the aShape (not recommended).
