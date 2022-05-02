@@ -2,10 +2,14 @@
 ### The game helper is just a collection of functions, to help you create games using aryaa3D.
 
 ## Setup
+### CDN
 To import it just add this script tag after importing aryaa3D:
 ```html
 <script src="https://aryaask.github.io/3D-Engine/GameHelper/gameHelper.js"></script>
 ```
+
+### Typescript
+If you want typescript declarations, then you can import it using the CDN link, and then just download the [GameHelper.ts](https://github.com/AryaaSk/3D-Engine/blob/master/GameHelper/gameHelper.ts) file, then just rename it to *gameHelper.d.ts* to use it as a declaration file.
 
 ## Utilities
 - **enableKeyListeners()**: This function will start a key listener, which keeps track of which keys are currently being held down. You can access this with the **keysDown** array, and handle the keys inside your event loop. When just using the document.onkeydown(), there is a delay between clicking the key, and holding, this function will remove that. Here is an example of using it:
