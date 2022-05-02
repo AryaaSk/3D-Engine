@@ -720,6 +720,9 @@ class Camera {
         const positionPoint = [0, 0, -50000];
         const sortedObjects: { object: Shape, screenPoints: matrix, center: number[] }[] = this.sortFurthestDistanceTo(objectData, "center", positionPoint);
 
+        //TODO: DON'T USE A STATIC POSITION POINT, CHANGE THE Y COORDINATE BASED ON WORLD ROTATION'S X ANGLE
+        //JUST USE TRIGONEMETRY: TAN( X ) = Y (OPPOSITE) / -50000 (ADJACENT)
+
         for (let objectIndex = 0; objectIndex != sortedObjects.length; objectIndex += 1 ) {
             const object = sortedObjects[objectIndex].object;
             const screenPoints = sortedObjects[objectIndex].screenPoints;

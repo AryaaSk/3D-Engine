@@ -68,34 +68,55 @@ const createCANNONBoundingBox = (aShape: Shape): CANNON.Box => {
 
 
 //Primatives, used for creating custom hitboxes
-class primative {
+class Primative {
     dimensions: any;
     type: string = "";
     offset: XYZ = Vector(0, 0, 0);
+    rotation: XYZ = { x: 0, y: 0, z: 0 };
 }
-class PrimativeBox extends primative{
+class PrimativeBox extends Primative {
     dimensions: { width: number, height: number, depth: number };
-
-    constructor(dimensions: { width: number, height: number, depth: number }, offset: XYZ) {
+    constructor(dimensions: { width: number, height: number, depth: number }, offset: XYZ, rotation?: XYZ) {
         super();
         this.type = "box";
         this.dimensions = dimensions;
         this.offset = offset;
+        if (rotation != undefined) { this.rotation = rotation; }
     }
 }
-class PrimativeSphere extends primative {
+class PrimativeSphere extends Primative {
     dimensions: { radius: number };
-
-    constructor(dimensions: { radius: number }, offset: XYZ) {
+    constructor(dimensions: { radius: number }, offset: XYZ, rotation?: XYZ) {
         super();
         this.type = "sphere";
         this.dimensions = dimensions;
         this.offset = offset;
+        if (rotation != undefined) { this.rotation = rotation; }
     }
 }
-//will add cylinder and cone later
+class PrimativeCylinder extends Primative { //In original cannonjs, the cylinder actually starts horizontally, so I copied the changes from Cannon-es here: https://github.com/pmndrs/cannon-es/pull/30/commits/3767192096ff0207f79352f0f90e16c01de7426f
+    dimensions: { radius: number, height: number };
+    constructor(dimensions: { radius: number, height: number }, offset: XYZ, rotation?: XYZ) {
+        super();
+        this.type = "cylinder";
+        this.dimensions = dimensions;
+        this.offset = offset;
+        if (rotation != undefined) { this.rotation = rotation; }
+    }
+}
+class PrimativeCone extends Primative {
+    dimensions: { radius: number, height: number };
+    constructor(dimensions: { radius: number, height: number }, offset: XYZ, rotation?: XYZ) {
+        super();
+        this.type = "cone";
+        this.dimensions = dimensions;
+        this.offset = offset;
+        if (rotation != undefined) { this.rotation = rotation; }
+    }
+}
 
-const constructObjectFromPrimatives = (primatives: primative[], mass: number) => {
+
+const constructObjectFromPrimatives = (primatives: Primative[], mass: number) => {
     //takes in aryaa3D shapes (must be a primative, e.g. box, sphere, cylinder, cone)
     let shape = new Shape();
     const body = new CANNON.Body( { mass: mass } );
@@ -104,24 +125,27 @@ const constructObjectFromPrimatives = (primatives: primative[], mass: number) =>
         const dimensions = primative.dimensions;
         const offset = primative.offset;
 
+        let aShape = new Shape();
+        let cShape = new CANNON.Shape();
         if (primative.type == "box") {
-            const aShape = new Box( dimensions.width, dimensions.height, dimensions.depth );
-            aShape.pointMatrix.translateMatrix(offset.x, offset.y, offset.z);
-            aShape.updateMatrices();
-            const cShape = new CANNON.Box( new CANNON.Vec3( dimensions.width / 2, dimensions.height / 2, dimensions.depth / 2 ) );
-
-            shape = mergeShapes(shape, aShape);
-            body.addShape(cShape, new CANNON.Vec3(offset.x, offset.y, offset.z) );
+            aShape = new Box( dimensions.width, dimensions.height, dimensions.depth );
+            cShape = new CANNON.Box( new CANNON.Vec3( dimensions.width / 2, dimensions.height / 2, dimensions.depth / 2 ) );
         }
         else if (primative.type == "sphere") {
-            const aShape = new Sphere( dimensions.radius );
-            aShape.pointMatrix.translateMatrix(offset.x, offset.y, offset.z);
-            aShape.updateMatrices();
-            const cShape = new CANNON.Sphere( dimensions.radius );
-
-            shape = mergeShapes(shape, aShape);
-            body.addShape(cShape, new CANNON.Vec3(offset.x, offset.y, offset.z) );
+            aShape = new Sphere( dimensions.radius );
+            cShape = new CANNON.Sphere( dimensions.radius );
         }
+        else if (primative.type == "cylinder") {
+            aShape = new Cylinder( dimensions.radius, dimensions.height );
+            cShape = new CANNON.Cylinder( dimensions.radius, dimensions.radius, dimensions.height, 30 );
+        }
+
+        aShape.rotation = primative.rotation;
+        aShape.updateQuaternion();
+        aShape.physicalMatrix.translateMatrix(offset.x, offset.y, offset.z); //can't use position since that is only applied when the shape is rendered
+        shape = mergeShapes(shape, aShape);
+
+        body.addShape(cShape, new CANNON.Vec3(offset.x, offset.y, offset.z), new CANNON.Quaternion( aShape.quaternion.x, aShape.quaternion.y, aShape.quaternion.z, aShape.quaternion.w ) );
     }
 
     return { aShape: shape, cBody: body };

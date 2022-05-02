@@ -42,16 +42,14 @@ planeShape.showOutline();
 planeShape.setColour("efefef");
 const plane = new PhysicsObject( world, planeShape, new CANNON.Body( { mass: 0 } ) );
 
-/*
+
+
 //REGULAR ASHAPE, REGULAR CBODY:
 const cubeShape = new Box(100, 100, 100);
 cubeShape.position = { x: 300, y: 0, z: 300 };
 const cube = new PhysicsObject( world, cubeShape, undefined); //auto-generated cBody
 cube.aShape.setColour("#c870ff");
 cube.aShape.showOutline();
-
-
-
 
 
 
@@ -81,15 +79,12 @@ const pentagonalPrism = new PhysicsObject( world, pentagonalPrismShape, undefine
 
 
 
-
-
-
 //CUSTOM HITBOXES:
 //Use primatives to build hitboxes, supply an array of primative shapes and their individual offsets, then the function will combine them all into 1
 //Use it to visualise the hitbox while you create it, since it returns an aShape and a cBody, then you can use a custom aShape once you have finished
 const boxSphereHitbox = constructObjectFromPrimatives([
     new PrimativeSphere( { radius: 50 }, Vector(0, -90, 0) ),
-    new PrimativeBox( { width: 50, height: 100, depth: 50 }, Vector(0, 0, 0) ),
+    new PrimativeCylinder( { radius: 25, height: 100 }, Vector(0, 0, 0) ),
     new PrimativeSphere( { radius: 50 }, Vector(0, 90, 0) )
 ], 1);
 
@@ -97,7 +92,7 @@ const boxSphereHitbox = constructObjectFromPrimatives([
 boxSphereHitbox.aShape.rotation.z = 90;
 boxSphereHitbox.aShape.updateQuaternion();
 boxSphereHitbox.aShape.setColour("#ff8000");
-boxSphereHitbox.aShape.faces.map( (face, index) => { if (index == 56 || index == 57 || index == 60 || index == 61)  { face.colour = "#87deeb"; } } );
+boxSphereHitbox.aShape.faces.map( (face, index) => { if (index >= 58 && index <= 65)  { face.colour = "#87deeb"; } } ); //changing the colour of the cylinder
 
 const boxSphere = new PhysicsObject(world, boxSphereHitbox.aShape, boxSphereHitbox.cBody); //when you are happy with the hitbox, you can replace the doubleBoxHitbox.aShape with your own aryaa3D Shape
 boxSphereHitbox.aShape.showOutline();
@@ -112,20 +107,6 @@ doubleBoxHitbox.aShape.position = { x: 150, y: 200, z: 0 };
 doubleBoxHitbox.aShape.showOutline();
 
 const doubleBox = new PhysicsObject( world, doubleBoxHitbox.aShape, doubleBoxHitbox.cBody );
-*/
-
-//The reason this is because the cylinder object is rotated wrong in cannon-js
-//I had to manually go to the source code of https://github.com/pmndrs/cannon-es/pull/30/commits/3767192096ff0207f79352f0f90e16c01de7426f, and copy the changes over from cannon-es
-
-const cylinderShape = new Cylinder( 100, 300 );
-const cylinderBody = new CANNON.Body( { mass: 1, shape: new CANNON.Cylinder(100, 100, 300, 8) } )
-cylinderShape.rotation.z = 90;
-cylinderShape.updateQuaternion();
-const cylinder = new PhysicsObject( world, cylinderShape, cylinderBody )
-
-
-
-
 
 
 
@@ -137,18 +118,14 @@ const interval = setInterval(() => { //animation loop
 
     //sync aryaa3D objects with cannon objects
     plane.syncAShape();
-    /*
     cube.syncAShape();
     pentagonalPrism.syncAShape();
     boxSphere.syncAShape();
     doubleBox.syncAShape();
-    */
-    cylinder.syncAShape()
 
     clearCanvas();
     camera.render([plane.aShape]);
-    //camera.render([cube.aShape, pentagonalPrism.aShape, boxSphere.aShape, doubleBox.aShape]);
-    camera.render([cylinder.aShape]);
+    camera.render([cube.aShape, pentagonalPrism.aShape, boxSphere.aShape, doubleBox.aShape]);
 }, 16);
 
 

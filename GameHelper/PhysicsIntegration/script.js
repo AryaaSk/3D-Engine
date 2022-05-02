@@ -35,99 +35,69 @@ planeShape.updateMatrices();
 planeShape.showOutline();
 planeShape.setColour("efefef");
 const plane = new PhysicsObject(world, planeShape, new CANNON.Body({ mass: 0 }));
-/*
 //REGULAR ASHAPE, REGULAR CBODY:
 const cubeShape = new Box(100, 100, 100);
 cubeShape.position = { x: 300, y: 0, z: 300 };
-const cube = new PhysicsObject( world, cubeShape, undefined); //auto-generated cBody
+const cube = new PhysicsObject(world, cubeShape, undefined); //auto-generated cBody
 cube.aShape.setColour("#c870ff");
 cube.aShape.showOutline();
-
-
-
-
-
-
 //CUSTOM ASHAPE, REGULAR CBODY:
 class PentagonalPrism extends Shape {
-    constructor () {
+    constructor() {
         super();
-
         this.pointMatrix = new matrix();
-        const points = [[0,0,0],[100,0,0],[150,100,0],[50,150,0],[-50,100,0],[0,0,200],[100,0,200],[150,100,200],[50,150,200],[-50,100,200]];
-        for (let i = 0; i != points.length; i += 1)
-        { this.pointMatrix.addColumn(points[i]); }
-
+        const points = [[0, 0, 0], [100, 0, 0], [150, 100, 0], [50, 150, 0], [-50, 100, 0], [0, 0, 200], [100, 0, 200], [150, 100, 200], [50, 150, 200], [-50, 100, 200]];
+        for (let i = 0; i != points.length; i += 1) {
+            this.pointMatrix.addColumn(points[i]);
+        }
         const [centeringX, centeringY, centeringZ] = [-50, -75, -100];
         this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
-
         this.setFaces();
         this.updateMatrices();
     }
     setFaces() {
-        this.faces = [{pointIndexes:[0,1,6,5],colour:"#ff2600"},{pointIndexes:[1,2,7,6],colour:"#ff9300"},{pointIndexes:[2,3,8,7],colour:"#fffb00"},{pointIndexes:[3,4,9,8],colour:"#00f900"},{pointIndexes:[0,4,9,5],colour:"#00fdff"},{pointIndexes:[0,1,2,3,4],colour:"#0433ff"},{pointIndexes:[5,6,7,8,9],colour:"#ff40ff"}];
+        this.faces = [{ pointIndexes: [0, 1, 6, 5], colour: "#ff2600" }, { pointIndexes: [1, 2, 7, 6], colour: "#ff9300" }, { pointIndexes: [2, 3, 8, 7], colour: "#fffb00" }, { pointIndexes: [3, 4, 9, 8], colour: "#00f900" }, { pointIndexes: [0, 4, 9, 5], colour: "#00fdff" }, { pointIndexes: [0, 1, 2, 3, 4], colour: "#0433ff" }, { pointIndexes: [5, 6, 7, 8, 9], colour: "#ff40ff" }];
     }
 }
 const pentagonalPrismShape = new PentagonalPrism(); //create aryaa3D object with the newly created class
 pentagonalPrismShape.position = { x: -300, y: 300, z: -200 };
-const pentagonalPrism = new PhysicsObject( world, pentagonalPrismShape, undefined ); //didn't pass a CANNON.Body so it will create a bounding box hitbox
-
-
-
-
-
-
+const pentagonalPrism = new PhysicsObject(world, pentagonalPrismShape, undefined); //didn't pass a CANNON.Body so it will create a bounding box hitbox
 //CUSTOM HITBOXES:
 //Use primatives to build hitboxes, supply an array of primative shapes and their individual offsets, then the function will combine them all into 1
 //Use it to visualise the hitbox while you create it, since it returns an aShape and a cBody, then you can use a custom aShape once you have finished
 const boxSphereHitbox = constructObjectFromPrimatives([
-    new PrimativeSphere( { radius: 50 }, Vector(0, -90, 0) ),
-    new PrimativeBox( { width: 50, height: 100, depth: 50 }, Vector(0, 0, 0) ),
-    new PrimativeSphere( { radius: 50 }, Vector(0, 90, 0) )
+    new PrimativeSphere({ radius: 50 }, Vector(0, -90, 0)),
+    new PrimativeCylinder({ radius: 25, height: 100 }, Vector(0, 0, 0)),
+    new PrimativeSphere({ radius: 50 }, Vector(0, 90, 0))
 ], 1);
-
 //That will return an aShape, and a cBody, you can then edit these however you want, and then create a PhysicsObject with them
 boxSphereHitbox.aShape.rotation.z = 90;
 boxSphereHitbox.aShape.updateQuaternion();
 boxSphereHitbox.aShape.setColour("#ff8000");
-boxSphereHitbox.aShape.faces.map( (face, index) => { if (index == 56 || index == 57 || index == 60 || index == 61)  { face.colour = "#87deeb"; } } );
-
+boxSphereHitbox.aShape.faces.map((face, index) => { if (index >= 58 && index <= 65) {
+    face.colour = "#87deeb";
+} }); //changing the colour of the cylinder
 const boxSphere = new PhysicsObject(world, boxSphereHitbox.aShape, boxSphereHitbox.cBody); //when you are happy with the hitbox, you can replace the doubleBoxHitbox.aShape with your own aryaa3D Shape
 boxSphereHitbox.aShape.showOutline();
-
-
 //Creating a box on top of a box
 const doubleBoxHitbox = constructObjectFromPrimatives([
-    new PrimativeBox( { width: 100, height: 100, depth: 100 }, Vector(0, 35, 0) ),
-    new PrimativeBox( { width: 70, height: 70, depth: 70 }, Vector(0, -50, 0) )
+    new PrimativeBox({ width: 100, height: 100, depth: 100 }, Vector(0, 35, 0)),
+    new PrimativeBox({ width: 70, height: 70, depth: 70 }, Vector(0, -50, 0))
 ], 1);
 doubleBoxHitbox.aShape.position = { x: 150, y: 200, z: 0 };
 doubleBoxHitbox.aShape.showOutline();
-
-const doubleBox = new PhysicsObject( world, doubleBoxHitbox.aShape, doubleBoxHitbox.cBody );
-*/
-//The reason this is because the cylinder object is rotated wrong in cannon-js
-//I had to manually go to the source code of https://github.com/pmndrs/cannon-es/pull/30/commits/3767192096ff0207f79352f0f90e16c01de7426f, and copy the changes over from cannon-es
-const cylinderShape = new Cylinder(100, 300);
-const cylinderBody = new CANNON.Body({ mass: 1, shape: new CANNON.Cylinder(100, 100, 300, 8) });
-cylinderShape.rotation.z = 90;
-cylinderShape.updateQuaternion();
-const cylinder = new PhysicsObject(world, cylinderShape, cylinderBody);
+const doubleBox = new PhysicsObject(world, doubleBoxHitbox.aShape, doubleBoxHitbox.cBody);
 const interval = setInterval(() => {
     world.step(16 / 1000);
     //sync aryaa3D objects with cannon objects
     plane.syncAShape();
-    /*
     cube.syncAShape();
     pentagonalPrism.syncAShape();
     boxSphere.syncAShape();
     doubleBox.syncAShape();
-    */
-    cylinder.syncAShape();
     clearCanvas();
     camera.render([plane.aShape]);
-    //camera.render([cube.aShape, pentagonalPrism.aShape, boxSphere.aShape, doubleBox.aShape]);
-    camera.render([cylinder.aShape]);
+    camera.render([cube.aShape, pentagonalPrism.aShape, boxSphere.aShape, doubleBox.aShape]);
 }, 16);
 //Controls
 document.onkeydown = ($e) => {

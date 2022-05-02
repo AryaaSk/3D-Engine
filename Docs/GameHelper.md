@@ -104,15 +104,16 @@ pentagonalPrismCannonBody.addShape( new CANNON.Sphere(75) ); //Custom Shape, whi
 
 const pentagonalPrism = new PhysicsObject(world, pentagonalPrismShape, pentagonalPrismCannonBody);
 ```
+*If you have a custom object then I wouldn't recommend letting GameHelper create the hitbox in the CannonJSBody, since it creates a bounding box, which may not be ideal for your object, you should use primatives to create a custom hitbox using primatives*
 
 ### Custom Hitboxes
-To create a custom hitbox, you will need to make use of the Primative system, CannonJS requires you to construct a hitbox using primative shapes such as a cube, sphere, cylinder, to construct a compound shape. Luckily I have created a fucntion called *constructObjectFromPrimatives()*, will takes in Primatives Shapes, with their offsets to the center, as well a mass for the entire object.
+To create a custom hitbox, you will need to make use of the Primative system, CannonJS requires you to construct a hitbox using primative shapes such as a cube, sphere, cylinder, to construct a compound shape. Luckily I have created a fucntion called *constructObjectFromPrimatives()*, will takes in Primatives Shapes, with their offsets to the center, an optional rotation paramter, as well a mass for the entire object.
 
-Here is an example creating an object with 2 Spheres and a Cuboid connecting them:
+Here is an example creating an object with 2 Spheres and a Cylinder connecting them:
 ```javascript
 const boxSphereHitbox = constructObjectFromPrimatives([
     new PrimativeSphere( { radius: 50 }, Vector(0, -90, 0) ),
-    new PrimativeBox( { width: 50, height: 100, depth: 50 }, Vector(0, 0, 0) ),
+    new PrimativeCylinder( { radius: 25, height: 100 }, Vector(0, 0, 0) ),
     new PrimativeSphere( { radius: 50 }, Vector(0, 90, 0) )
 ], 1);
 
@@ -120,13 +121,14 @@ const boxSphereHitbox = constructObjectFromPrimatives([
 boxSphereHitbox.aShape.rotation.z = 90;
 boxSphereHitbox.aShape.updateQuaternion();
 boxSphereHitbox.aShape.setColour("#ff8000");
-boxSphereHitbox.aShape.faces.map( (face, index) => { if (index == 56 || index == 57 || index == 60 || index == 61)  { face.colour = "#87deeb"; } } );
+boxSphereHitbox.aShape.faces.map( (face, index) => { if (index >= 58 && index <= 65)  { face.colour = "#87deeb"; } } ); //changing the colour of the cylinder
 ```
 
-Right now there are only 2 primative shapes avaiable to use:
+Right now there are only 3 primative shapes avaiable to use:
 ```javascript
-PrimativeBox( { width, height, depth }, Vector(x, y, z) ) //takes in dimensions, and offset (represented by vector)
-PrimativeSphere( { radius }, Vector(x, y, z) )
+PrimativeBox( { width, height, depth }, offset, rotation? ) //takes in dimensions, and offset (represented by vector), and optional rotation, represented with Euler Angles
+PrimativeSphere( { radius }, offset, rotation?  )
+PrimativeCylinder( { radius, height }, offset, rotation? )
 ```
 
 The function will take in the primatives, and merge them all together, and output an aShape and cBody, which you can then use to create a phyiscal object.
@@ -138,8 +140,6 @@ boxSphereHitbox.aShape.showOutline();
 
 Then you can just use this PhysicsObject like any other one.
 
-
-*If you have a custom object then I wouldn't recommend letting GameHelper create the hitbox in the CannonJSBody, since it creates a bounding box, which may not be ideal for your object. I would recommend reading the [CannonJS Docs](https://github.com/schteppe/cannon.js), on how to create custom Shapes.*
 
 ### Editing Objects
 To edit the objects once you have initialized them, you can use the cBody, or the aShape (not recommended).
