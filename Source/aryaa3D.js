@@ -94,6 +94,9 @@ const clearCanvas = () => {
 const Vector = (x, y, z) => {
     return { x: x, y: y, z: z };
 };
+const Euler = (x, y, z) => {
+    return Vector(x, y, z);
+};
 class matrix {
     data = [];
     width = 0;
@@ -444,9 +447,8 @@ class Cylinder extends Shape {
         super();
         this.pointMatrix = new matrix();
         const points = [[-100, 0, 33.6], [-33.6, 0, 100], [33.6, 0, 100], [100, 0, 33.6], [100, 0, -33.6], [33.6, 0, -100], [-33.6, 0, -100], [-100, 0, -33.6], [-100, height, 33.6], [-33.6, height, 100], [33.6, height, 100], [100, height, 33.6], [100, height, -33.6], [33.6, height, -100], [-33.6, height, -100], [-100, height, -33.6]];
-        for (let i = 0; i != points.length; i += 1) {
+        for (let i = 0; i != points.length; i += 1) { //scale the x and z coordinates of each point by (radius / 100) to give it the correct radius
             const point = points[i];
-            //scale the x and z coordinates of each point by (radius / 100) to give it the correct radius
             point[0] *= (radius / 100);
             point[2] *= (radius / 100);
             this.pointMatrix.addColumn(point);
@@ -458,6 +460,27 @@ class Cylinder extends Shape {
     }
     setFaces() {
         this.faces = [{ pointIndexes: [9, 8, 15, 14, 13, 12, 11, 10], colour: "#c4c4c4", outline: true }, { pointIndexes: [4, 5, 6, 7, 0, 1, 2, 3], colour: "#c4c4c4", outline: true }, { pointIndexes: [9, 1, 0, 8], colour: "#c4c4c4", outline: true }, { pointIndexes: [8, 0, 7, 15], colour: "#c4c4c4", outline: true }, { pointIndexes: [15, 7, 6, 14], colour: "#c4c4c4", outline: true }, { pointIndexes: [14, 6, 5, 13], colour: "#c4c4c4", outline: true }, { pointIndexes: [13, 5, 4, 12], colour: "#c4c4c4", outline: true }, { pointIndexes: [12, 4, 3, 11], colour: "#c4c4c4", outline: true }, { pointIndexes: [11, 3, 2, 10], colour: "#c4c4c4", outline: true }, { pointIndexes: [10, 2, 1, 9], colour: "#c4c4c4", outline: true }];
+    }
+}
+//again, not a proper cone, it's actually just an octagonal pyramid
+class Cone extends Shape {
+    constructor(radius, height) {
+        super();
+        this.pointMatrix = new matrix();
+        const points = [[-100, 0, 33.6], [-33.6, 0, 100], [33.6, 0, 100], [100, 0, 33.6], [100, 0, -33.6], [33.6, 0, -100], [-33.6, 0, -100], [-100, 0, -33.6], [0, height, 0], [0, 0, 0]];
+        for (let i = 0; i != points.length; i += 1) { //scale the x and z coordinates of each point by (radius / 100) to give it the correct radius
+            const point = points[i];
+            point[0] *= (radius / 100);
+            point[2] *= (radius / 100);
+            this.pointMatrix.addColumn(point);
+        }
+        const [centeringX, centeringY, centeringZ] = [0, -(height / 2), 0];
+        this.pointMatrix.translateMatrix(centeringX, centeringY, centeringZ);
+        this.setFaces();
+        this.updateMatrices();
+    }
+    setFaces() {
+        this.faces = [{ pointIndexes: [0, 1, 2, 3, 4, 5, 6, 7], colour: "#c4c4c4", outline: true }, { pointIndexes: [8, 3, 2], colour: "#c4c4c4", outline: true }, { pointIndexes: [8, 2, 1], colour: "#c4c4c4", outline: true }, { pointIndexes: [8, 1, 0], colour: "#c4c4c4", outline: true }, { pointIndexes: [8, 0, 7], colour: "#c4c4c4", outline: true }, { pointIndexes: [8, 7, 6], colour: "#c4c4c4", outline: true }, { pointIndexes: [8, 6, 5], colour: "#c4c4c4", outline: true }, { pointIndexes: [8, 5, 4], colour: "#c4c4c4", outline: true }, { pointIndexes: [8, 4, 3], colour: "#c4c4c4", outline: true }];
     }
 }
 class SquareBasedPyramid extends Shape {

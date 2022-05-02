@@ -124,12 +124,14 @@ boxSphereHitbox.aShape.setColour("#ff8000");
 boxSphereHitbox.aShape.faces.map( (face, index) => { if (index >= 58 && index <= 65)  { face.colour = "#87deeb"; } } ); //changing the colour of the cylinder
 ```
 
-Right now there are only 3 primative shapes avaiable to use:
+Right now there are only 4 primative shapes avaiable to use:
 ```javascript
 PrimativeBox( { width, height, depth }, offset, rotation? ) //takes in dimensions, and offset (represented by vector), and optional rotation, represented with Euler Angles
 PrimativeSphere( { radius }, offset, rotation?  )
 PrimativeCylinder( { radius, height }, offset, rotation? )
+PrimativeCone( { radius, height }, offset, rotation? )
 ```
+*The rotation paramter should only be used relative to the rest of the object, don't use it to just rotate the shape before creating a physics object, that should be done on the aShape which gets returned from the function*
 
 The function will take in the primatives, and merge them all together, and output an aShape and cBody, which you can then use to create a phyiscal object.
 ```javascript
@@ -141,7 +143,7 @@ boxSphereHitbox.aShape.showOutline();
 Then you can just use this PhysicsObject like any other one.
 
 
-### Editing Objects
+### Modifying Objects
 To edit the objects once you have initialized them, you can use the cBody, or the aShape (not recommended).
 - The cBody is the CannonJSBody, which you passed or was automaticaly created, this is what you should be applying forces and impulses to, so that the physics can be simulated.\
 It is simply a CANNON.Body, so you can do all the operations that you could do on a regular cannon body. Read the [CannonJS Docs](https://github.com/schteppe/cannon.js) for more info.
@@ -176,11 +178,12 @@ setInterval(() => {
     //Sync aryaa3D Shapes to CannonJS Bodies
     cube.syncAShape();
     pentagonalPrism.syncAShape();
+    boxSphere.syncAShape();
 
     //Render objects
     clearCanvas();
     camera.renderGrid();
-    camera.render([cube.aShape, pentagonalPrism.aShape]) //notice how we pass in the aryaa3D shapes
+    camera.render([cube.aShape, pentagonalPrism.aShape, boxSphere.aShape]) //notice how we pass in the aryaa3D shapes
 }, 16);
 ```
 

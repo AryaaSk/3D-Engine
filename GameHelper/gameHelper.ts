@@ -139,6 +139,10 @@ const constructObjectFromPrimatives = (primatives: Primative[], mass: number) =>
             aShape = new Cylinder( dimensions.radius, dimensions.height );
             cShape = new CANNON.Cylinder( dimensions.radius, dimensions.radius, dimensions.height, 30 );
         }
+        else if (primative.type == "cone") {
+            aShape = new Cone( dimensions.radius, dimensions.height );
+            cShape = new CANNON.Cylinder( 10, dimensions.radius, dimensions.height, 30 );
+        }
 
         aShape.rotation = primative.rotation;
         aShape.updateQuaternion();

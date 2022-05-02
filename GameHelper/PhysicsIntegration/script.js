@@ -87,6 +87,12 @@ const doubleBoxHitbox = constructObjectFromPrimatives([
 doubleBoxHitbox.aShape.position = { x: 150, y: 200, z: 0 };
 doubleBoxHitbox.aShape.showOutline();
 const doubleBox = new PhysicsObject(world, doubleBoxHitbox.aShape, doubleBoxHitbox.cBody);
+//Creating a cone
+const coneHitbox = constructObjectFromPrimatives([
+    new PrimativeCone({ radius: 50, height: 120 }, Vector(0, 0, 0), Euler(-150, 60, 0)) //setting a rotation with the Euler() function (does the same thing as Vector() )
+], 1);
+coneHitbox.aShape.position = { x: 300, y: 0, z: -300 };
+const cone = new PhysicsObject(world, coneHitbox.aShape, coneHitbox.cBody);
 const interval = setInterval(() => {
     world.step(16 / 1000);
     //sync aryaa3D objects with cannon objects
@@ -95,9 +101,10 @@ const interval = setInterval(() => {
     pentagonalPrism.syncAShape();
     boxSphere.syncAShape();
     doubleBox.syncAShape();
+    cone.syncAShape();
     clearCanvas();
     camera.render([plane.aShape]);
-    camera.render([cube.aShape, pentagonalPrism.aShape, boxSphere.aShape, doubleBox.aShape]);
+    camera.render([cube.aShape, pentagonalPrism.aShape, boxSphere.aShape, doubleBox.aShape, cone.aShape]);
 }, 16);
 //Controls
 document.onkeydown = ($e) => {
@@ -121,10 +128,7 @@ document.onkeydown = ($e) => {
     plane.syncCBody(); //sync cannon body with aryaa3D shape's rotation
 };
 //Console messages
-/*
 console.log("Press space to stop the animation");
 console.log("Press arrow keys to rotate plane and move objects");
-console.log("Press WASD to apply impulses to the cube in the respective directions")
 console.warn("Object's may seem to be in front of plane, even when they are behind, because I am rendering the plane before the objects");
 console.warn("As this is a parallel projection, there is no depth perception");
-*/ 

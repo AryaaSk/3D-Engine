@@ -2,7 +2,6 @@
 const world = new CANNON.World();
 world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
 
-
 //ARYAA3D SETUP
 linkCanvas("renderingWindow")
 
@@ -12,6 +11,10 @@ camera.worldRotation.y = 20;
 camera.updateRotationMatrix();
 camera.position.y = -300;
 camera.enableMovementControls("renderingWindow", true, true, true, true);
+
+
+
+
 
 
 //Objects
@@ -109,6 +112,14 @@ doubleBoxHitbox.aShape.showOutline();
 const doubleBox = new PhysicsObject( world, doubleBoxHitbox.aShape, doubleBoxHitbox.cBody );
 
 
+//Creating a cone
+const coneHitbox = constructObjectFromPrimatives([
+    new PrimativeCone( { radius: 50, height: 120 }, Vector(0, 0, 0), Euler(-150, 60, 0) ) //setting a rotation with the Euler() function (does the same thing as Vector() )
+], 1);
+coneHitbox.aShape.position = { x: 300, y: 0, z: -300 };
+const cone = new PhysicsObject( world, coneHitbox.aShape, coneHitbox.cBody );
+
+
 
 
 
@@ -122,16 +133,12 @@ const interval = setInterval(() => { //animation loop
     pentagonalPrism.syncAShape();
     boxSphere.syncAShape();
     doubleBox.syncAShape();
+    cone.syncAShape();
 
     clearCanvas();
     camera.render([plane.aShape]);
-    camera.render([cube.aShape, pentagonalPrism.aShape, boxSphere.aShape, doubleBox.aShape]);
+    camera.render([cube.aShape, pentagonalPrism.aShape, boxSphere.aShape, doubleBox.aShape, cone.aShape]);
 }, 16);
-
-
-
-
-
 
 
 
@@ -158,10 +165,7 @@ document.onkeydown = ($e) => {
 
 
 //Console messages
-/*
 console.log("Press space to stop the animation");
 console.log("Press arrow keys to rotate plane and move objects");
-console.log("Press WASD to apply impulses to the cube in the respective directions")
 console.warn("Object's may seem to be in front of plane, even when they are behind, because I am rendering the plane before the objects");
 console.warn("As this is a parallel projection, there is no depth perception");
-*/
