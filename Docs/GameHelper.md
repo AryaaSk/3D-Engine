@@ -28,6 +28,13 @@ keysDown.forEach(key => {
 - **syncCamera()**: This function takes in 2 parameters: The Camera, and an Object. Then it will position the camera at the same position and rotate the world inversly to the object's y-rotation, which makes a third-person view of the object you are following. You can look in the [ThirdPersonDemo](https://github.com/AryaaSk/3D-Engine/blob/master/GameHelper/ThirdPersonDemo) for more info.
 
 
+
+
+
+
+
+
+
 # Physics Integration with CannonJS
 
 ## Getting Started
@@ -43,7 +50,8 @@ You will need to import aryaa3D, as well as cannon.js, and the aryaa3D gameHelpe
 <script src="yourownjsfile.js" defer>
 ```
 
-If you want to use typescript auto-complete, then just download the [CannonJS Types](https://github.com/AryaaSk/3D-Engine/blob/master/GameHelper/PhysicsIntegration/cannonTypes.d.ts), and the [GameHelper.ts](https://github.com/AryaaSk/3D-Engine/blob/master/GameHelper/gameHelper.ts), then just compile them using the TS compiler, and use those in the script tags.
+### Typescript
+You should have already download the Game Helper declarations file (look above), so just also download the [cannonTypes.d.ts](https://github.com/AryaaSk/3D-Engine/blob/master/GameHelper/PhysicsIntegration/cannonTypes.d.ts) file, to get CannonJS auto-complete.
 
 ## Setup
 First setup the aryaa3D and cannon world/scene:
