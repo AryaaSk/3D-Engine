@@ -169,11 +169,8 @@ class matrix {
             const columnCopy = JSON.parse(JSON.stringify(column));
             returnMatrix.addColumn(columnCopy);
         }
-        //@ts-expect-error
         for (let i in returnMatrix.data) { //scale up
-            //@ts-expect-error
             for (let a in returnMatrix.data[i]) {
-                //@ts-expect-error
                 returnMatrix.data[i][a] *= factor;
             }
         }
@@ -618,7 +615,10 @@ class Camera {
         for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
             const object = objects[objectIndex];
             const points = this.transformMatrix(object.physicalMatrix, object.position);
+            const worldPointsMatrix = points.worldPoints;
             const cameraObjectMatrix = points.cameraPoints;
+            worldPointsMatrix.printMatrix();
+            cameraObjectMatrix.printMatrix();
             //work out center of shape by finding average of all points
             let [totalX, totalY, totalZ] = [0, 0, 0];
             for (let i = 0; i != cameraObjectMatrix.width; i += 1) {
@@ -629,7 +629,7 @@ class Camera {
             }
             const [averageX, averageY, averageZ] = [totalX / cameraObjectMatrix.width, totalY / cameraObjectMatrix.width, totalZ / cameraObjectMatrix.width];
             const center = [averageX, averageY, averageZ];
-            objectData.push({ object: object, screenPoints: cameraObjectMatrix, center: center });
+            objectData.push({ object: object, worldPoints: worldPointsMatrix, screenPoints: cameraObjectMatrix, center: center });
         }
         //sort objects based on distance to the position point:
         const positionPoint = [0, 0, -50000];

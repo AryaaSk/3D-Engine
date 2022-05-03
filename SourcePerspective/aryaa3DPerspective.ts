@@ -167,11 +167,8 @@ class matrix {
             const columnCopy = JSON.parse(JSON.stringify(column))
             returnMatrix.addColumn(columnCopy); 
         }
-        //@ts-expect-error
         for (let i in returnMatrix.data) { //scale up
-            //@ts-expect-error
             for (let a in returnMatrix.data[i]) {  
-                //@ts-expect-error
                 returnMatrix.data[i][a] *= factor; 
             } 
         }  
@@ -719,22 +716,25 @@ class Camera {
 
         const cameraObjectMatrix = worldPoints.copy() //these are the points after having perspective applied to them
 
-        
+
 
         cameraObjectMatrix.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0); //translate for absolute position
-        
         cameraObjectMatrix.scaleUp(this.zoom); //scale for zoom
 
         return { worldPoints: worldPoints, cameraPoints: cameraObjectMatrix };
     }
 
     render(objects: Shape[]) {  
-        const objectData: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
+        const objectData: { object: Shape, worldPoints: matrix, screenPoints: matrix, center: number[] }[] = [];
         for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
             const object = objects[objectIndex];
             
             const points = this.transformMatrix(object.physicalMatrix, object.position ); 
+            const worldPointsMatrix = points.worldPoints;
             const cameraObjectMatrix = points.cameraPoints;
+
+            worldPointsMatrix.printMatrix();
+            cameraObjectMatrix.printMatrix();
 
             //work out center of shape by finding average of all points
             let [totalX, totalY, totalZ] = [0, 0, 0];
@@ -745,12 +745,12 @@ class Camera {
             const [averageX, averageY, averageZ] = [totalX / cameraObjectMatrix.width, totalY / cameraObjectMatrix.width, totalZ / cameraObjectMatrix.width];
             const center = [averageX, averageY, averageZ];
             
-            objectData.push( { object: object, screenPoints: cameraObjectMatrix, center: center} )
+            objectData.push( { object: object, worldPoints: worldPointsMatrix, screenPoints: cameraObjectMatrix, center: center} )
         }
 
         //sort objects based on distance to the position point:
         const positionPoint = [0, 0, -50000];
-        const sortedObjects: { object: Shape, screenPoints: matrix, center: number[] }[] = this.sortFurthestDistanceTo(objectData, "center", positionPoint);
+        const sortedObjects: { object: Shape, worldPoints: matrix, screenPoints: matrix, center: number[] }[] = this.sortFurthestDistanceTo(objectData, "center", positionPoint);
 
         //TODO: DON'T USE A STATIC POSITION POINT, CHANGE THE Y COORDINATE BASED ON WORLD ROTATION'S X ANGLE
         //JUST USE TRIGONEMETRY: TAN( X ) = Y (OPPOSITE) / -50000 (ADJACENT)

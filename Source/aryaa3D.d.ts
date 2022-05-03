@@ -1,5 +1,3 @@
-//Have just renamed to .d.ts so that it doesn't override the javascript file, while I work on the perspective camera
-
 //CANVAS UTILITIES
 let dpi = window.devicePixelRatio;
 let canvas: any = undefined;
@@ -706,32 +704,29 @@ class Camera {
 
     showScreenOrigin: boolean = false;
 
-
     transformMatrix( points: matrix, objectPosition: XYZ ) { //returns the points after applying the transformations to them.
-        
-        let worldPoints = points.copy(); //these are the points inside the world
-        worldPoints.translateMatrix(objectPosition.x, objectPosition.y, objectPosition.z); //translate for object's position
-        worldPoints.translateMatrix(-this.position.x, -this.position.y, -this.position.z) //translating relative to camera's position
-        worldPoints = multiplyMatrixs(this.worldRotationMatrix, worldPoints); //rotate for global world rotation
+        let cameraObjectMatrix = points.copy();
 
-        const cameraObjectMatrix = worldPoints.copy() //these are the points after having perspective applied to them
+        cameraObjectMatrix.translateMatrix(objectPosition.x, objectPosition.y, objectPosition.z); //translate for object's position
 
-        
+        cameraObjectMatrix.translateMatrix(-this.position.x, -this.position.y, -this.position.z) //translating relative to camera's position
+
+        cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //rotate for global world rotation
 
         cameraObjectMatrix.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0); //translate for absolute position
-        
+
         cameraObjectMatrix.scaleUp(this.zoom); //scale for zoom
 
-        return { worldPoints: worldPoints, cameraPoints: cameraObjectMatrix };
+        return cameraObjectMatrix;
     }
 
     render(objects: Shape[]) {  
         const objectData: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
         for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
+            //transform the object's physicalMatrix to how the camera would see it:
             const object = objects[objectIndex];
             
-            const points = this.transformMatrix(object.physicalMatrix, object.position ); 
-            const cameraObjectMatrix = points.cameraPoints;
+            const cameraObjectMatrix = this.transformMatrix(object.physicalMatrix, { x: object.position.x, y: object.position.y, z: object.position.z });
 
             //work out center of shape by finding average of all points
             let [totalX, totalY, totalZ] = [0, 0, 0];
