@@ -1,5 +1,6 @@
 "use strict";
 //CANVAS UTILITIES
+//@ts-expect-error
 let dpi = window.devicePixelRatio;
 let canvas = undefined;
 let c = undefined;
@@ -168,8 +169,11 @@ class matrix {
             const columnCopy = JSON.parse(JSON.stringify(column));
             returnMatrix.addColumn(columnCopy);
         }
+        //@ts-expect-error
         for (let i in returnMatrix.data) { //scale up
+            //@ts-expect-error
             for (let a in returnMatrix.data[i]) {
+                //@ts-expect-error
                 returnMatrix.data[i][a] *= factor;
             }
         }
