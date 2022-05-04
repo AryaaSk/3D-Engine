@@ -700,16 +700,15 @@ class Grid extends Shape {
 }
 
 class Camera {
-    absPosition: {x: number, y: number} = { x: 0, y: 0 };
     position: XYZ = { x: 0, y: 0, z: 0 };
     zoom = 1;
-
+    nearDistance = 300; //distance from the camera -> viewport, always + in the z-axis since the camera cannot rotate, only the world can
 
     worldRotation: XYZ = Euler(0, 0, 0);
     worldRotationMatrix = new matrix();
 
+    absPosition: {x: number, y: number} = { x: 0, y: 0 };
     showScreenOrigin: boolean = false;
-
 
     generateWorldPoints ( points: matrix, objectPosition: XYZ ) { //these are the points inside the 3D world
         let worldPoints = points.copy();
@@ -726,13 +725,15 @@ class Camera {
 		for (let i = 0; i != points.width; i += 1) {
 			const point = points.getColumn(i);
 			const vector = [ point[0] - cameraPosition[0], point[1] - cameraPosition[1], point[2] - cameraPosition[2] ];
-			
-			//normalize z axis to 100
-			const zScaleFactor = 100 / vector[2];
+            
+            //clip the points whose z coordinate is less than the camera's, since they are behind the camera.
+
+			//normalize z axis (viewport is nearDistance from camera)
+			const zScaleFactor = this.nearDistance / vector[2];
 			const xyPoint = [ vector[0] * zScaleFactor, vector[1] * zScaleFactor ];
 			cameraPoints.addColumn( xyPoint );
 
-            //instead of scaling based on z difference, maybe I should try and convert the vector to an equation, then just check where it intersects z = (camera.z) + 100
+            //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
 		}
 
         //finally translate for absolute position, and scale for zoom
@@ -772,18 +773,30 @@ class Camera {
 			objectData.push( { object: object, worldPoints: worldPoints, screenPoints: cameraPoints, center: center } )
         }
 
+
+        //sort objects here
+
+
+        //draw objects here, use sortedData instead of objectData, as well as sortedFaces
         for (const data of objectData) {
             const screenpoints = data.screenPoints;
             const object = data.object;
+
+            //sort faces here, using cameraPoints, since they will have their z coordinate attached to them
 
             for (const face of object.faces) {
                 const pointIndexes = face.pointIndexes;
                 const points: number[][] = [];
                 for (const pointIndex of pointIndexes) {
-                    points.push( screenpoints.getColumn(pointIndex) );
+                    const point = screenpoints.getColumn(pointIndex)
+                    points.push( point );
+
+                    if (object.showFaceIndexes == true) {
+                        plotPoint( point, "grey", String(pointIndex) );
+                    }
                 }
 
-                drawShape( points, "#ffffff00", true );
+                drawShape( points, face.colour, face.outline );
             }
         }
 
