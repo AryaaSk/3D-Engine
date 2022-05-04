@@ -35,20 +35,13 @@
         //CAMERA GOES HERE...
         const camera = new Camera();
         camera.enableMovementControls("renderingWindow");
+        camera.rotation.y = -90;
 
 
 
 
-
-        //RENDERING / ANIMATION LOOP HERE...
-        setInterval(() => {
-            //Animation loop logic here...
-
-
-            clearCanvas();
-            camera.renderGrid();
-            camera.render([cube]);
-        }, 16);
+        clearCanvas();
+        camera.render([cube]);
     </script>
 
 

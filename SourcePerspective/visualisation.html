@@ -1,0 +1,88 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://aryaask.github.io/3D-Engine/Source/aryaa3D.js"></script>
+
+    <title>Perspective Visualisation</title>
+
+    <style>
+        body {
+            margin: 0;
+        }
+        #renderingWindow {
+            height: 100vh;
+            width: 100vw;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="renderingWindow"></canvas>
+
+    <script>
+        linkCanvas("renderingWindow");
+
+        const draw3DLine = (p1, p2) => {
+            const pointMatrix = new matrix();
+            pointMatrix.addColumn(p1);
+            pointMatrix.addColumn(p2);
+            const transformedPointsMatrix = camera.transformMatrix(pointMatrix, { x: 0, y: 0, z: 0 });
+            const point1 = transformedPointsMatrix.getColumn(0);
+            const point2 = transformedPointsMatrix.getColumn(1);
+
+            drawLine(point1, point2, "black")
+            plotPoint(point1, "black");
+            plotPoint(point2, "black");
+        }
+
+        //OBJECTS GO HERE...
+        const cube = new Box(200, 300, 500);
+        
+        const cameraObject = new Box(50, 50, 50);
+        cameraObject.name = "camera"
+        cameraObject.position.z = -800;
+        cameraObject.setColour("#c4c4c4");
+        cameraObject.showOutline();
+        const cameraCenter = [cameraObject.position.x, cameraObject.position.y, cameraObject.position.z];
+        cameraObject.setColour("");
+
+
+        const viewport = new Box(500, 500, 1);
+        viewport.position.z = -500;
+        viewport.setColour("#ffffff80");
+        viewport.showOutline();
+
+
+
+        //CAMERA GOES HERE...
+        const camera = new Camera();
+        camera.worldRotation = { x: -20, y: 20, z: 0 };
+        camera.updateRotationMatrix();
+        camera.enableMovementControls("renderingWindow");
+
+
+        //RENDERING / ANIMATION LOOP HERE...
+        setInterval(() => {
+            //Animation loop logic here...
+
+
+            clearCanvas();
+            camera.renderGrid();
+            const screenObjects = camera.render([cube, cameraObject, viewport]);
+
+            const translatedMatrix = cube.physicalMatrix.copy();
+            translatedMatrix.translateMatrix( cube.position.x, cube.position.y, cube.position.z );
+            draw3DLine( translatedMatrix.getColumn(3), cameraCenter )
+            /*
+            for (let i = 0; i != translatedMatrix.width; i += 1) {
+                draw3DLine( translatedMatrix.getColumn(i), cameraCenter )
+            }
+            */
+        }, 16);
+    </script>
+
+
+</body>
+</html>
