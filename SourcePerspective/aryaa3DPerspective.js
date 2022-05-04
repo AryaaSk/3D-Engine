@@ -169,8 +169,11 @@ class matrix {
             const columnCopy = JSON.parse(JSON.stringify(column));
             returnMatrix.addColumn(columnCopy);
         }
+        //@ts-expect-error
         for (let i in returnMatrix.data) { //scale up
+            //@ts-expect-error
             for (let a in returnMatrix.data[i]) {
+                //@ts-expect-error
                 returnMatrix.data[i][a] *= factor;
             }
         }
@@ -597,8 +600,6 @@ class Camera {
     absPosition = { x: 0, y: 0 };
     position = { x: 0, y: 0, z: 0 };
     zoom = 1;
-    rotation = Euler(0, 0, 0);
-    rotationMatrix = new matrix();
     worldRotation = Euler(0, 0, 0);
     worldRotationMatrix = new matrix();
     showScreenOrigin = false;
@@ -608,25 +609,22 @@ class Camera {
         worldPoints = multiplyMatrixs(this.worldRotationMatrix, worldPoints); //rotate for global world rotation
         return worldPoints;
     }
-    generateViewport() {
-        //generate the points of the plane (viewport), the plane is just an equation and so extends infinetly in all directions, but we need at least 3 points to define it
-        let planePoints = new matrix();
-        planePoints.addColumn([-100, 100, 0]); //plane's position is at 0, 0, 0
-        planePoints.addColumn([100, 100, 0]);
-        planePoints.addColumn([100, -100, 0]);
-        planePoints.addColumn([-100, -100, 0]);
-        this.rotationMatrix = calculateRotationMatrix(this.rotation.x, this.rotation.y, this.rotation.z); //rotate based on camera's rotation
-        planePoints = multiplyMatrixs(this.rotationMatrix, planePoints);
-        planePoints.translateMatrix(this.position.x, this.position.y, this.position.z); //translating it to the camera
-        //in future I also need to move in front of the camera by 100, but for now ill just leave it like this
-        planePoints.printMatrix(); //these are the points of the viewport, now we need to convert it into a plane
-        //WATCH: https://www.youtube.com/watch?v=0qYJfKG-3l8
-    }
     generatePerspective(points) {
-        const cameraPoints = points.copy();
-        //already have the viewport, calculate equation from camera -> point, then calculate where that line intersects the viewport
-        //save as an xyz coordinate, or maybe just xy
-        this.generateViewport();
+        const cameraPoints = new matrix();
+        //calculate vector between camera and each point
+        const cameraPosition = [this.position.x, this.position.y, this.position.z];
+        for (let i = 0; i != points.width; i += 1) {
+            const point = points.getColumn(i);
+            const vector = [point[0] - cameraPosition[0], point[1] - cameraPosition[1], point[2] - cameraPosition[2]];
+            //normalize z axis to 100
+            const zScaleFactor = 100 / vector[2];
+            const xyPoint = [vector[0] * zScaleFactor, vector[1] * zScaleFactor];
+            cameraPoints.addColumn(xyPoint);
+            //instead of scaling based on z difference, maybe I should try and convert the vector to an equation, then just check where it intersects z = (camera.z) + 100
+        }
+        //finally translate for absolute position, and scale for zoom
+        cameraPoints.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0);
+        cameraPoints.scaleUp(this.zoom);
         return cameraPoints;
     }
     render(objects) {
@@ -638,11 +636,32 @@ class Camera {
         const objectData = [];
         for (const object of objects) {
             const worldPoints = this.generateWorldPoints(object.physicalMatrix, object.position); //points in the 3D world
-            worldPoints.printMatrix();
             const cameraPoints = this.generatePerspective(worldPoints); //points as the camera would see them
-            cameraPoints.printMatrix();
-            //calculate center with worldPoints
-            //push to object data
+            //find center using worldPoints
+            let [totalx, totaly, totalz] = [0, 0, 0];
+            for (let i = 0; i != worldPoints.width; i += 1) {
+                const point = worldPoints.getColumn(i);
+                totalx += point[0];
+                totaly += point[1];
+                totalz += point[2];
+            }
+            const pointTotal = worldPoints.width;
+            const [averagex, averagey, averagez] = [totalx / pointTotal, totaly / pointTotal, totalz / pointTotal];
+            const center = [averagex, averagey, averagez];
+            //push to objectData
+            objectData.push({ object: object, worldPoints: worldPoints, screenPoints: cameraPoints, center: center });
+        }
+        for (const data of objectData) {
+            const screenpoints = data.screenPoints;
+            const object = data.object;
+            for (const face of object.faces) {
+                const pointIndexes = face.pointIndexes;
+                const points = [];
+                for (const pointIndex of pointIndexes) {
+                    points.push(screenpoints.getColumn(pointIndex));
+                }
+                drawShape(points, "#ffffff00", true);
+            }
         }
         /*
         const objectData: { object: Shape, worldPoints: matrix, screenPoints: matrix, center: number[] }[] = [];
@@ -721,12 +740,11 @@ class Camera {
             }
         }
 
-        if (this.showScreenOrigin == true) {
-            plotPoint([-this.absPosition.x, -this.absPosition.y], "#000000"); //a visual marker of where it will zoom into
-        }
-
         return sortedObjects;
         */
+        if (this.showScreenOrigin == true) {
+            plotPoint([0, 0], "#000000"); //a visual marker of where it will zoom into
+        }
     }
     sortFurthestDistanceTo(list, positionKey, positionPoint) {
         const sortedList = [];
