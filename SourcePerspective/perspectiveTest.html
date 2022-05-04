@@ -42,7 +42,7 @@
         const camera = new Camera();
         camera.showScreenOrigin = true;
         //camera.type = "absolute";
-        camera.position = ( camera.type == "perspective" ) ? Vector( 0, 100, -550 ) : Vector(0, 0, 0); 
+        camera.position = ( camera.type == "perspective" ) ? Vector( 0, 100, -1000 ) : Vector(0, 0, 0); 
         if (camera.type == "perspective") { camera.enableMovementControls("renderingWindow", { limitRotation: true }); }
         else { camera.enableMovementControls("renderingWindow", { limitRotation: true }); }
 

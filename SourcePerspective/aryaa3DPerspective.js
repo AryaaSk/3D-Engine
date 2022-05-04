@@ -636,7 +636,7 @@ class Camera {
             //clip the points if the z-vector is <= 1, since it means it is behind the camera
             if (vector[2] <= 1) {
                 //move the xypoint off the screen ??
-                console.log(xyPoint);
+                console.error(`Need to clip point ${xyPoint} since it is behind camera`);
             }
             cameraPoints.addColumn(xyPoint);
         }
@@ -683,6 +683,11 @@ class Camera {
             const center = [averagex, averagey, averagez];
             //push to objectData
             objectData.push({ object: object, screenPoints: cameraPoints, center: center });
+        }
+        //create a copy of object data before it gets wiped
+        const objectDataCopy = [];
+        for (const data of objectData) {
+            objectDataCopy.push({ object: data.object.clone(), screenPoints: data.screenPoints.copy(), center: JSON.parse(JSON.stringify(data.center)) });
         }
         //sort objects based on distance to the position point:
         const positionPoint = (this._type == "perspective") ? [this.position.x, this.position.y, this.position.z] : [0, 0, -50000]; //different for perspective and absolute
@@ -735,7 +740,7 @@ class Camera {
         if (this.showScreenOrigin == true) {
             plotPoint([0, 0], "#000000"); //a visual marker of where it will zoom into
         }
-        return sortedObjects;
+        return objectDataCopy;
     }
     sortFurthestDistanceTo(list, positionKey, positionPoint) {
         const sortedList = [];
