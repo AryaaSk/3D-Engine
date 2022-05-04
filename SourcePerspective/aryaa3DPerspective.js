@@ -620,6 +620,7 @@ class Camera {
         planePoints.translateMatrix(this.position.x, this.position.y, this.position.z); //translating it to the camera
         //in future I also need to move in front of the camera by 100, but for now ill just leave it like this
         planePoints.printMatrix(); //these are the points of the viewport, now we need to convert it into a plane
+        //WATCH: https://www.youtube.com/watch?v=0qYJfKG-3l8
     }
     generatePerspective(points) {
         const cameraPoints = points.copy();
