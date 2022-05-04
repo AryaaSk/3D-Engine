@@ -740,11 +740,16 @@ class Camera {
 			const point = points.getColumn(i);
 			const vector = [ point[0] - cameraPosition[0], point[1] - cameraPosition[1], point[2] - cameraPosition[2] ];
             
-            //clip the points whose z coordinate is less than the camera's, since they are behind the camera.
-
 			//normalize z axis (viewport is nearDistance from camera)
 			const zScaleFactor = this.nearDistance / vector[2];
 			const xyPoint = [ vector[0] * zScaleFactor, vector[1] * zScaleFactor, point[2] ]; //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
+
+            //clip the points if the z-vector is <= 1, since it means it is behind the camera
+            if ( vector[2] <= 1 ) {
+                //move the xypoint off the screen ??
+                console.log(xyPoint); 
+            }
+
 			cameraPoints.addColumn( xyPoint );
 		}
 
@@ -802,7 +807,7 @@ class Camera {
 
 
         //sort objects based on distance to the position point:
-        const positionPoint = [ this.position.x, this.position.y, this.position.z ];
+        const positionPoint = ( this._type == "perspective" ) ? [this.position.x, this.position.y, this.position.z] : [0, 0, -50000]; //different for perspective and absolute
         const sortedObjects: { object: Shape, screenPoints: matrix, center: number[] }[] = this.sortFurthestDistanceTo(objectData, "center", positionPoint);
 
         for (const data of sortedObjects) {
@@ -889,12 +894,15 @@ class Camera {
         this.render([grid]);
     }
 
-    enableMovementControls(canvasID: string, options?: { rotation?: boolean, movement?: boolean, zoom?: boolean, limitRotation?: boolean } ) {
+    enableMovementControls(canvasID: string, options?: { rotation?: boolean, movement?: boolean, zoom?: boolean, limitRotation?: boolean, limitRotationMin: number, limitRotationMax: number} ) {
         let [rotation, movement, zoom, limitRotation] = [true, true, true, false];
+        let [limitRotationMin, limitRotationMax] = [0, -90];
         if (options?.rotation == false ) { rotation = false; }
         if (options?.movement == false ) { movement = false; }
         if (options?.zoom == false ) { zoom = false; }
         if (options?.limitRotation == true) { limitRotation = true; }
+        if (options?.limitRotationMin != undefined) { limitRotationMin = options!.limitRotationMin; }
+        if (options?.limitRotationMax != undefined) { limitRotationMax = options!.limitRotationMax; }
 
         let mouseDown = false;
         let altDown = false;
@@ -916,11 +924,11 @@ class Camera {
                 this.worldRotation.x -= differenceY / 5;
                 this.worldRotation.y -= differenceX / 5;
 
-                if (this.worldRotation.x < -90 && limitRotation == true) { //to limit rotation, user can only rotate around 90 degrees on x axis
-                    this.worldRotation.x = -90; 
+                if (this.worldRotation.x < limitRotationMax && limitRotation == true) { //to limit rotation, user can only rotate around 90 degrees on x axis
+                    this.worldRotation.x = limitRotationMax;
                 } 
-                else if (this.worldRotation.x > 0 && limitRotation == true) { 
-                    this.worldRotation.x = 0; 
+                else if (this.worldRotation.x > limitRotationMin && limitRotation == true) { 
+                    this.worldRotation.x = limitRotationMin; 
                 }
 
                 this.updateRotationMatrix()
