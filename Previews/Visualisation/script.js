@@ -3,17 +3,8 @@
 //also want to show the point where they intersect the viewport (optional: draw lines on the viewport to show resulting image)
 //will be done in absolute mode since it is easier to understand and work with.
 const localVisualisationScope = () => {
-    const draw3DLine = (p1, p2) => {
-        const pointMatrix = new matrix();
-        pointMatrix.addColumn(p1);
-        pointMatrix.addColumn(p2);
-        const transformedPointsMatrix = camera.transformMatrix(pointMatrix, { x: 0, y: 0, z: 0 });
-        const point1 = transformedPointsMatrix.getColumn(0);
-        const point2 = transformedPointsMatrix.getColumn(1);
-        drawLine(point1, point2, "black");
-        plotPoint(point1, "black");
-        plotPoint(point2, "black");
-    };
+    //CONSTANTS
+    const nearDistance = 100;
     const visualiseRays = (object, cameraPosition, options) => {
         let [showRays, showIntersection, showImage] = [true, true, true];
         if (options?.showIntersection == false) {
@@ -31,6 +22,9 @@ const localVisualisationScope = () => {
         const intersectionPoints = [];
         for (let i = 0; i != objectPoints.width; i += 1) {
             const vertex = objectPoints.getColumn(i);
+            if (vertex[2] < (cameraPosition.z + nearDistance)) {
+                console.log("need to clip");
+            }
             const ray = [cameraPos, vertex]; //ray is just vector from camera -> vertex
             //calculate intersection, normalize z-axis to (camera.position.z + nearDistance), the position of the viewport
             const vector = [vertex[0] - cameraPos[0], vertex[1] - cameraPos[1], vertex[2] - cameraPos[2]];
@@ -45,7 +39,7 @@ const localVisualisationScope = () => {
             const transformedMatrix = camera.transformPoints(packageMatrix);
             intersectionPoints.push(transformedMatrix.getColumn(2));
             if (showRays == true) {
-                drawLine(transformedMatrix.getColumn(0), transformedMatrix.getColumn(1), "black");
+                drawLine(transformedMatrix.getColumn(0), transformedMatrix.getColumn(1), "black"); //camera -> object
             }
             if (showIntersection == true) {
                 plotPoint(transformedMatrix.getColumn(2), "grey");
@@ -61,20 +55,25 @@ const localVisualisationScope = () => {
             }
         }
     };
-    //CONSTANTS
-    const nearDistance = 100;
     linkCanvas("renderingWindow");
     //Objects:
-    const cube = new Box(200, 300, 500);
-    cube.setColour("#87deeb20"); //transparent
+    const plane = new Box(300, 10, 1000);
+    plane.setColour("#ffffff00"); //transparent
+    plane.showOutline();
+    plane.position.y = -55;
+    const cube = new Box(100, 100, 100);
     cube.showOutline();
+    const sphere = new Sphere(50);
+    sphere.setColour("#87deeb");
+    sphere.showOutline();
+    sphere.position.z = 500;
     const cameraObject = new Sphere(25);
     cameraObject.name = "camera";
     cameraObject.setColour("#c4c4c4");
     cameraObject.showOutline();
-    cameraObject.position.z = -500;
+    cameraObject.position.z = -600;
     const viewport = new Box(1280, 720, 1);
-    viewport.setColour("#ffffff80");
+    viewport.setColour("#ffff0080");
     viewport.showOutline();
     const updateViewport = () => {
         viewport.position = JSON.parse(JSON.stringify(cameraObject.position));
@@ -82,7 +81,7 @@ const localVisualisationScope = () => {
     };
     updateViewport();
     const camera = new Camera();
-    camera.worldRotation = { x: -20, y: 20, z: 0 };
+    camera.worldRotation = Euler(-20, 20, 0);
     camera.updateRotationMatrix();
     camera.enableMovementControls("renderingWindow");
     //@ts-expect-error
@@ -90,8 +89,11 @@ const localVisualisationScope = () => {
     setInterval(() => {
         clearCanvas();
         camera.renderGrid();
-        camera.render([cameraObject, viewport, cube])[2].screenPoints;
-        visualiseRays(cube, cameraObject.position);
+        camera.render([plane]);
+        camera.render([cameraObject, viewport, cube, sphere]);
+        visualiseRays(plane, cameraObject.position, { showRays: false, showIntersection: false });
+        visualiseRays(cube, cameraObject.position, { showRays: false, showIntersection: false });
+        visualiseRays(sphere, cameraObject.position, { showRays: false, showIntersection: false });
     }, 16);
     document.onkeydown = ($e) => {
         const key = $e.key.toLowerCase();
@@ -113,7 +115,14 @@ const localVisualisationScope = () => {
         else if (key == "s") {
             cameraObject.position.z -= 5;
         }
+        else if (key == "1") {
+            cameraObject.setColour("#c4c4c4");
+        }
+        else if (key == "2") {
+            cameraObject.setColour("");
+        }
         updateViewport();
     };
+    console.log("Arrow keys to move camera x and y, w and s to move camera z, press 1 or 2 to show or hide camera");
 };
 localVisualisationScope();

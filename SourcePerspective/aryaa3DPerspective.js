@@ -610,55 +610,45 @@ class Camera {
             this._type = value;
         }
     }
-    get type() {
-        return this._type;
-    }
+    get type() { return this._type; }
     worldRotation = Euler(0, 0, 0);
     worldRotationMatrix = new matrix();
     absPosition = { x: 0, y: 0 };
     showScreenOrigin = false;
-    generateWorldPoints(points, objectPosition) {
-        let worldPoints = points.copy();
-        worldPoints.translateMatrix(objectPosition.x, objectPosition.y, objectPosition.z); //translate for object's position
+    generateWorldPoints(object) {
+        let worldPoints = object.physicalMatrix.copy();
+        worldPoints.translateMatrix(object.position.x, object.position.y, object.position.z); //translate for object's position
         worldPoints = multiplyMatrixs(this.worldRotationMatrix, worldPoints); //rotate for global world rotation
         return worldPoints;
     }
     generatePerspective(points) {
-        const cameraPoints = new matrix();
-        //calculate vector between camera and each point
-        const cameraPosition = [this.position.x, this.position.y, this.position.z];
-        for (let i = 0; i != points.width; i += 1) {
-            const point = points.getColumn(i);
-            const vector = [point[0] - cameraPosition[0], point[1] - cameraPosition[1], point[2] - cameraPosition[2]];
-            //normalize z axis (viewport is nearDistance from camera)
-            const zScaleFactor = this.nearDistance / vector[2];
-            const intersectionVector = [vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor];
-            const intersectionPoint = [this.position.x + intersectionVector[0], this.position.y + intersectionVector[1], point[2]]; //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
-            //clip the points if the z-vector is <= 1, since it means it is behind the camera
-            if (vector[2] <= 1) {
-                //move the xypoint off the screen ??
-                console.error(`Need to clip point ${intersectionPoint} since it is behind camera`);
+        const cameraPoints = points.copy();
+        if (this._type == "perspective") {
+            //calculate vector between camera and each point
+            const cameraPosition = [this.position.x, this.position.y, this.position.z];
+            for (let i = 0; i != points.width; i += 1) {
+                const point = points.getColumn(i);
+                const vector = [point[0] - cameraPosition[0], point[1] - cameraPosition[1], point[2] - cameraPosition[2]];
+                //normalize z axis (viewport is nearDistance from camera)
+                const zScaleFactor = this.nearDistance / vector[2];
+                const intersectionVector = [vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor];
+                const intersectionPoint = [this.position.x + intersectionVector[0], this.position.y + intersectionVector[1], point[2]]; //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
+                console.log(intersectionPoint);
+                //clip the points if the z-vector is <= 1, since it means it is behind the camera
+                if (point[2] < (this.position.z + this.nearDistance)) {
+                    //move the xypoint off the screen ??
+                    console.error(`Need to clip point ${intersectionPoint} since point is in behind the viewport`);
+                }
+                cameraPoints.addColumn(intersectionPoint);
             }
-            cameraPoints.addColumn(intersectionPoint);
+        }
+        else { //most transformations are already done for absolute
+            cameraPoints.translateMatrix(-this.position.x, -this.position.y, -this.position.z); //translating relative to camera's position
         }
         //finally translate for absolute position, and scale for zoom
         cameraPoints.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0);
         cameraPoints.scaleUp(this.zoom);
         return cameraPoints;
-    }
-    transformPoints(points) {
-        if (this._type == "perspective") {
-            const cameraPoints = this.generatePerspective(points); //points as the camera would see them
-            return cameraPoints;
-        }
-        else { //if (this._type == "absolute") //old system
-            let cameraPoints = points.copy();
-            cameraPoints.translateMatrix(-this.position.x, -this.position.y, -this.position.z); //translating relative to camera's position
-            cameraPoints = multiplyMatrixs(this.worldRotationMatrix, cameraPoints); //rotate for global world rotation
-            cameraPoints.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0); //translate for absolute position
-            cameraPoints.scaleUp(this.zoom); //scale for zoom
-            return cameraPoints;
-        }
     }
     render(objects) {
         //generate 3D world, just contains the points inside the world, with their actual position and the world rotation applied to them
@@ -668,16 +658,8 @@ class Camera {
         //Then sort objects/faces based on the cameraPoints
         const objectData = [];
         for (const object of objects) {
-            let cameraPoints = new matrix();
-            if (this._type == "perspective") {
-                const worldPoints = this.generateWorldPoints(object.physicalMatrix, object.position); //points in the 3D world
-                cameraPoints = this.transformPoints(worldPoints);
-            }
-            else {
-                cameraPoints = object.physicalMatrix.copy();
-                cameraPoints.translateMatrix(object.position.x, object.position.y, object.position.z); //translate for object's position
-                cameraPoints = this.transformPoints(cameraPoints);
-            }
+            const worldPoints = this.generateWorldPoints(object);
+            const cameraPoints = this.generatePerspective(worldPoints);
             //find center using worldPoints
             let [totalx, totaly, totalz] = [0, 0, 0];
             for (let i = 0; i != cameraPoints.width; i += 1) {
