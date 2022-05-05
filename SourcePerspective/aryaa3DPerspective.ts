@@ -702,7 +702,7 @@ class Grid extends Shape {
 class Camera {
     position: XYZ = { x: 0, y: 0, z: 0 };
     zoom = 1;
-    nearDistance = 300; //distance from the camera -> viewport, always + in the z-axis since the camera cannot rotate, only the world can
+    nearDistance = 100; //distance from the camera -> viewport, always + in the z-axis since the camera cannot rotate, only the world can
 
     _type: string = "perspective";
     set type( value: string ) {
@@ -724,13 +724,12 @@ class Camera {
     absPosition: {x: number, y: number} = { x: 0, y: 0 };
     showScreenOrigin: boolean = false;
 
-    generateWorldPoints ( points: matrix, objectPosition: XYZ ) { //these are the points inside the 3D world
+    generateWorldPoints ( points: matrix, objectPosition: XYZ ) { //pass in an object's physical matrix, and its position, and it transforms those points into the 3D scene.
         let worldPoints = points.copy();
         worldPoints.translateMatrix(objectPosition.x, objectPosition.y, objectPosition.z); //translate for object's position
         worldPoints = multiplyMatrixs(this.worldRotationMatrix, worldPoints); //rotate for global world rotation
         return worldPoints;
     }
-
     generatePerspective( points: matrix ) { //these are the points after having perspective applied to them
         const cameraPoints = new matrix();
         
@@ -742,15 +741,16 @@ class Camera {
             
 			//normalize z axis (viewport is nearDistance from camera)
 			const zScaleFactor = this.nearDistance / vector[2];
-			const xyPoint = [ vector[0] * zScaleFactor, vector[1] * zScaleFactor, point[2] ]; //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
-
+            const intersectionVector = [ vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor ];
+            const intersectionPoint = [ this.position.x + intersectionVector[0], this.position.y + intersectionVector[1], point[2] ] //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
+            
             //clip the points if the z-vector is <= 1, since it means it is behind the camera
             if ( vector[2] <= 1 ) {
                 //move the xypoint off the screen ??
-                console.error(`Need to clip point ${xyPoint} since it is behind camera`); 
+                console.error(`Need to clip point ${intersectionPoint} since it is behind camera`); 
             }
 
-			cameraPoints.addColumn( xyPoint );
+			cameraPoints.addColumn( intersectionPoint );
 		}
 
         //finally translate for absolute position, and scale for zoom
@@ -760,15 +760,13 @@ class Camera {
         return cameraPoints;
     }
 
-    transformPoints( points: matrix, objectPosition: XYZ ) {
+    transformPoints( points: matrix ) { //send 3D coordintes in, and it will return the 2D eqivalent to displayed
         if (this._type == "perspective") {
-            const worldPoints = this.generateWorldPoints( points, objectPosition ) //points in the 3D world
-            const cameraPoints = this.generatePerspective( worldPoints ) //points as the camera would see them
+            const cameraPoints = this.generatePerspective( points ) //points as the camera would see them
             return cameraPoints;
         }
         else { //if (this._type == "absolute") //old system
             let cameraPoints = points.copy();
-            cameraPoints.translateMatrix(objectPosition.x, objectPosition.y, objectPosition.z); //translate for object's position
             cameraPoints.translateMatrix(-this.position.x, -this.position.y, -this.position.z) //translating relative to camera's position
             cameraPoints = multiplyMatrixs(this.worldRotationMatrix, cameraPoints); //rotate for global world rotation
             cameraPoints.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0); //translate for absolute position
@@ -787,7 +785,16 @@ class Camera {
         const objectData: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
         for (const object of objects) {
             
-            const cameraPoints = this.transformPoints( object.physicalMatrix, object.position );
+            let cameraPoints = new matrix()
+            if ( this._type == "perspective" ) {
+                const worldPoints = this.generateWorldPoints( object.physicalMatrix, object.position ) //points in the 3D world
+                cameraPoints = this.transformPoints( worldPoints );
+            }
+            else {
+                cameraPoints = object.physicalMatrix.copy();
+                cameraPoints.translateMatrix(object.position.x, object.position.y, object.position.z); //translate for object's position
+                cameraPoints = this.transformPoints( cameraPoints );
+            }
 
             //find center using worldPoints
             let [totalx, totaly, totalz] = [0, 0, 0];

@@ -37,21 +37,22 @@
         sphere.setColour("#87deeb");
         sphere.showOutline();
         sphere.position.z = 500;
+        
 
         //CAMERA GOES HERE...
         const camera = new Camera();
-        camera.showScreenOrigin = true;
+        camera.type = "perspective";
         //camera.type = "absolute";
-        camera.position = ( camera.type == "perspective" ) ? Vector( 0, 100, -1000 ) : Vector(0, 0, 0); 
+        camera.position = ( camera.type == "perspective" ) ? Vector( 50, 50, -600 ) : Vector(0, 0, 0); 
         if (camera.type == "perspective") { camera.enableMovementControls("renderingWindow", { limitRotation: true }); }
         else { camera.enableMovementControls("renderingWindow", { limitRotation: true }); }
 
-
         setInterval(() => {
             clearCanvas();
+
             camera.render([plane]);
             camera.render([cube, sphere]);
-        }, 16)
+        })
 
         document.onkeydown = ($e) => {
             const key = $e.key.toLowerCase();
@@ -63,6 +64,8 @@
 
             else if ( key == "w" ) { camera.position.z += 5; }
             else if ( key == "s" ) { camera.position.z -= 5; }
+
+            console.log(camera.position.z)
         }
     </script>
 

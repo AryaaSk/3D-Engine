@@ -599,7 +599,7 @@ class Grid extends Shape {
 class Camera {
     position = { x: 0, y: 0, z: 0 };
     zoom = 1;
-    nearDistance = 300; //distance from the camera -> viewport, always + in the z-axis since the camera cannot rotate, only the world can
+    nearDistance = 100; //distance from the camera -> viewport, always + in the z-axis since the camera cannot rotate, only the world can
     _type = "perspective";
     set type(value) {
         if (value != "perspective" && value != "absolute") {
@@ -632,28 +632,27 @@ class Camera {
             const vector = [point[0] - cameraPosition[0], point[1] - cameraPosition[1], point[2] - cameraPosition[2]];
             //normalize z axis (viewport is nearDistance from camera)
             const zScaleFactor = this.nearDistance / vector[2];
-            const xyPoint = [vector[0] * zScaleFactor, vector[1] * zScaleFactor, point[2]]; //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
+            const intersectionVector = [vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor];
+            const intersectionPoint = [this.position.x + intersectionVector[0], this.position.y + intersectionVector[1], point[2]]; //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
             //clip the points if the z-vector is <= 1, since it means it is behind the camera
             if (vector[2] <= 1) {
                 //move the xypoint off the screen ??
-                console.error(`Need to clip point ${xyPoint} since it is behind camera`);
+                console.error(`Need to clip point ${intersectionPoint} since it is behind camera`);
             }
-            cameraPoints.addColumn(xyPoint);
+            cameraPoints.addColumn(intersectionPoint);
         }
         //finally translate for absolute position, and scale for zoom
         cameraPoints.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0);
         cameraPoints.scaleUp(this.zoom);
         return cameraPoints;
     }
-    transformPoints(points, objectPosition) {
+    transformPoints(points) {
         if (this._type == "perspective") {
-            const worldPoints = this.generateWorldPoints(points, objectPosition); //points in the 3D world
-            const cameraPoints = this.generatePerspective(worldPoints); //points as the camera would see them
+            const cameraPoints = this.generatePerspective(points); //points as the camera would see them
             return cameraPoints;
         }
         else { //if (this._type == "absolute") //old system
             let cameraPoints = points.copy();
-            cameraPoints.translateMatrix(objectPosition.x, objectPosition.y, objectPosition.z); //translate for object's position
             cameraPoints.translateMatrix(-this.position.x, -this.position.y, -this.position.z); //translating relative to camera's position
             cameraPoints = multiplyMatrixs(this.worldRotationMatrix, cameraPoints); //rotate for global world rotation
             cameraPoints.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0); //translate for absolute position
@@ -669,7 +668,16 @@ class Camera {
         //Then sort objects/faces based on the cameraPoints
         const objectData = [];
         for (const object of objects) {
-            const cameraPoints = this.transformPoints(object.physicalMatrix, object.position);
+            let cameraPoints = new matrix();
+            if (this._type == "perspective") {
+                const worldPoints = this.generateWorldPoints(object.physicalMatrix, object.position); //points in the 3D world
+                cameraPoints = this.transformPoints(worldPoints);
+            }
+            else {
+                cameraPoints = object.physicalMatrix.copy();
+                cameraPoints.translateMatrix(object.position.x, object.position.y, object.position.z); //translate for object's position
+                cameraPoints = this.transformPoints(cameraPoints);
+            }
             //find center using worldPoints
             let [totalx, totaly, totalz] = [0, 0, 0];
             for (let i = 0; i != cameraPoints.width; i += 1) {
