@@ -620,46 +620,54 @@ class Camera {
     generateWorldPoints(object) {
         let worldPoints = object.physicalMatrix.copy();
         worldPoints.translateMatrix(object.position.x, object.position.y, object.position.z); //translate for object's position
-        if (this._type == "absolute") {
-            worldPoints.translateMatrix(-this.position.x, -this.position.y, -this.position.z);
-        } //translating relative to camera's position
         worldPoints = multiplyMatrixs(this.worldRotationMatrix, worldPoints); //rotate for global world rotation
         return worldPoints;
     }
     generatePerspective(points) {
         let cameraPoints = new matrix();
         if (this._type == "perspective") {
+            //RENDERING PIPELINE FOR PERSPECTIVE MODE
+            //generate 3D world, applies position and world rotation
+            //find vector from camera -> (each vertex of object)
+            //find where the vector intersects the viewport, by scaling the vector with ( nearDistance / vector.z ), find coordinate in world with: (camera.position) + (scaled vector)
+            //Attach object's original z position to their (x, y) coordinate on the viewport to sort objects/faces
+            //Then sort objects/faces based on the cameraPoints
             //calculate vector between camera and each point
             const cameraPosition = [this.position.x, this.position.y, this.position.z];
             for (let i = 0; i != points.width; i += 1) {
                 const point = points.getColumn(i);
                 const vector = [point[0] - cameraPosition[0], point[1] - cameraPosition[1], point[2] - cameraPosition[2]];
-                //normalize z axis (viewport is nearDistance from camera)
+                //normalize z axis to viewport's z (viewport is nearDistance from camera)
                 const zScaleFactor = this.nearDistance / vector[2];
                 const intersectionVector = [vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor];
                 const intersectionPoint = [this.position.x + intersectionVector[0], this.position.y + intersectionVector[1], point[2]]; //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
-                //clip the points if the z-vector is <= 1, since it means it is behind the camera
-                if (vector[2] <= 1) {
+                //clip the points if the z-vector is <= 1, since it means it is behind the viewport
+                if (point[2] < (this.position.z + this.nearDistance)) {
                     //move the xypoint off the screen ??
-                    console.error(`Need to clip point ${intersectionPoint} since it is behind camera`);
+                    console.error(`Need to clip point ${intersectionPoint} since point is in behind the viewport`);
                 }
                 cameraPoints.addColumn(intersectionPoint);
             }
         }
         else {
-            //camera points will already have nessecary transformations applied to them by now if it in in absolute mode
+            //RENDERING PIPLINE FOR ABSOLUTE MODE
+            //generate 3D world, applies position and world rotation
+            //translate by camera's position
+            //translate by absPosition and scale points
+            //sort objects/faces based on the cameraPoints
             cameraPoints = points.copy();
+            //translating relative to camera's position, need to rotate the vector to the world's rotation since the object's have already been rotated
+            let cameraTranslationMatrix = new matrix();
+            cameraTranslationMatrix.addColumn([-this.position.x, -this.position.y, -this.position.z]);
+            cameraTranslationMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraTranslationMatrix);
+            const cameraTranslationVector = cameraTranslationMatrix.getColumn(0);
+            cameraPoints.translateMatrix(cameraTranslationVector[0], cameraTranslationVector[1], cameraTranslationVector[2]);
         }
         cameraPoints.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0); //translate for absolute position
         cameraPoints.scaleUp(this.zoom); //scale for zoom
         return cameraPoints;
     }
     render(objects) {
-        //generate 3D world, just contains the points inside the world, with their actual position and the world rotation applied to them
-        //Once you have 3D world, generate camera's perspective, by finding vector between object points and camera (singular point), then find the equation of the line
-        //After getting equation of the vector from object point to camera, find the point of intersection, where it intersects with the viewport (the screen)
-        //Attach object's original z position to their (x, y) coordinate on the viewport
-        //Then sort objects/faces based on the cameraPoints
         const objectData = [];
         for (const object of objects) {
             const worldPoints = this.generateWorldPoints(object);

@@ -41,8 +41,8 @@
 
         //CAMERA GOES HERE...
         const camera = new Camera();
-        camera.type = "perspective";
-        //camera.type = "absolute";
+        //camera.type = "perspective";
+        camera.type = "absolute";
         camera.position = ( camera.type == "perspective" ) ? Vector( 50, 50, -600 ) : Vector(0, 0, 0); 
         if (camera.type == "perspective") { camera.enableMovementControls("renderingWindow", { limitRotation: true }); }
         else { camera.enableMovementControls("renderingWindow", { limitRotation: true }); }
