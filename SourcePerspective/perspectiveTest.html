@@ -47,14 +47,11 @@
         if (camera.type == "perspective") { camera.enableMovementControls("renderingWindow", { limitRotation: true }); }
         else { camera.enableMovementControls("renderingWindow", { limitRotation: true }); }
 
-        /*
         setInterval(() => {
             clearCanvas();
-            //camera.render([plane]);
-            //camera.render([cube, sphere]);
+            camera.render([plane]);
+            camera.render([cube, sphere]);
         })
-        */
-        camera.render([cube]);
 
         document.onkeydown = ($e) => {
             const key = $e.key.toLowerCase();
