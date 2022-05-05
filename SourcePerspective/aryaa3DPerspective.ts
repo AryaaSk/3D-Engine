@@ -747,10 +747,10 @@ class Camera {
                 const intersectionVector = [ vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor ];
                 const intersectionPoint = [ this.position.x + intersectionVector[0], this.position.y + intersectionVector[1], point[2] ] //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
 
-                //clip the points if the z-vector is <= 1, since it means it is behind the camera
-                if ( vector[2] <= 1 ) {
+                //clip the points if the z-vector is <= 1, since it means it is behind the viewport
+                if ( point[2] < (this.position.z + this.nearDistance) ) {
                     //move the xypoint off the screen ??
-                    console.error(`Need to clip point ${intersectionPoint} since it is behind camera`); 
+                    console.error(`Need to clip point ${intersectionPoint} since point is in behind the viewport`); 
                 }
 
                 cameraPoints.addColumn( intersectionPoint );
