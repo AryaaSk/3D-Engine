@@ -41,12 +41,20 @@ const localVisualisationScope = () => {
             const zScaleFactor = nearDistance / vector[2];
             const intersectionVector = [vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor]; //keep z position since I need to plot it in the 3D world
             const intersectionPoint = [cameraPoint[0] + intersectionVector[0], cameraPoint[1] + intersectionVector[1], cameraPoint[2] + intersectionVector[2]];
+            /* //You need this when projecting onto the screen, in our case the viewport moves
+            intersectionPoint[0] -= cameraPoint[0];
+            intersectionPoint[1] -= cameraPoint[1];
+            intersectionPoint[2] -= cameraPoint[2];
+            */
             const packageMatrix = new matrix(); //wrapping the ray and intersection into 1 matrix to get transformed into 2D points to plot
             packageMatrix.addColumn(vertex);
             packageMatrix.addColumn(cameraPoint);
             packageMatrix.addColumn(intersectionPoint);
             const transformedMatrix = camera.transformPoints(packageMatrix);
             intersectionPoints.push(transformedMatrix.getColumn(2)); //to create the image later
+            //intersectionPoints.push( intersectionPoint );
+            //When it is projected on the viewport, the player stays in the same position (relative to viewport), but when projected onto screen it moves even when the camera is directly behind it.
+            //May have to translate by the inverse of the camera's position, since when projecting to the viewport, the viewport also moves.
             if (showRays == true) {
                 drawLine(transformedMatrix.getColumn(0), transformedMatrix.getColumn(1), "lime"); //camera -> object
             }
@@ -136,12 +144,10 @@ const localVisualisationScope = () => {
     planeTop.showOutline();
     planeTop.scale = planeSize / 800;
     planeTop.updateMatrices();
-    /*
     plane.setColour("");
     player.setColour("");
     house1.setColour("");
     house2.setColour("");
-    */
     const cameraObject = new Sphere(25);
     cameraObject.name = "camera";
     cameraObject.setColour("#c4c4c4");

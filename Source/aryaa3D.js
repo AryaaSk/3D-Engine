@@ -657,14 +657,13 @@ class AbsoluteCamera {
     render(objects) {
         const objectData = [];
         for (const object of objects) {
-            let worldPoints = object.physicalMatrix.copy(); //position of points in actual world
-            worldPoints.translateMatrix(object.position.x, object.position.y, object.position.z);
-            const cameraPoints = this.transformPoints(worldPoints);
+            let cameraPoints = object.physicalMatrix.copy(); //position of points in actual world
+            cameraPoints.translateMatrix(object.position.x, object.position.y, object.position.z);
+            cameraPoints = this.transformPoints(cameraPoints);
             //find center using cameraPoints
             let [totalx, totaly, totalz] = [0, 0, 0];
             for (let i = 0; i != cameraPoints.width; i += 1) {
                 const point = cameraPoints.getColumn(i);
-                point[2] = worldPoints.getValue(i, 2); //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
                 totalx += point[0];
                 totaly += point[1];
                 totalz += point[2];
