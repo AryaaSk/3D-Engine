@@ -4,7 +4,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script src="/SourcePerspective/aryaa3DPerspective.js"></script>
+    <script src="/Source/aryaa3D.js"></script>
 
     <title>Perspective  Test</title>
 
@@ -50,7 +50,6 @@
         //camera.nearDistance = 1;
         //camera.zoom = 5;
 
-        sphere.faces[49].colour = "#ffff00";
 
         setInterval(() => {
             /*
@@ -60,7 +59,7 @@
             */
 
             clearCanvas();
-            camera.render( [sphere] );
+            camera.render( [cube, sphere] );
         }, 16);
 
         document.onkeydown = ($e) => {

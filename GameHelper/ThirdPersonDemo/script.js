@@ -10,10 +10,11 @@ const localScope = () => {
     };
     const gravityCurve = [0.25, 0.5, 1, 2, 2, 2, 2, 2, 2];
     const camera = new Camera();
+    //camera.type = "perspective";
     camera.absPosition.y = 200; //to move camera up
     camera.showScreenOrigin = true;
-    camera.worldRotation.x = -10; //inital rotation to look down onto player
     camera.zoom = 1;
+    camera.worldRotation.x = -10;
     camera.updateRotationMatrix();
     //Game Helper Functions
     enableKeyListeners();
@@ -137,6 +138,8 @@ const localScope = () => {
         });
         player.translateLocal(movementVector.x, movementVector.y, movementVector.z);
         syncCamera(camera, player);
+        //camera.position = Vector( 0, 300, -200 );
+        //camera.position.z += player.position.z;
         clearCanvas();
         camera.renderGrid();
         camera.render([plane, planeTop]); //plane will always be below the other objects

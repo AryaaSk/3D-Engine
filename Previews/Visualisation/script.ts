@@ -14,9 +14,7 @@ const visualiseRays = ( object: Shape, camera: Camera, options?: { showRays?: bo
     if (options?.showRays == false) { showRays = false; }
     if (options?.showImage == false) { showImage = false; }
 
-    //@ts-expect-error
     const cameraPosition = new matrix( [ [camera.position.x, camera.position.y, camera.position.z] ] );
-    //@ts-expect-error
     const cameraPosition3D = camera.generatePerspective ( cameraPosition )
 
     /*
@@ -113,8 +111,6 @@ const camera = new Camera();
 camera.worldRotation = Euler( -20, 20, 0 );
 camera.updateRotationMatrix();
 camera.enableMovementControls("renderingWindow");
-//@ts-expect-error
-camera.type = "absolute"
 
 setInterval(() => {
     clearCanvas();

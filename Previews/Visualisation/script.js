@@ -16,9 +16,7 @@ const localVisualisationScope = () => {
         if (options?.showImage == false) {
             showImage = false;
         }
-        //@ts-expect-error
         const cameraPosition = new matrix([[camera.position.x, camera.position.y, camera.position.z]]);
-        //@ts-expect-error
         const cameraPosition3D = camera.generatePerspective(cameraPosition);
         /*
         const objectPoints = object.physicalMatrix.copy();
@@ -101,8 +99,6 @@ const localVisualisationScope = () => {
     camera.worldRotation = Euler(-20, 20, 0);
     camera.updateRotationMatrix();
     camera.enableMovementControls("renderingWindow");
-    //@ts-expect-error
-    camera.type = "absolute";
     setInterval(() => {
         clearCanvas();
         camera.renderGrid();

@@ -192,7 +192,18 @@ class matrix {
         }
         return copyMatrix;
     }
-    constructor() { }
+    constructor(data) {
+        if (data != undefined) {
+            this.data = data;
+            this.width = data.length;
+            try {
+                this.height = data[0].length;
+            }
+            catch {
+                this.height = 0;
+            }
+        }
+    }
     ;
 }
 const multiplyMatrixs = (m1, m2) => {
@@ -593,58 +604,117 @@ class Grid extends Shape {
     }
 }
 class Camera {
-    absPosition = { x: 0, y: 0 };
     position = { x: 0, y: 0, z: 0 };
     zoom = 1;
-    worldRotation = { x: 0, y: 0, z: 0 };
+    nearDistance = 100; //distance from the camera -> viewport, always + in the z-axis since the camera cannot rotate, only the world can
+    _type = "absolute"; //keeping it on absolute by default to avoid issues
+    set type(value) {
+        if (value != "perspective" && value != "absolute") {
+            console.error("INVALID TRANSFORM TYPE: Type must either be 'perspective' or 'absolute");
+            return;
+        }
+        else {
+            this._type = value;
+        }
+    }
+    get type() {
+        return this._type;
+    }
+    worldRotation = Euler(0, 0, 0);
     worldRotationMatrix = new matrix();
+    absPosition = { x: 0, y: 0 };
     showScreenOrigin = false;
-    transformMatrix(points, objectPosition) {
-        let cameraObjectMatrix = points.copy();
-        cameraObjectMatrix.translateMatrix(objectPosition.x, objectPosition.y, objectPosition.z); //translate for object's position
-        cameraObjectMatrix.translateMatrix(-this.position.x, -this.position.y, -this.position.z); //translating relative to camera's position
-        cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //rotate for global world rotation
-        cameraObjectMatrix.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0); //translate for absolute position
-        cameraObjectMatrix.scaleUp(this.zoom); //scale for zoom
-        return cameraObjectMatrix;
+    generateWorldPoints(object) {
+        let worldPoints = object.physicalMatrix.copy();
+        worldPoints.translateMatrix(object.position.x, object.position.y, object.position.z); //translate for object's position
+        worldPoints = multiplyMatrixs(this.worldRotationMatrix, worldPoints); //rotate for global world rotation
+        return worldPoints;
+    }
+    generatePerspective(points) {
+        let cameraPoints = new matrix();
+        if (this._type == "perspective") {
+            //RENDERING PIPELINE FOR PERSPECTIVE MODE
+            //generate 3D world, applies position and world rotation
+            //find vector from camera -> (each vertex of object)
+            //find where the vector intersects the viewport, by scaling the vector with ( nearDistance / vector.z ), find coordinate in world with: (camera.position) + (scaled vector)
+            //Attach object's original z position to their (x, y) coordinate on the viewport to sort objects/faces
+            //Then sort objects/faces based on the cameraPoints
+            //calculate vector between camera and each point
+            const cameraPosition = [this.position.x, this.position.y, this.position.z];
+            for (let i = 0; i != points.width; i += 1) {
+                const point = points.getColumn(i);
+                const vector = [point[0] - cameraPosition[0], point[1] - cameraPosition[1], point[2] - cameraPosition[2]];
+                //normalize z axis to viewport's z (viewport is nearDistance from camera)
+                const zScaleFactor = this.nearDistance / vector[2];
+                const intersectionVector = [vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor];
+                const intersectionPoint = [this.position.x + intersectionVector[0], this.position.y + intersectionVector[1], point[2]]; //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
+                //clip the points if the z-vector is <= 1, since it means it is behind the viewport
+                if (point[2] < (this.position.z + this.nearDistance)) {
+                    //move the xypoint off the screen ??
+                    console.error(`Need to clip point ${intersectionPoint} since point is in behind the viewport`);
+                }
+                cameraPoints.addColumn(intersectionPoint);
+            }
+        }
+        else {
+            //RENDERING PIPLINE FOR ABSOLUTE MODE
+            //generate 3D world, applies position and world rotation
+            //translate by camera's position
+            //translate by absPosition and scale points
+            //sort objects/faces based on the cameraPoints
+            cameraPoints = points.copy();
+            //translating relative to camera's position, need to rotate the vector to the world's rotation since the object's have already been rotated
+            let cameraTranslationMatrix = new matrix([[-this.position.x, -this.position.y, -this.position.z]]);
+            cameraTranslationMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraTranslationMatrix);
+            const cameraTranslationVector = cameraTranslationMatrix.getColumn(0);
+            cameraPoints.translateMatrix(cameraTranslationVector[0], cameraTranslationVector[1], cameraTranslationVector[2]);
+        }
+        cameraPoints.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0); //translate for absolute position
+        cameraPoints.scaleUp(this.zoom); //scale for zoom
+        return cameraPoints;
     }
     render(objects) {
         const objectData = [];
-        for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
-            //transform the object's physicalMatrix to how the camera would see it:
-            const object = objects[objectIndex];
-            const cameraObjectMatrix = this.transformMatrix(object.physicalMatrix, { x: object.position.x, y: object.position.y, z: object.position.z });
-            //work out center of shape by finding average of all points
-            let [totalX, totalY, totalZ] = [0, 0, 0];
-            for (let i = 0; i != cameraObjectMatrix.width; i += 1) {
-                const point = cameraObjectMatrix.getColumn(i);
-                totalX += point[0];
-                totalY += point[1];
-                totalZ += point[2];
+        for (const object of objects) {
+            const worldPoints = this.generateWorldPoints(object);
+            const cameraPoints = this.generatePerspective(worldPoints);
+            //find center using cameraPoints
+            let [totalx, totaly, totalz] = [0, 0, 0];
+            for (let i = 0; i != cameraPoints.width; i += 1) {
+                const point = cameraPoints.getColumn(i);
+                totalx += point[0];
+                totaly += point[1];
+                totalz += point[2];
             }
-            const [averageX, averageY, averageZ] = [totalX / cameraObjectMatrix.width, totalY / cameraObjectMatrix.width, totalZ / cameraObjectMatrix.width];
-            const center = [averageX, averageY, averageZ];
-            objectData.push({ object: object, screenPoints: cameraObjectMatrix, center: center });
+            const pointTotal = cameraPoints.width;
+            const [averagex, averagey, averagez] = [totalx / pointTotal, totaly / pointTotal, totalz / pointTotal];
+            const center = [averagex, averagey, averagez];
+            //push to objectData
+            objectData.push({ object: object, screenPoints: cameraPoints, center: center });
+        }
+        //create a copy of object data before it gets wiped
+        const objectDataCopy = [];
+        for (const data of objectData) {
+            objectDataCopy.push({ object: data.object.clone(), screenPoints: data.screenPoints.copy(), center: JSON.parse(JSON.stringify(data.center)) });
         }
         //sort objects based on distance to the position point:
-        const positionPoint = [0, 0, -50000];
+        const positionPoint = (this._type == "perspective") ? [this.position.x, this.position.y, this.position.z] : [0, 0, -50000]; //different for perspective and absolute
         const sortedObjects = this.sortFurthestDistanceTo(objectData, "center", positionPoint);
-        //TODO: DON'T USE A STATIC POSITION POINT, CHANGE THE Y COORDINATE BASED ON WORLD ROTATION'S X ANGLE
-        //JUST USE TRIGONEMETRY: TAN( X ) = Y (OPPOSITE) / -50000 (ADJACENT)
-        for (let objectIndex = 0; objectIndex != sortedObjects.length; objectIndex += 1) {
-            const object = sortedObjects[objectIndex].object;
-            const screenPoints = sortedObjects[objectIndex].screenPoints;
+        for (const data of sortedObjects) {
+            const object = data.object;
+            const screenPoints = data.screenPoints;
             //draw faces of shape in correct order, by finding the center and sorting based on distance to the position point
             let objectFaces = [];
             //populate the array
             for (let i = 0; i != object.faces.length; i += 1) {
+                const face = object.faces[i];
                 //if face is transparent then just don't render it
-                if (object.faces[i].colour == "") {
+                if (face.colour == "") {
                     continue;
                 }
                 let points = [];
-                for (let a = 0; a != object.faces[i].pointIndexes.length; a += 1) {
-                    points.push(screenPoints.getColumn(object.faces[i].pointIndexes[a]));
+                for (let a = 0; a != face.pointIndexes.length; a += 1) {
+                    points.push(screenPoints.getColumn(face.pointIndexes[a]));
                 }
                 //find center by getting average of all points
                 let [totalX, totalY, totalZ] = [0, 0, 0];
@@ -655,16 +725,16 @@ class Camera {
                 }
                 const [averageX, averageY, averageZ] = [totalX / points.length, totalY / points.length, totalZ / points.length];
                 const center = [averageX, averageY, averageZ];
-                objectFaces.push({ points: points, center: center, colour: object.faces[i].colour, faceIndex: i, outline: object.faces[i].outline });
+                objectFaces.push({ points: points, center: center, colour: face.colour, faceIndex: i, outline: face.outline });
             }
             const sortedFaces = this.sortFurthestDistanceTo(objectFaces, "center", positionPoint); //sort based on distance from center to (0, 0, -50000)
-            for (let i = 0; i != sortedFaces.length; i += 1) {
-                const facePoints = sortedFaces[i].points;
-                let colour = sortedFaces[i].colour;
+            for (const face of sortedFaces) {
+                const facePoints = face.points;
+                let colour = face.colour;
                 //find if the face has outline == true, or if it is false / undefined.
-                drawShape(facePoints, colour, sortedFaces[i].outline);
+                drawShape(facePoints, colour, face.outline);
                 if (object.showFaceIndexes == true) {
-                    plotPoint(sortedFaces[i].center, "#000000", String(sortedFaces[i].faceIndex));
+                    plotPoint(face.center, "#000000", String(face.faceIndex));
                 }
             }
             //draw points last so you can see them through the faces
@@ -676,9 +746,9 @@ class Camera {
             }
         }
         if (this.showScreenOrigin == true) {
-            plotPoint([-this.absPosition.x, -this.absPosition.y], "#000000"); //a visual marker of where it will zoom into
+            plotPoint([0, 0], "#000000"); //a visual marker of where it will zoom into
         }
-        return sortedObjects;
+        return objectDataCopy;
     }
     sortFurthestDistanceTo(list, positionKey, positionPoint) {
         const sortedList = [];
@@ -707,18 +777,26 @@ class Camera {
         }
         this.render([grid]);
     }
-    enableMovementControls(canvasID, rotation, movement, zoom, limitRotation) {
-        if (rotation == undefined) {
-            rotation = true;
+    enableMovementControls(canvasID, options) {
+        let [rotation, movement, zoom, limitRotation] = [true, true, true, false];
+        let [limitRotationMin, limitRotationMax] = [0, -90];
+        if (options?.rotation == false) {
+            rotation = false;
         }
-        if (movement == undefined) {
-            movement = true;
+        if (options?.movement == false) {
+            movement = false;
         }
-        if (zoom == undefined) {
-            zoom = true;
+        if (options?.zoom == false) {
+            zoom = false;
         }
-        if (limitRotation == undefined) {
-            limitRotation = false;
+        if (options?.limitRotation == true) {
+            limitRotation = true;
+        }
+        if (options?.limitRotationMin != undefined) {
+            limitRotationMin = options.limitRotationMin;
+        }
+        if (options?.limitRotationMax != undefined) {
+            limitRotationMax = options.limitRotationMax;
         }
         let mouseDown = false;
         let altDown = false;
@@ -742,11 +820,11 @@ class Camera {
                 }
                 this.worldRotation.x -= differenceY / 5;
                 this.worldRotation.y -= differenceX / 5;
-                if (this.worldRotation.x < -90 && limitRotation == true) { //to limit rotation, user can only rotate around 90 degrees on x axis
-                    this.worldRotation.x = -90;
+                if (this.worldRotation.x < limitRotationMax && limitRotation == true) { //to limit rotation, user can only rotate around 90 degrees on x axis
+                    this.worldRotation.x = limitRotationMax;
                 }
-                else if (this.worldRotation.x > 0 && limitRotation == true) {
-                    this.worldRotation.x = 0;
+                else if (this.worldRotation.x > limitRotationMin && limitRotation == true) {
+                    this.worldRotation.x = limitRotationMin;
                 }
                 this.updateRotationMatrix();
             }

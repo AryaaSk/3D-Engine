@@ -2,7 +2,7 @@
 
 linkCanvas("renderingWindow");
 const camera = new Camera();
-camera.enableMovementControls("renderingWindow", true, true, true);
+camera.enableMovementControls("renderingWindow");
 
 const shape = new Shape();
 const displayShape = new Shape();

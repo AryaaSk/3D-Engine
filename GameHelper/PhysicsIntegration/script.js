@@ -9,7 +9,7 @@ camera.worldRotation.x = -20;
 camera.worldRotation.y = 20;
 camera.updateRotationMatrix();
 camera.position.y = -300;
-camera.enableMovementControls("renderingWindow", true, true, true, true);
+camera.enableMovementControls("renderingWindow", { limitRotation: true });
 //Objects
 class Plane extends Shape {
     constructor() {
@@ -33,7 +33,7 @@ planeShape.position.y = -300;
 planeShape.scale = (1000 / 800);
 planeShape.updateMatrices();
 planeShape.showOutline();
-planeShape.setColour("efefef");
+planeShape.setColour("#efefef");
 const plane = new PhysicsObject(world, planeShape, new CANNON.Body({ mass: 0 }));
 //REGULAR ASHAPE, REGULAR CBODY:
 const cubeShape = new Box(100, 100, 100);
