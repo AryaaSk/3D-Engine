@@ -938,7 +938,7 @@ class PerspectiveCamera extends Camera {
             if (absX > 90 && absX < 270) {
                 differenceX *= -1;
             }
-            this.rotation.x += differenceY / 20;
+            this.rotation.x -= differenceY / 20;
             this.rotation.y -= differenceX / 20;
             if (this.rotation.x < limitRotationMax && limitRotation == true) { //to limit rotation, user can only rotate around 90 degrees on x axis
                 this.rotation.x = limitRotationMax;
