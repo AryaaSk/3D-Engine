@@ -647,30 +647,33 @@ class Camera {
             //find where the vector intersects the viewport, by scaling the vector with ( nearDistance / vector.z ), find coordinate in world with: (camera.position) + (scaled vector)
             //Attach object's original z position to their (x, y) coordinate on the viewport to sort objects/faces
             //Then sort objects/faces based on the cameraPoints
-            const cameraPosition = [this.position.x, this.position.y, this.position.z];
-            let pointsInFrontofCamera = false;
-            for (let i = 0; i != points.width; i += 1) {
-                const vertex = points.getColumn(i);
-                if (vertex[2] > cameraPosition[2]) {
-                    pointsInFrontofCamera = true;
+            cameraPoints = points.copy();
+            const cameraPoint = [this.position.x, this.position.y, this.position.z];
+            //prepare the points
+            let pointsInFrontOfCamera = false;
+            for (let i = 0; i != cameraPoints.width; i += 1) {
+                const vertex = cameraPoints.getColumn(i);
+                if (vertex[2] > cameraPoint[2]) {
+                    pointsInFrontOfCamera = true;
+                }
+                if (vertex[2] <= cameraPoint[2]) {
+                    cameraPoints.setValue(i, 2, cameraPoint[2] + 1); //clip point to the camera'z so it doesn't get inverted
                 }
             }
-            if (pointsInFrontofCamera == false) {
-                return cameraPoints;
+            if (pointsInFrontOfCamera == false) {
+                return new matrix();
             } //no point rendering if all the points are behind the camera
-            //calculate vector between camera and each point
-            for (let i = 0; i != points.width; i += 1) {
-                const vertex = points.getColumn(i);
-                if (vertex[2] <= cameraPosition[2]) {
-                    vertex[2] = cameraPosition[2] + 1; //clip point to the camera'z so it doesn't get inverted
-                }
-                const vector = [vertex[0] - cameraPosition[0], vertex[1] - cameraPosition[1], vertex[2] - cameraPosition[2]];
-                //normalize z axis to viewport's z (viewport is nearDistance from camera)
+            const intersectionPoints = new matrix();
+            for (let i = 0; i != cameraPoints.width; i += 1) {
+                const vertex = cameraPoints.getColumn(i);
+                //calculate intersection, normalize z-axis to (camera.position.z + nearDistance), the position of the viewport
+                const vector = [vertex[0] - cameraPoint[0], vertex[1] - cameraPoint[1], vertex[2] - cameraPoint[2]];
                 const zScaleFactor = this.nearDistance / vector[2];
                 const intersectionVector = [vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor];
-                const intersectionPoint = [this.position.x + intersectionVector[0], this.position.y + intersectionVector[1], this.position.z + intersectionVector[2]];
-                cameraPoints.addColumn(intersectionPoint);
+                const intersectionPoint = [cameraPoint[0] + intersectionVector[0], cameraPoint[1] + intersectionVector[1], cameraPoint[2] + intersectionVector[2]];
+                intersectionPoints.addColumn(intersectionPoint);
             }
+            cameraPoints = intersectionPoints;
         }
         else {
             //RENDERING PIPLINE FOR ABSOLUTE MODE
