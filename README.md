@@ -1,3 +1,5 @@
+*# Currently outdated since I have added perspective and will require a lot of rewriting*
+
 # Aryaa 3D: A 3D Library which uses Parallel Projection, and comes with it's own Object Builder/Editor
 
 **I just made this to learn more about 3D rendering/modelling, and Matrix transformations**\

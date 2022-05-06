@@ -1,4 +1,4 @@
-# Python Port of aryaa3D
+# Python Port of aryaa3D, as of 18/04/22, may get outdated
 ## I have tried to keep as many aspects of the original Javascript library the same in python, however in some cases I just had to make some changes
 
 ### Importing

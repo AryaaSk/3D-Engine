@@ -1,3 +1,5 @@
+*# Currently outdated since I have added perspective and will require a lot of rewriting*
+
 # The Rendering Pipeline
 ## How an object is created and then drawn onto the screen
 *A constant theme of this is the order of operations, which is very important. For example if you translate an object and then rotate it, since I am using the Euler Rotation Matrix formula which rotates around the origin, the shape would be in a different position compared to if you rotated first and then translated.*
