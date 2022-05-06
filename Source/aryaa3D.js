@@ -624,7 +624,14 @@ class Camera {
     worldRotationMatrix = new matrix();
     absPosition = { x: 0, y: 0 };
     showScreenOrigin = false;
-    generateWorldPoints(object) {
+    transformPoints(points) {
+        //pass in 3d coordinates, and this returns the 2d coordinate of that point
+        let returnPoints = points.copy();
+        returnPoints = multiplyMatrixs(this.worldRotationMatrix, returnPoints);
+        returnPoints = this.generatePerspective(returnPoints);
+        return returnPoints;
+    }
+    generateObjectWorldPoints(object) {
         let worldPoints = object.physicalMatrix.copy();
         worldPoints.translateMatrix(object.position.x, object.position.y, object.position.z); //translate for object's position
         worldPoints = multiplyMatrixs(this.worldRotationMatrix, worldPoints); //rotate for global world rotation
@@ -647,7 +654,8 @@ class Camera {
                 //normalize z axis to viewport's z (viewport is nearDistance from camera)
                 const zScaleFactor = this.nearDistance / vector[2];
                 const intersectionVector = [vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor];
-                const intersectionPoint = [this.position.x + intersectionVector[0], this.position.y + intersectionVector[1], point[2]]; //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
+                const intersectionPoint = [this.position.x + intersectionVector[0], this.position.y + intersectionVector[1], this.position.z + intersectionVector[2]];
+                console.log(intersectionPoint);
                 //clip the points if the z-vector is <= 1, since it means it is behind the viewport
                 if (point[2] < (this.position.z + this.nearDistance)) {
                     //move the xypoint off the screen ??
@@ -676,12 +684,13 @@ class Camera {
     render(objects) {
         const objectData = [];
         for (const object of objects) {
-            const worldPoints = this.generateWorldPoints(object);
+            const worldPoints = this.generateObjectWorldPoints(object);
             const cameraPoints = this.generatePerspective(worldPoints);
             //find center using cameraPoints
             let [totalx, totaly, totalz] = [0, 0, 0];
             for (let i = 0; i != cameraPoints.width; i += 1) {
                 const point = cameraPoints.getColumn(i);
+                point[2] = worldPoints.getValue(i, 2); //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
                 totalx += point[0];
                 totaly += point[1];
                 totalz += point[2];
