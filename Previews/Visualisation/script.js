@@ -83,6 +83,13 @@ const localVisualisationScope = () => {
     camera.worldRotation = Euler(-20, 20, 0);
     camera.updateRotationMatrix();
     camera.enableMovementControls("renderingWindow");
+    //zoom based on device height / width
+    const cameraZoomWidth = (window.innerWidth) / 1850;
+    const cameraZoomHeight = (window.innerHeight) / 1100;
+    camera.zoom = cameraZoomWidth; //set to lowest
+    if (cameraZoomHeight < cameraZoomWidth) {
+        camera.zoom = cameraZoomHeight;
+    }
     setInterval(() => {
         clearCanvas();
         camera.render([plane]);
@@ -120,5 +127,13 @@ const localVisualisationScope = () => {
         updateViewport();
     };
     console.log("Arrow keys to move camera x and y, w and s to move camera z, press 1 or 2 to show or hide camera");
+    document.getElementById("moveLeft").onclick = () => {
+        cameraObject.position.z -= 5;
+        updateViewport();
+    };
+    document.getElementById("moveRight").onclick = () => {
+        cameraObject.position.z += 5;
+        updateViewport();
+    };
 };
 localVisualisationScope();
