@@ -1015,24 +1015,14 @@ class PerspectiveCamera extends Camera {
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
         //create a copy of object data before it gets wiped
         const objectDataCopy: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
         for (const data of objectData) {
             objectDataCopy.push( { object: data.object.clone(), screenPoints: data.screenPoints.copy(), center: JSON.parse(JSON.stringify(data.center)) } );
         }
-        this.renderObjectData( objectData, cameraPoint );
+
+        this.renderObjectData( objectData, cameraPoint ); //need to find another way of sorting faces, since it is quite bad rn
+        
         return objectDataCopy;
     }
 

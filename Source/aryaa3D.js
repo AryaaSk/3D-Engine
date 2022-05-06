@@ -903,7 +903,7 @@ class PerspectiveCamera extends Camera {
         for (const data of objectData) {
             objectDataCopy.push({ object: data.object.clone(), screenPoints: data.screenPoints.copy(), center: JSON.parse(JSON.stringify(data.center)) });
         }
-        this.renderObjectData(objectData, cameraPoint);
+        this.renderObjectData(objectData, cameraPoint); //need to find another way of sorting faces, since it is quite bad rn
         return objectDataCopy;
     }
     enableMovementControls(canvasID, options) {

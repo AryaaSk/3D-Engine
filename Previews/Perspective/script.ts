@@ -5,18 +5,18 @@
 linkCanvas("renderingWindow") ;
 
 //OBJECTS GO HERE...
- const plane = new Box(300, 10, 1000);
- plane.setColour("#ffffff00"); //transparent
- plane.showOutline();
- plane.position.y = -55;
+const plane = new Box(300, 10, 1000);
+plane.setColour("#ffffff00"); //transparent
+plane.showOutline();
+plane.position.y = -55;
 
- const cube = new Box(100, 100, 100);
- cube.showOutline();
+const cube = new Box(100, 100, 100);
+cube.showOutline();
 
- const sphere = new Sphere( 50 );
- sphere.setColour("#87deeb");
- sphere.showOutline();
- sphere.position.z = 500;
+const sphere = new Sphere( 50 );
+sphere.setColour("#87deeb");
+sphere.showOutline();
+sphere.position.z = 500;
 
 //CAMERA GOES HERE...
 const camera = new PerspectiveCamera();
