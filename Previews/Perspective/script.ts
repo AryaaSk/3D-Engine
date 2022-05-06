@@ -13,12 +13,10 @@ cube2.showOutline();
 cube2.position.z = 500;
 
 //CAMERA GOES HERE...
-const camera = new AbsoluteCamera();
-camera.position = Vector( 0, 200, -200 )
-camera.enableMovementControls("renderingWindow", { limitRotation: true });
-
-//camera.type = "absolute";
-//camera.position = Vector(0, 0, 0);
+const camera = new PerspectiveCamera();
+camera.position = Vector( 0, 200, -1000 )
+camera.updateRotationMatrix();
+camera.enableMovementControls("renderingWindow", {  });
 
 
 setInterval(() => {
