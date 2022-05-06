@@ -41,17 +41,27 @@
 
         //CAMERA GOES HERE...
         const camera = new Camera();
-        //camera.type = "perspective";
-        camera.type = "absolute";
+        camera.type = "perspective";
+        //camera.type = "absolute";
         camera.position = ( camera.type == "perspective" ) ? Vector( 50, 50, -600 ) : Vector(0, 0, 0); 
         if (camera.type == "perspective") { camera.enableMovementControls("renderingWindow", { limitRotation: true }); }
         else { camera.enableMovementControls("renderingWindow", { limitRotation: true }); }
 
+        //camera.nearDistance = 1;
+        //camera.zoom = 5;
+
+        sphere.faces[49].colour = "#ffff00";
+
         setInterval(() => {
+            /*
             clearCanvas();
             camera.render([plane]);
             camera.render([cube, sphere]);
-        })
+            */
+
+            clearCanvas();
+            camera.render( [sphere] );
+        }, 16);
 
         document.onkeydown = ($e) => {
             const key = $e.key.toLowerCase();

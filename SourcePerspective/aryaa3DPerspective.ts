@@ -197,7 +197,14 @@ class matrix {
         return copyMatrix;
     }
 
-    constructor() { };
+    constructor( data?: number[][] ) {
+        if (data != undefined) {
+            this.data = data;
+            this.width = data.length;
+            try { this.height = data[0].length; }
+            catch { this.height = 0; }
+        }
+    };
 }
 
 const multiplyMatrixs = (m1: matrix, m2: matrix) => {
@@ -704,7 +711,7 @@ class Camera {
     zoom = 1;
     nearDistance = 100; //distance from the camera -> viewport, always + in the z-axis since the camera cannot rotate, only the world can
 
-    _type: string = "perspective";
+    _type: string = "absolute";
     set type( value: string ) {
         if (value != "perspective" && value != "absolute") {
             console.error("INVALID TRANSFORM TYPE: Type must either be 'perspective' or 'absolute");
@@ -739,8 +746,7 @@ class Camera {
             //generate 3D world, applies position and world rotation
             //find vector from camera -> (each vertex of object)
             //find where the vector intersects the viewport, by scaling the vector with ( nearDistance / vector.z ), find coordinate in world with: (camera.position) + (scaled vector)
-            //Attach object's original z position to their (x, y) coordinate on the viewport to sort objects/faces
-            //Then sort objects/faces based on the cameraPoints
+            //Then sort objects/faces based on the worldPoints
 
             //calculate vector between camera and each point
             const cameraPosition = [ this.position.x, this.position.y, this.position.z ];
@@ -751,7 +757,7 @@ class Camera {
                 //normalize z axis to viewport's z (viewport is nearDistance from camera)
                 const zScaleFactor = this.nearDistance / vector[2];
                 const intersectionVector = [ vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor ];
-                const intersectionPoint = [ this.position.x + intersectionVector[0], this.position.y + intersectionVector[1], point[2] ] //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
+                const intersectionPoint = [ this.position.x + intersectionVector[0], this.position.y + intersectionVector[1] ] //no z coordinate
 
                 //clip the points if the z-vector is <= 1, since it means it is behind the viewport
                 if ( point[2] < (this.position.z + this.nearDistance) ) {
@@ -768,7 +774,7 @@ class Camera {
             //generate 3D world, applies position and world rotation
             //translate by camera's position
             //translate by absPosition and scale points
-            //sort objects/faces based on the cameraPoints
+            //sort objects/faces based on the cameraPoints / worldPoints, both the same thing
 
             cameraPoints = points.copy();
 
@@ -786,7 +792,7 @@ class Camera {
     }
 
     render(objects: Shape[]) {
-        const objectData: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
+        const objectData: { object: Shape, worldPoints: matrix, screenPoints: matrix, center: number[] }[] = [];
         for (const object of objects) {
 
             const worldPoints = this.generateWorldPoints( object );
@@ -794,33 +800,34 @@ class Camera {
 
             //find center using cameraPoints
             let [totalx, totaly, totalz] = [0, 0, 0];
-			for (let i = 0; i != cameraPoints.width; i += 1) {
-				const point = cameraPoints.getColumn(i)
+			for (let i = 0; i != worldPoints.width; i += 1) {
+				const point = worldPoints.getColumn(i)
 				totalx += point[0];
 				totaly += point[1];
 				totalz += point[2];
 			}
-			const pointTotal = cameraPoints.width
-			const [averagex, averagey, averagez] = [ totalx / pointTotal, totaly / pointTotal, totalz / pointTotal ];
+			const total = worldPoints.width
+			const [averagex, averagey, averagez] = [ totalx / total, totaly / total, totalz / total ];
 			const center = [ averagex, averagey, averagez ]
 			
 			//push to objectData
-			objectData.push( { object: object, screenPoints: cameraPoints, center: center } )
+			objectData.push( { object: object,  worldPoints: worldPoints, screenPoints: cameraPoints, center: center } )
         }
 
         //create a copy of object data before it gets wiped
-        const objectDataCopy: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
+        const objectDataCopy: { object: Shape, worldPoints: matrix, screenPoints: matrix, center: number[] }[] = [];
         for (const data of objectData) {
-            objectDataCopy.push( { object: data.object.clone(), screenPoints: data.screenPoints.copy(), center: JSON.parse(JSON.stringify(data.center)) } );
+            objectDataCopy.push( { object: data.object.clone(), worldPoints: data.worldPoints.copy(), screenPoints: data.screenPoints.copy(), center: JSON.parse(JSON.stringify(data.center)) } );
         }
 
         //sort objects based on distance to the position point:
         const positionPoint = ( this._type == "perspective" ) ? [this.position.x, this.position.y, this.position.z] : [0, 0, -50000]; //different for perspective and absolute
-        const sortedObjects: { object: Shape, screenPoints: matrix, center: number[] }[] = this.sortFurthestDistanceTo(objectData, "center", positionPoint);
+        const sortedObjects: { object: Shape, worldPoints: matrix, screenPoints: matrix, center: number[] }[] = this.sortFurthestDistanceTo(objectData, "center", positionPoint);
 
         for (const data of sortedObjects) {
             const object = data.object;
             const screenPoints = data.screenPoints;
+            const worldPoints = data.worldPoints;
             
             //draw faces of shape in correct order, by finding the center and sorting based on distance to the position point
             let objectFaces: { points: number[][], center: number[], colour: string, faceIndex: number, outline?: boolean }[] = [];
@@ -832,18 +839,20 @@ class Camera {
                 //if face is transparent then just don't render it
                 if (face.colour == "") { continue; }
 
+                //find center by getting average of all points, and also store the 2d point 
+                let [totalX, totalY, totalZ] = [0, 0, 0];
                 let points: number[][] = [];
                 for (let a = 0; a != face.pointIndexes.length; a += 1) { 
-                    points.push(screenPoints.getColumn(face.pointIndexes[a])); 
-                }
+                    const pointIndex = face.pointIndexes[a];
+                    points.push(screenPoints.getColumn( pointIndex )); 
 
-                //find center by getting average of all points
-                let [totalX, totalY, totalZ] = [0, 0, 0];
-                for (let a = 0; a != points.length; a += 1) { 
-                    totalX += points[a][0]; totalY += points[a][1]; totalZ += points[a][2]; 
+                    const point = worldPoints.getColumn( pointIndex );
+                    totalX += point[0]; totalY += point[1]; totalZ += point[2]; 
                 }
-                const [averageX, averageY, averageZ] = [totalX / points.length, totalY / points.length, totalZ / points.length]
+                const total = worldPoints.width;
+                const [averageX, averageY, averageZ] = [totalX / total, totalY / total, totalZ / total]
                 const center = [averageX, averageY, averageZ];
+
                 objectFaces.push( { points: points, center: center, colour: face.colour, faceIndex: i, outline: face.outline} );
             }
 
@@ -857,7 +866,14 @@ class Camera {
                 drawShape(facePoints, colour, face.outline );
                 
                 if (object.showFaceIndexes == true) {
-                    plotPoint(face.center, "#000000", String(face.faceIndex)); 
+                    //calculate center of 2D points
+                    let [totalX, totalY, totalZ] = [0, 0, 0];
+                    for (const point of facePoints) { totalX += point[0]; totalY += point[1]; totalZ += point[2];  }
+                    const total = facePoints.length;
+                    const [averageX, averageY, averageZ] = [totalX / total, totalY / total, totalZ / total]
+                    const center = [averageX, averageY, averageZ];
+
+                    plotPoint( center , "#000000", String(face.faceIndex)); 
                 }
             }
 

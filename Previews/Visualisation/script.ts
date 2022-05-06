@@ -8,12 +8,18 @@ const localVisualisationScope = () => {
 //CONSTANTS
 const nearDistance = 100;
 
-const visualiseRays = ( object: Shape, cameraPosition: XYZ, options?: { showRays?: boolean, showIntersection?: boolean, showImage?: boolean }) => {
+const visualiseRays = ( object: Shape, camera: Camera, options?: { showRays?: boolean, showIntersection?: boolean, showImage?: boolean }) => {
     let [showRays, showIntersection, showImage] = [true, true, true];
     if (options?.showIntersection == false) { showIntersection = false; }
     if (options?.showRays == false) { showRays = false; }
     if (options?.showImage == false) { showImage = false; }
 
+    //@ts-expect-error
+    const cameraPosition = new matrix( [ [camera.position.x, camera.position.y, camera.position.z] ] );
+    //@ts-expect-error
+    const cameraPosition3D = camera.generatePerspective ( cameraPosition )
+
+    /*
     const objectPoints = object.physicalMatrix.copy();
     objectPoints.translateMatrix( object.position.x, object.position.y, object.position.z );
     const cameraPos = [ cameraPosition.x, cameraPosition.y, cameraPosition.z ];
@@ -61,6 +67,7 @@ const visualiseRays = ( object: Shape, cameraPosition: XYZ, options?: { showRays
             drawShape( points, "#ffffff00", true );
         }
     }
+    */
 }
 
 
@@ -81,17 +88,19 @@ sphere.showOutline();
 sphere.position.z = 500;
 
 
+const perspectiveCamera = new Camera();
+perspectiveCamera.position.z = -600;
 const cameraObject = new Sphere( 25 );
 cameraObject.name = "camera"
 cameraObject.setColour("#c4c4c4");
 cameraObject.showOutline();
-cameraObject.position.z = -600;
 
 
 const viewport = new Box(1280, 720, 1);
 viewport.setColour("#ffff0080");
 viewport.showOutline();
 const updateViewport = () => { 
+    cameraObject.position = perspectiveCamera.position;
     viewport.position = JSON.parse(JSON.stringify(cameraObject.position));
     viewport.position.z = cameraObject.position.z + nearDistance; 
 }
@@ -113,9 +122,9 @@ setInterval(() => {
     camera.render([plane]);
     camera.render([cameraObject, viewport, cube, sphere]);
 
-    visualiseRays( plane, cameraObject.position, { showRays: false, showIntersection: false });
-    visualiseRays( cube, cameraObject.position, { showRays: false, showIntersection: false });
-    visualiseRays( sphere, cameraObject.position, { showRays: false, showIntersection: false });
+    visualiseRays( plane, perspectiveCamera, { showRays: false, showIntersection: false });
+    visualiseRays( cube, perspectiveCamera, { showRays: false, showIntersection: false });
+    visualiseRays( sphere, perspectiveCamera, { showRays: false, showIntersection: false });
 }, 16);
 
 
