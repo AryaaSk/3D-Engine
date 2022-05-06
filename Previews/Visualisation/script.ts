@@ -142,11 +142,11 @@ const localVisualisationScope = () => {
     console.log("Arrow keys to move camera x and y, w and s to move camera z, press 1 or 2 to show or hide camera");
     
     document.getElementById("moveLeft")!.onclick = () => {
-        cameraObject.position.z -= 5
+        cameraObject.position.z -= 20;
         updateViewport();
     }
     document.getElementById("moveRight")!.onclick = () => {
-        cameraObject.position.z += 5
+        cameraObject.position.z += 20;
         updateViewport();
     }
     
