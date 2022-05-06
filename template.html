@@ -34,7 +34,7 @@
 
 
         //CAMERA GOES HERE...
-        const camera = new Camera();
+        const camera = new AbsoluteCamera();
         camera.worldRotation = { x: -20, y: 20, z: 0 };
         camera.updateRotationMatrix();
         camera.enableMovementControls("renderingWindow");

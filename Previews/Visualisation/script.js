@@ -136,10 +136,12 @@ const localVisualisationScope = () => {
     planeTop.showOutline();
     planeTop.scale = planeSize / 800;
     planeTop.updateMatrices();
+    /*
     plane.setColour("");
     player.setColour("");
     house1.setColour("");
     house2.setColour("");
+    */
     const cameraObject = new Sphere(25);
     cameraObject.name = "camera";
     cameraObject.setColour("#c4c4c4");

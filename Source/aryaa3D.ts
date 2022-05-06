@@ -703,70 +703,118 @@ class Grid extends Shape {
 }
 
 class AbsoluteCamera {
-    absPosition: {x: number, y: number} = { x: 0, y: 0 };
     position: XYZ = { x: 0, y: 0, z: 0 };
     zoom = 1;
 
-    worldRotation: XYZ = { x: 0, y: 0, z: 0 };
+    worldRotation: XYZ = Euler(0, 0, 0);
     worldRotationMatrix = new matrix();
 
+    absPosition: {x: number, y: number} = { x: 0, y: 0 };
     showScreenOrigin: boolean = false;
 
-    transformPoints( points: matrix ) { //returns the points after applying the transformations to them.
-        let cameraObjectMatrix = points.copy();
-
-        cameraObjectMatrix.translateMatrix(-this.position.x, -this.position.y, -this.position.z) //translating relative to camera's position
-
-        cameraObjectMatrix = multiplyMatrixs(this.worldRotationMatrix, cameraObjectMatrix); //rotate for global world rotation
-
-        cameraObjectMatrix.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0); //translate for absolute position
-
-        cameraObjectMatrix.scaleUp(this.zoom); //scale for zoom
-
-        return cameraObjectMatrix;
+    /*
+    transformPoints ( points: matrix ) {
+        //pass in 3d coordinates, and this returns the 2d coordinate of that point
+        let returnPoints = points.copy();
+        returnPoints = multiplyMatrixs( this.worldRotationMatrix, returnPoints );
+        returnPoints = this.generatePerspective( returnPoints );
+        return returnPoints;
     }
 
-    render(objects: Shape[]) {  
-        const objectData: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
-        for (let objectIndex = 0; objectIndex != objects.length; objectIndex += 1) {
-            //transform the object's physicalMatrix to how the camera would see it:
-            const object = objects[objectIndex];
-            
-            let cameraObjectMatrix = object.physicalMatrix.copy();
-            cameraObjectMatrix.translateMatrix(object.position.x, object.position.y, object.position.z); //translate for object's position
-            cameraObjectMatrix = this.transformPoints(object.physicalMatrix);
+    generateObjectWorldPoints ( object: Shape ) {
+        let worldPoints = object.physicalMatrix.copy();
+        worldPoints.translateMatrix(object.position.x, object.position.y, object.position.z); //translate for object's position
+        worldPoints = multiplyMatrixs(this.worldRotationMatrix, worldPoints); //rotate for global world rotation
+        return worldPoints;
+    }
 
-            //work out center of shape by finding average of all points
-            let [totalX, totalY, totalZ] = [0, 0, 0];
-            for (let i = 0; i != cameraObjectMatrix.width; i += 1) {
-                const point = cameraObjectMatrix.getColumn(i);
-                totalX += point[0]; totalY += point[1]; totalZ += point[2];
-            }
-            const [averageX, averageY, averageZ] = [totalX / cameraObjectMatrix.width, totalY / cameraObjectMatrix.width, totalZ / cameraObjectMatrix.width];
-            const center = [averageX, averageY, averageZ];
-            
-            objectData.push( { object: object, screenPoints: cameraObjectMatrix, center: center} )
+    generatePerspective ( points: matrix ) {
+        //RENDERING PIPLINE FOR ABSOLUTE MODE
+        //generate 3D world, applies position and world rotation
+        //translate by camera's position
+        //translate by absPosition and scale points
+        //sort objects/faces based on the cameraPoints
+
+        const cameraPoints = points.copy();
+
+        //translating relative to camera's position, need to rotate the vector to the world's rotation since the object's have already been rotated
+        let cameraTranslationMatrix = new matrix([ [-this.position.x, -this.position.y, -this.position.z] ]);
+        cameraTranslationMatrix = multiplyMatrixs( this.worldRotationMatrix, cameraTranslationMatrix );
+        const cameraTranslationVector = cameraTranslationMatrix.getColumn(0)
+        cameraPoints.translateMatrix( cameraTranslationVector[0], cameraTranslationVector[1], cameraTranslationVector[2] );
+
+        cameraPoints.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0); //translate for absolute position
+        cameraPoints.scaleUp(this.zoom); //scale for zoom
+        return cameraPoints;
+    }
+    */
+
+    transformPoints( points: matrix ) { //returns 2d coordinate of points, but keep z axis to sort faces
+        let cameraPoints = points.copy();
+
+        cameraPoints.translateMatrix(-this.position.x, -this.position.y, -this.position.z) //translating relative to camera's position
+
+        cameraPoints = multiplyMatrixs(this.worldRotationMatrix, cameraPoints); //rotate for global world rotation
+
+        cameraPoints.translateMatrix(-this.absPosition.x, -this.absPosition.y, 0); //translate for absolute position
+
+        cameraPoints.scaleUp(this.zoom); //scale for zoom
+
+        return cameraPoints;
+    }
+
+
+    render(objects: Shape[]) {
+        const objectData: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
+        for (const object of objects) {
+
+            let worldPoints = object.physicalMatrix.copy(); //position of points in actual world
+            worldPoints.translateMatrix( object.position.x, object.position.y, object.position.z );
+            const cameraPoints = this.transformPoints( worldPoints );
+
+            //find center using cameraPoints
+            let [totalx, totaly, totalz] = [0, 0, 0];
+			for (let i = 0; i != cameraPoints.width; i += 1) {
+                const point = cameraPoints.getColumn(i)
+                point[2] = worldPoints.getValue( i, 2 ) //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
+
+				totalx += point[0]; totaly += point[1]; totalz += point[2];
+			}
+			const pointTotal = cameraPoints.width
+			const [averagex, averagey, averagez] = [ totalx / pointTotal, totaly / pointTotal, totalz / pointTotal ];
+			const center = [ averagex, averagey, averagez ]
+			
+			//push to objectData
+			objectData.push( { object: object, screenPoints: cameraPoints, center: center } )
+        }
+
+        //create a copy of object data before it gets wiped
+        const objectDataCopy: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
+        for (const data of objectData) {
+            objectDataCopy.push( { object: data.object.clone(), screenPoints: data.screenPoints.copy(), center: JSON.parse(JSON.stringify(data.center)) } );
         }
 
         //sort objects based on distance to the position point:
         const positionPoint = [0, 0, -50000];
         const sortedObjects: { object: Shape, screenPoints: matrix, center: number[] }[] = this.sortFurthestDistanceTo(objectData, "center", positionPoint);
 
-        for (let objectIndex = 0; objectIndex != sortedObjects.length; objectIndex += 1 ) {
-            const object = sortedObjects[objectIndex].object;
-            const screenPoints = sortedObjects[objectIndex].screenPoints;
-
+        for (const data of sortedObjects) {
+            const object = data.object;
+            const screenPoints = data.screenPoints;
+            
             //draw faces of shape in correct order, by finding the center and sorting based on distance to the position point
             let objectFaces: { points: number[][], center: number[], colour: string, faceIndex: number, outline?: boolean }[] = [];
 
             //populate the array
             for (let i = 0; i != object.faces.length; i += 1) {
+                const face = object.faces[i]
+
                 //if face is transparent then just don't render it
-                if (object.faces[i].colour == "") { continue; }
+                if (face.colour == "") { continue; }
 
                 let points: number[][] = [];
-                for (let a = 0; a != object.faces[i].pointIndexes.length; a += 1) { 
-                    points.push(screenPoints.getColumn(object.faces[i].pointIndexes[a])); 
+                for (let a = 0; a != face.pointIndexes.length; a += 1) { 
+                    points.push(screenPoints.getColumn(face.pointIndexes[a])); 
                 }
 
                 //find center by getting average of all points
@@ -776,20 +824,20 @@ class AbsoluteCamera {
                 }
                 const [averageX, averageY, averageZ] = [totalX / points.length, totalY / points.length, totalZ / points.length]
                 const center = [averageX, averageY, averageZ];
-                objectFaces.push( { points: points, center: center, colour: object.faces[i].colour, faceIndex: i, outline: object.faces[i].outline} );
+                objectFaces.push( { points: points, center: center, colour: face.colour, faceIndex: i, outline: face.outline} );
             }
 
             const sortedFaces = this.sortFurthestDistanceTo(objectFaces, "center", positionPoint); //sort based on distance from center to (0, 0, -50000)
 
-            for (let i = 0; i != sortedFaces.length; i += 1) {
-                const facePoints = sortedFaces[i].points;
-                let colour = sortedFaces[i].colour;
+            for (const face of sortedFaces) {
+                const facePoints = face.points;
+                let colour = face.colour;
 
                 //find if the face has outline == true, or if it is false / undefined.
-                drawShape(facePoints, colour, sortedFaces[i].outline );
+                drawShape(facePoints, colour, face.outline );
                 
                 if (object.showFaceIndexes == true) {
-                    plotPoint(sortedFaces[i].center, "#000000", String(sortedFaces[i].faceIndex)); 
+                    plotPoint(face.center, "#000000", String(face.faceIndex)); 
                 }
             }
 
@@ -803,10 +851,10 @@ class AbsoluteCamera {
         }
 
         if (this.showScreenOrigin == true) {
-            plotPoint([-this.absPosition.x, -this.absPosition.y], "#000000"); //a visual marker of where it will zoom into
+            plotPoint([0, 0], "#000000"); //a visual marker of where it will zoom into
         }
 
-        return sortedObjects;
+        return objectDataCopy;
     }
     private sortFurthestDistanceTo(list: any[], positionKey: string, positionPoint: number[]) {
         const sortedList: any[] = [];

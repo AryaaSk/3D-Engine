@@ -153,10 +153,12 @@ const localVisualisationScope = () => {
     planeTop.updateMatrices();
     
 
+    /*
     plane.setColour("");
     player.setColour("");
     house1.setColour("");
     house2.setColour("");
+    */
 
 
 
