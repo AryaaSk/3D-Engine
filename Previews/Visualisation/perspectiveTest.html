@@ -42,7 +42,7 @@
         //CAMERA GOES HERE...
         const camera = new Camera();
         camera.type = "perspective";
-        camera.position = Vector( 50, 50, -600 )
+        camera.position = Vector( 0, 0, -1000 )
         camera.enableMovementControls("renderingWindow", { limitRotation: true });
 
         //camera.type = "absolute";
@@ -57,16 +57,14 @@
 
         document.onkeydown = ($e) => {
             const key = $e.key.toLowerCase();
-            if (key == "arrowup") { camera.position.y += 5; }
-            else if (key == "arrowdown") { camera.position.y -= 5; }
+            if (key == "arrowup") { camera.position.y += 50; }
+            else if (key == "arrowdown") { camera.position.y -= 50; }
 
-            else if ( key == "arrowleft" ) { camera.position.x -= 5; }
-            else if ( key == "arrowright" ) { camera.position.x += 5; }
+            else if ( key == "arrowleft" ) { camera.position.x -= 50; }
+            else if ( key == "arrowright" ) { camera.position.x += 50; }
 
-            else if ( key == "w" ) { camera.position.z += 5; }
-            else if ( key == "s" ) { camera.position.z -= 5; }
-
-            console.log(camera.position.z)
+            else if ( key == "w" ) { camera.position.z += 50; }
+            else if ( key == "s" ) { camera.position.z -= 50; }
         }
     </script>
 

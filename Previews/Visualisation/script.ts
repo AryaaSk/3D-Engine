@@ -6,7 +6,7 @@
 const localVisualisationScope = () => {
 
     //CONSTANTS
-    const nearDistance = 100;
+    const nearDistance = 1000;
     
     const visualiseRays = ( object: Shape, cameraPosition: XYZ, options?: { showRays?: boolean, showIntersection?: boolean, showImage?: boolean }) => {
         let [showRays, showIntersection, showImage] = [true, true, true];
@@ -16,38 +16,44 @@ const localVisualisationScope = () => {
     
         const objectPoints = object.physicalMatrix.copy();
         objectPoints.translateMatrix( object.position.x, object.position.y, object.position.z );
-        const cameraPos = [ cameraPosition.x, cameraPosition.y, cameraPosition.z ];
-    
+        const cameraPoint = [ cameraPosition.x, cameraPosition.y, cameraPosition.z ];
+        
+        //prepare the points
+        let pointsInFrontOfCamera = false;
+        for (let i = 0; i != objectPoints.width; i += 1) {
+            const vertex = objectPoints.getColumn(i);
+            if ( vertex[2] > cameraPoint[2] ) { pointsInFrontOfCamera = true; }
+
+            if (vertex[2] <= cameraPoint[2]) {
+                objectPoints.setValue( i, 2, cameraPoint[2] + 1 ); //clip point to the camera'z so it doesn't get inverted
+            }
+        }
+        if ( pointsInFrontOfCamera == false ) { return; } //no point rendering if all the points are behind the camera
+
+
         const intersectionPoints: number[][] = [];
-    
         for (let i = 0; i != objectPoints.width; i += 1) {
             const vertex = objectPoints.getColumn(i);
     
-            if ( vertex[2] < (cameraPosition.z + nearDistance) ) {
-                console.log("need to clip")
-            }
-    
-            const ray = [ cameraPos, vertex ]; //ray is just vector from camera -> vertex
-    
             //calculate intersection, normalize z-axis to (camera.position.z + nearDistance), the position of the viewport
-            const vector = [ vertex[0] - cameraPos[0], vertex[1] - cameraPos[1], vertex[2] - cameraPos[2] ];
+            const vector = [ vertex[0] - cameraPoint[0], vertex[1] - cameraPoint[1], vertex[2] - cameraPoint[2] ];
             const zScaleFactor = nearDistance / vector[2];
             const intersectionVector = [  vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor ]; //keep z position since I need to plot it in the 3D world
-            const intersectionPoint = [ cameraPosition.x + intersectionVector[0], cameraPosition.y + intersectionVector[1], cameraPosition.z + intersectionVector[2] ]
+            const intersectionPoint = [ cameraPoint[0] + intersectionVector[0], cameraPoint[1] + intersectionVector[1], cameraPoint[2] + intersectionVector[2] ]
 
             const packageMatrix = new matrix(); //wrapping the ray and intersection into 1 matrix to get transformed into 2D points to plot
-            packageMatrix.addColumn( ray[0] );
-            packageMatrix.addColumn( ray[1] );
+            packageMatrix.addColumn( vertex );
+            packageMatrix.addColumn( cameraPoint );
             packageMatrix.addColumn( intersectionPoint );
 
             const transformedMatrix = camera.transformPoints( packageMatrix );
             intersectionPoints.push( transformedMatrix.getColumn(2) ); //to create the image later
 
             if (showRays == true) {
-                drawLine( transformedMatrix.getColumn(0), transformedMatrix.getColumn(1), "black" ) //camera -> object
+                drawLine( transformedMatrix.getColumn(0), transformedMatrix.getColumn(1), "lime" ) //camera -> object
             }
             if (showIntersection == true) {
-                plotPoint( transformedMatrix.getColumn(2), "grey" );
+                plotPoint( transformedMatrix.getColumn(2), "red" );
             }
         }
     
@@ -117,7 +123,7 @@ const localVisualisationScope = () => {
         camera.render([plane]);
         camera.render([cameraObject, viewport, cube, sphere]);
     
-        visualiseRays( plane, cameraObject.position, { showRays: false, showIntersection: true });
+        visualiseRays( plane, cameraObject.position, { showRays: false, showIntersection: false });
         visualiseRays( cube, cameraObject.position, { showRays: false, showIntersection: false });
         visualiseRays( sphere, cameraObject.position, { showRays: false, showIntersection: false });
     }, 16);

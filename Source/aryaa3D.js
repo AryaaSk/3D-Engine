@@ -606,7 +606,7 @@ class Grid extends Shape {
 class Camera {
     position = { x: 0, y: 0, z: 0 };
     zoom = 1;
-    nearDistance = 100; //distance from the camera -> viewport, always + in the z-axis since the camera cannot rotate, only the world can
+    nearDistance = 1000; //distance from the camera -> viewport, always + in the z-axis since the camera cannot rotate, only the world can, acts like FOV
     _type = "absolute"; //keeping it on absolute by default to avoid issues
     set type(value) {
         if (value != "perspective" && value != "absolute") {
@@ -642,25 +642,33 @@ class Camera {
         if (this._type == "perspective") {
             //RENDERING PIPELINE FOR PERSPECTIVE MODE
             //generate 3D world, applies position and world rotation
+            //prepare verteces, check if the object is behind the camera (if so then don't render), and if some are behind then clip the vertece to the near plane
             //find vector from camera -> (each vertex of object)
             //find where the vector intersects the viewport, by scaling the vector with ( nearDistance / vector.z ), find coordinate in world with: (camera.position) + (scaled vector)
             //Attach object's original z position to their (x, y) coordinate on the viewport to sort objects/faces
             //Then sort objects/faces based on the cameraPoints
-            //calculate vector between camera and each point
             const cameraPosition = [this.position.x, this.position.y, this.position.z];
+            let pointsInFrontofCamera = false;
             for (let i = 0; i != points.width; i += 1) {
-                const point = points.getColumn(i);
-                const vector = [point[0] - cameraPosition[0], point[1] - cameraPosition[1], point[2] - cameraPosition[2]];
+                const vertex = points.getColumn(i);
+                if (vertex[2] > cameraPosition[2]) {
+                    pointsInFrontofCamera = true;
+                }
+            }
+            if (pointsInFrontofCamera == false) {
+                return cameraPoints;
+            } //no point rendering if all the points are behind the camera
+            //calculate vector between camera and each point
+            for (let i = 0; i != points.width; i += 1) {
+                const vertex = points.getColumn(i);
+                if (vertex[2] <= cameraPosition[2]) {
+                    vertex[2] = cameraPosition[2] + 1; //clip point to the camera'z so it doesn't get inverted
+                }
+                const vector = [vertex[0] - cameraPosition[0], vertex[1] - cameraPosition[1], vertex[2] - cameraPosition[2]];
                 //normalize z axis to viewport's z (viewport is nearDistance from camera)
                 const zScaleFactor = this.nearDistance / vector[2];
                 const intersectionVector = [vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor];
                 const intersectionPoint = [this.position.x + intersectionVector[0], this.position.y + intersectionVector[1], this.position.z + intersectionVector[2]];
-                console.log(intersectionPoint);
-                //clip the points if the z-vector is <= 1, since it means it is behind the viewport
-                if (point[2] < (this.position.z + this.nearDistance)) {
-                    //move the xypoint off the screen ??
-                    console.error(`Need to clip point ${intersectionPoint} since point is in behind the viewport`);
-                }
                 cameraPoints.addColumn(intersectionPoint);
             }
         }
