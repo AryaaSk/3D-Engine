@@ -11,7 +11,7 @@ const playerProperties = {
 };
 const gravityCurve = [0.25, 0.5, 1, 2, 2, 2, 2, 2, 2]
 
-const camera = new Camera();
+const camera = new AbsoluteCamera();
 //camera.type = "perspective";
 camera.absPosition.y = 200; //to move camera up
 camera.showScreenOrigin = true;
@@ -148,7 +148,7 @@ setInterval(() => { //animation loop
     })
     player.translateLocal(movementVector.x, movementVector.y, movementVector.z);
 
-    syncCamera( camera, player )
+    camera.position = JSON.parse(JSON.stringify(player.position));
     //camera.position = Vector( 0, 300, -200 );
     //camera.position.z += player.position.z;
 

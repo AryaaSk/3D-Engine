@@ -25,8 +25,6 @@ keysDown.forEach(key => {
 })
 ```
 
-- **syncCamera()**: This function takes in 2 parameters: The Camera, and an Object. Then it will position the camera at the same position and rotate the world inversly to the object's y-rotation, which makes a third-person view of the object you are following. You can look in the [ThirdPersonDemo](https://github.com/AryaaSk/3D-Engine/blob/master/GameHelper/ThirdPersonDemo) for more info.
-
 
 
 

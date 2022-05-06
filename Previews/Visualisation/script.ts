@@ -177,7 +177,7 @@ const localVisualisationScope = () => {
     updateViewport();
     
     
-    const camera = new Camera();
+    const camera = new AbsoluteCamera();
     camera.worldRotation = Euler( -20, 20, 0 );
     camera.updateRotationMatrix();
     camera.enableMovementControls("renderingWindow");

@@ -12,15 +12,6 @@ const enableKeyListeners = () => {
     })
 }
 
-const syncCamera = (camera: Camera, object: Shape) => { //Syncs camera to third person view, directly behind object
-    const objectPosition: { x: number, y: number, z: number }  = JSON.parse(JSON.stringify(object.position));
-    camera.position = objectPosition;
-
-    const objectYRotation = object.rotation.y;
-    camera.worldRotation.y = -objectYRotation;
-    camera.updateRotationMatrix();
-}
-
 
 
 

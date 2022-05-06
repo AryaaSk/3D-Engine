@@ -5,7 +5,7 @@ world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
 //ARYAA3D SETUP
 linkCanvas("renderingWindow")
 
-const camera = new Camera();
+const camera = new AbsoluteCamera();
 camera.worldRotation.x = -20;
 camera.worldRotation.y = 20;
 camera.updateRotationMatrix();

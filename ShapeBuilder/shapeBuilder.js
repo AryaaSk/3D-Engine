@@ -1,7 +1,7 @@
 "use strict";
 (() => {
     linkCanvas("renderingWindow");
-    const camera = new Camera();
+    const camera = new AbsoluteCamera();
     camera.enableMovementControls("renderingWindow");
     const shape = new Shape();
     const displayShape = new Shape();

@@ -9,7 +9,7 @@ const localScope = () => {
         jumpCurve: [5, 4, 3, 2, 1, 0.5, 0.25, 0.125], //Imagine these points plot on the y-axis, x axis is the index, I am just re-creating an animation curve
     };
     const gravityCurve = [0.25, 0.5, 1, 2, 2, 2, 2, 2, 2];
-    const camera = new Camera();
+    const camera = new AbsoluteCamera();
     //camera.type = "perspective";
     camera.absPosition.y = 200; //to move camera up
     camera.showScreenOrigin = true;
@@ -137,7 +137,7 @@ const localScope = () => {
             }
         });
         player.translateLocal(movementVector.x, movementVector.y, movementVector.z);
-        syncCamera(camera, player);
+        camera.position = JSON.parse(JSON.stringify(player.position));
         //camera.position = Vector( 0, 300, -200 );
         //camera.position.z += player.position.z;
         clearCanvas();

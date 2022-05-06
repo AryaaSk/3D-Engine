@@ -16,13 +16,6 @@ const enableKeyListeners = () => {
         }
     });
 };
-const syncCamera = (camera, object) => {
-    const objectPosition = JSON.parse(JSON.stringify(object.position));
-    camera.position = objectPosition;
-    const objectYRotation = object.rotation.y;
-    camera.worldRotation.y = -objectYRotation;
-    camera.updateRotationMatrix();
-};
 //CannonJS Physics Functions, import cannonjs before using any of these
 const syncShape = (cannonBody, aryaa3DBody) => {
     aryaa3DBody.position.x = cannonBody.position.x;
