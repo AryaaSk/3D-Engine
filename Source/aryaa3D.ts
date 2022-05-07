@@ -1000,7 +1000,7 @@ class PerspectiveCamera extends Camera {
             //find center using cameraPoints
             let [totalx, totaly, totalz] = [0, 0, 0];
 			for (let i = 0; i != cameraPoints.width; i += 1) {
-                cameraPoints.setValue( i, 2, worldPoints.getColumn(i)[2] );
+                cameraPoints.setValue( i, 2, worldPoints.getColumn(i)[2] ); //attach original z-coordinate
 
                 const point = cameraPoints.getColumn(i)
 				totalx += point[0]; totaly += point[1]; totalz += point[2];
