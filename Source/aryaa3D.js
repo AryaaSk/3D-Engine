@@ -616,6 +616,9 @@ class Camera {
         for (const data of sortedObjects) {
             const object = data.object;
             const screenPoints = data.screenPoints;
+            if (screenPoints.width == 0) {
+                continue; //the object is not currently on the screen, so don't try and render 
+            }
             //draw faces of shape in correct order, by finding the center and sorting based on distance to the position point
             let objectFaces = [];
             //populate the array
