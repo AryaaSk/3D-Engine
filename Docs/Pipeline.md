@@ -65,7 +65,7 @@ Each number represents the (index of the corner)+1, the +1 is because I didn't w
 
     5. **Scale object's size and position based on camera's zoom, and absPosition**
 
-4. Then creates a copy of the CameraPoints called WorldPoints, and passes them to the drawing function. The WorldPoints represent the points in 3D space, but since it an absolute camera, the CameraPoints represent the same thing.
+4. Then just pass the CameraPoints to the rendering function, to get drawn onto the screen.
 
 #### Perspective Camera
 1. First it creates a copy of the object's Physical Matrix, and calls it the WorldPoints, which basically represent the object's verteces as points in 3D space. Here are the steps to get the WorldPoints:
@@ -94,21 +94,24 @@ Each number represents the (index of the corner)+1, the +1 is because I didn't w
 
     5. **Scale object's size and position based on camera's zoom, and absPosition**
 
-3. Then just pass the CameraPoints and WorldPoints to the rendering function, to get drawn onto the screen.
+    6. **Attach vertece's original z coordinate**:\
+    This is so that it can be sorted by ddistance to camera to draw the furthest faces and objects first.
+
+3. Then just pass the CameraPoints to the rendering function, to get drawn onto the screen.
 
 
 ### Rendering the Object (Actually drawing things on the screen):
 
-- A list of objects is passed into the camera.render() function, I loop through that list and calculate all the transformations above, then once I have done that I calculate the center of the object in the 3D world, then just sort the objects based on distance to **(0, 0, -50000) or the camera's position** (absolute or perspective camera) with the WorldPoints, *similar to how I sort the faces below*, and I just render each object individually in order of furthest first, using the steps below:
+- A list of objects is passed into the camera.render() function, I loop through that list and calculate all the transformations above, then once I have done that I calculate the CameraPoints of the object in the 3D world, then just sort the objects based on distance to **(0, 0, -50000) or the camera's position** (absolute or perspective camera) with the CameraPoints, *similar to how I sort the faces below*, and I just render each object individually in order of furthest first, using the steps below:
 
-1. Now we have the WorldPoints which has the points of the object in the correct position in the 3D World, we just need to draw the physical points using , lines and shapes onto the canvas:
+1. Now we have the CameraPoints which has the points of the object in the correct position in the 3D World, we just need to draw the physical points using , lines and shapes onto the canvas:
 
 2. We need to determine the order in which to draw the faces, otherwise we would get something like this:
     ![Wrong Face Order](https://github.com/AryaaSk/3D-Engine/blob/master/Docs/ResearchImages/WrongFaceOrder.png?raw=true)\
 
     1. First it calculates the center of each face, we know where the faces are located because we can hardcode the corners which construct each face, because we have a specific order of points, refer to the *Creating the Object* section for more info. To calculate the center you just find the average of all 4 points of the face (in a cube).
 
-    2. Once you have the centers of the faces, it calculates the distance of each center to the point  **(0, 0, -50000) or the camera's position** (absolute or perspective camera) with the WorldPoints, the reason I used (0, 0, -50000) for Absolute Camera was because it negates the differences between individual object's positions, which would be an issue if I used the camera's position, which is why the Perspective Camera's sorting is quite buggy. Then just sort based on the distance between both points.
+    2. Once you have the centers of the faces, it calculates the distance of each center to the point  **(0, 0, -50000) or the camera's position** (absolute or perspective camera) with the CameraPoints, the reason I used (0, 0, -50000) for Absolute Camera was because it negates the differences between individual object's positions, which would be an issue if I used the camera's position, which is why the Perspective Camera's sorting is quite buggy. Then just sort based on the distance between both points.
 
 3. Once you have the order just draw each face as a shape (for a box it is a quadrilateral), draw the furthest ones first. You know which points to use because we hardcoded the index's of the corners in the object's PhysicalMatrix and therefore the CameraPoints.\
 The reason this works is because although you are rotating and translating the shape, the corners don't actually move in relation to each other
