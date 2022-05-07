@@ -845,8 +845,8 @@ class PerspectiveCamera extends Camera {
             if (vertex[2] > cameraPoint[2]) {
                 pointsInFrontOfCamera = true;
             }
-            if (vertex[2] <= cameraPoint[2]) {
-                cameraPoints.setValue(i, 2, cameraPoint[2] + 1); //clip point to the camera'z so it doesn't get inverted
+            if (vertex[2] <= (cameraPoint[2] + 10)) {
+                cameraPoints.setValue(i, 2, cameraPoint[2] + 10); //clip point to the camera'z so it doesn't get inverted
             }
         }
         if (pointsInFrontOfCamera == false) {
