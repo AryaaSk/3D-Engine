@@ -798,7 +798,7 @@ class AbsoluteCamera extends Camera {
         this.worldRotationMatrix = calculateRotationMatrix(rX, rY, rZ);
     }
 
-     //RENDERING PIPLINE FOR ABSOLUTE MODE
+    //RENDERING PIPLINE FOR ABSOLUTE MODE
     //generate 3D world, applies position and world rotation
     //translate by camera's position
     //translate by absPosition and scale points
