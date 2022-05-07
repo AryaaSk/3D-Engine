@@ -205,7 +205,7 @@ You can download the [Quick Start Template](template.html) to get started straig
 
 ### If you want to create games with this, read the [Game Helper Docs](Docs/GameHelper.md)
 
-Here is a preview of the project in this repo [Example.html](https://aryaask.github.io/3D-Engine/Previews/example.html)\
+Here is a preview of the project in this repo [Absolute Camera Example](https://aryaask.github.io/3D-Engine/Examples/Absolute/)\
 ![Preview Gif](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/3DEngineDemo.gif?raw=true)
 
 Here is a preview of the [Shape Builder](https://aryaask.github.io/3D-Engine/ShapeBuilder/) which you can use to build custom shapes\

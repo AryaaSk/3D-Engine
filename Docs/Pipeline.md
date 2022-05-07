@@ -90,7 +90,7 @@ Each number represents the (index of the corner)+1, the +1 is because I didn't w
 
     - Here is a visualisation of how the perspective works, the green lines represent the vectors from the Camera -> Verteces, and Red Points represent the Intersection Points with the Viewport, and there is an image projected on the screen of the scene from the Camera's Perspective\
     ![Perspective Visualisation](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/PerspectiveVisualisation.png?raw=true)\
-    You can use this yourself: [Visualisation](https://aryaask.github.io/3D-Engine/Previews/Visualisation/)    
+    You can use this yourself: [Visualisation](https://aryaask.github.io/3D-Engine/Examples/PerspectiveVisualisation/)    
 
     5. **Scale object's size and position based on camera's zoom, and absPosition**
 

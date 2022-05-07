@@ -42,14 +42,14 @@ I used CannonJS to integrate phyiscs into my 3D Engine, the basic idea is that t
 You will need to import aryaa3D, as well as cannon.js, and the aryaa3D gameHelper.js
 ```html
 <script src="https://aryaask.github.io/3D-Engine/Source/aryaa3D.js"></script>
-<script src="https://aryaask.github.io/3D-Engine/GameHelper/PhysicsIntegration/cannon.js"></script>
+<script src="https://aryaask.github.io/3D-Engine/GameHelper/cannon.js"></script>
 <script src="https://aryaask.github.io/3D-Engine/GameHelper/gameHelper.js"></script>
 
 <script src="yourownjsfile.js" defer>
 ```
 
 ### Typescript
-You should have already download the Game Helper declarations file (look above), so just also download the [cannonTypes.d.ts](https://github.com/AryaaSk/3D-Engine/blob/master/GameHelper/PhysicsIntegration/cannonTypes.d.ts) file, to get CannonJS auto-complete.
+You should have already download the Game Helper declarations file (look above), so just also download the [cannonTypes.d.ts](https://github.com/AryaaSk/3D-Engine/blob/master/GameHelper/cannonTypes.d.ts) file, to get CannonJS auto-complete.
 
 ## Setup
 First setup the aryaa3D and cannon world/scene:
@@ -196,7 +196,7 @@ setInterval(() => {
 }, 16);
 ```
 
-You can get quickly get started with the [physicsTemplate.html](https://github.com/AryaaSk/3D-Engine/tree/master/GameHelper/PhysicsIntegration/physicsTemplate.html)
+You can get quickly get started with the [physicsTemplate.html](https://github.com/AryaaSk/3D-Engine/tree/master/GameHelper/physicsTemplate.html)
 
-Here is a demo of the [example.html](https://github.com/AryaaSk/3D-Engine/tree/master/GameHelper/PhysicsIntegration/example.html)\
+Here is a demo of the [Physics Example](https://github.com/AryaaSk/3D-Engine/tree/master/GameHelper/Physics)\
 ![Preview Gif](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/PhysicsDemo.gif?raw=true)
