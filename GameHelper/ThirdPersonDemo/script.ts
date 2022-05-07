@@ -11,12 +11,10 @@ const playerProperties = {
 };
 const gravityCurve = [0.25, 0.5, 1, 2, 2, 2, 2, 2, 2]
 
-const camera = new AbsoluteCamera();
-//camera.type = "perspective";
+const camera = new PerspectiveCamera();
 camera.absPosition.y = 200; //to move camera up
 camera.showScreenOrigin = true;
-camera.zoom = 1;
-camera.worldRotation.x = -10;
+camera.rotation.x = 10;
 camera.updateRotationMatrix();
 
 //Game Helper Functions
@@ -104,6 +102,8 @@ const planeTop = new PlaneTop();
 planeTop.showOutline();
 planeTop.scale = planeSize / 800;
 planeTop.updateMatrices();
+plane.setColour("#e4e4e4");
+planeTop.setColour("#e4e4e4");
 
 
 //Rotate player based on mouse movement
@@ -120,11 +120,6 @@ document.onmousemove = ($e) => {
     player.rotation.y += $e.movementX * playerProperties.rotationSensitivity;
     player.updateQuaternion();
     player.updateMatrices();
-
-    camera.worldRotation.x -= $e.movementY * playerProperties.rotationSensitivity; //only rotating world and not player
-    if (camera.worldRotation.x < -90) {  camera.worldRotation.x = -90; } //limit rotation ourselves, since we disabled rotation in enableMovementControls()
-    else if (camera.worldRotation.x > 0) {  camera.worldRotation.x = 0;  }
-    camera.updateRotationMatrix();
 }
 
 //can now render other objects here, just like a normal scene, the player can move around and the camera follows in third person
@@ -148,12 +143,11 @@ setInterval(() => { //animation loop
     })
     player.translateLocal(movementVector.x, movementVector.y, movementVector.z);
 
-    camera.position = JSON.parse(JSON.stringify(player.position));
-    //camera.position = Vector( 0, 300, -200 );
-    //camera.position.z += player.position.z;
+    camera.position = Vector( 0, 300, -600 );
+    camera.position.x += player.position.x;
+    camera.position.z += player.position.z;
 
     clearCanvas();
-    camera.renderGrid();
     camera.render([plane, planeTop]); //plane will always be below the other objects
     camera.render([player, house1, house2]);
 }, 16);
