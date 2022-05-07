@@ -72,7 +72,7 @@ const visualiseRays = ( object: Shape, cameraPosition: XYZ, options?: { showRays
             for (const pointIndex of face.pointIndexes) {
                 points.push( intersectionPoints[pointIndex] )
             }
-            drawShape( points, "#ffffff00", true );
+            drawShape( points, "#ffffff00", true, "#ffffff");
         }
     }
 }
@@ -82,7 +82,7 @@ linkCanvas("renderingWindow");
 
 //Objects:
 const plane = new Box(300, 10, 1000);
-plane.setColour("#ffffff00"); //transparent
+plane.setColour("#ffffff"); //transparent
 plane.showOutline();
 plane.position.y = -55;
 
@@ -104,7 +104,7 @@ cameraObject.showOutline();
 cameraObject.position = Vector( 50, 50, -600 );
 
 const viewport = new Box(1280, 720, 1);
-viewport.setColour("#d1e6ff40");
+viewport.setColour("#00000050");
 viewport.showOutline();
 const updateViewport = () => { 
     viewport.position = JSON.parse(JSON.stringify(cameraObject.position));
