@@ -821,6 +821,7 @@ class AbsoluteCamera extends Camera {
 }
 class PerspectiveCamera extends Camera {
     nearDistance = 1000; //distance from camera to near plane, can also be used like a makeshift FOV value
+    clipOffset = 2; //distance in front of camera which point is clipped to (z coordinate)
     rotation = Euler(0, 0, 0);
     rotationMatrix = new matrix();
     updateRotationMatrix() {
@@ -845,8 +846,8 @@ class PerspectiveCamera extends Camera {
             if (vertex[2] > cameraPoint[2]) {
                 pointsInFrontOfCamera = true;
             }
-            if (vertex[2] <= (cameraPoint[2] + 10)) {
-                cameraPoints.setValue(i, 2, cameraPoint[2] + 10); //clip point to the camera'z so it doesn't get inverted
+            if (vertex[2] <= (cameraPoint[2] + this.clipOffset)) {
+                cameraPoints.setValue(i, 2, cameraPoint[2] + this.clipOffset); //clip point in front of camera's z coordinate so it doesn't get inverted
             }
         }
         if (pointsInFrontOfCamera == false) {
