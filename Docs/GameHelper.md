@@ -198,5 +198,5 @@ setInterval(() => {
 
 You can get quickly get started with the [physicsTemplate.html](https://github.com/AryaaSk/3D-Engine/tree/master/GameHelper/physicsTemplate.html)
 
-Here is a demo of the [Physics Example](https://github.com/AryaaSk/3D-Engine/tree/master/GameHelper/Physics)\
+Here is a demo of the [Physics Example](https://aryaask.github.io/3D-Engine/Examples/Physics/)\
 ![Preview Gif](https://github.com/AryaaSk/3D-Engine/blob/master/Previews/PhysicsDemo.gif?raw=true)
