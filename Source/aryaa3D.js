@@ -614,6 +614,7 @@ class Camera {
         for (const data of sortedObjects) {
             const object = data.object;
             const screenPoints = data.screenPoints;
+            const worldPoints = data.worldPoints;
             //draw faces of shape in correct order, by finding the center and sorting based on distance to the position point
             let objectFaces = [];
             //populate the array
@@ -624,21 +625,20 @@ class Camera {
                     continue;
                 }
                 let points = [];
+                let [totalX, totalY, totalZ] = [0, 0, 0];
                 for (let a = 0; a != face.pointIndexes.length; a += 1) {
                     points.push(screenPoints.getColumn(face.pointIndexes[a]));
+                    const point = worldPoints.getColumn(face.pointIndexes[a]); //find face center using world points, for more accuracy
+                    totalX += point[0];
+                    totalY += point[1];
+                    totalZ += point[2];
                 }
-                //find center by getting average of all points
-                let [totalX, totalY, totalZ] = [0, 0, 0];
-                for (let a = 0; a != points.length; a += 1) {
-                    totalX += points[a][0];
-                    totalY += points[a][1];
-                    totalZ += points[a][2];
-                }
-                const [averageX, averageY, averageZ] = [totalX / points.length, totalY / points.length, totalZ / points.length];
+                const total = worldPoints.width;
+                const [averageX, averageY, averageZ] = [totalX / total, totalY / total, totalZ / total];
                 const center = [averageX, averageY, averageZ];
                 objectFaces.push({ points: points, center: center, colour: face.colour, faceIndex: i, outline: face.outline });
             }
-            const sortedFaces = this.sortFurthestDistanceTo(objectFaces, "center", positionPoint); //sort based on distance from center to (0, 0, -50000)
+            const sortedFaces = this.sortFurthestDistanceTo(objectFaces, "center", positionPoint);
             for (const face of sortedFaces) {
                 const facePoints = face.points;
                 let colour = face.colour;
@@ -715,7 +715,7 @@ class AbsoluteCamera extends Camera {
             const [averagex, averagey, averagez] = [totalx / pointTotal, totaly / pointTotal, totalz / pointTotal];
             const center = [averagex, averagey, averagez];
             //push to objectData
-            objectData.push({ object: object, screenPoints: cameraPoints, center: center });
+            objectData.push({ object: object, worldPoints: cameraPoints, screenPoints: cameraPoints, center: center });
         }
         //create a copy of object data before it gets wiped
         const objectDataCopy = [];
@@ -828,22 +828,11 @@ class PerspectiveCamera extends Camera {
     //prepare verteces, check if the object is behind the camera (if so then don't render), and if some are behind then clip the vertece to the near plane
     //find vector from camera -> (each vertex of object)
     //find where the vector intersects the viewport, by scaling the vector with ( nearDistance / vector.z ), find coordinate in world with: (camera.position) + (scaled vector)
-    //Attach object's original z position to their (x, y) coordinate on the viewport to sort objects/faces
-    //Then sort objects/faces based on the cameraPoints
+    //Then translate it by the camera's x and y position to negate the scaling difference since the viewport is not in the same position as the camera.
+    //Then sort objects/faces based on worldPoints, since cameraPoints will only have an X and Y coordinate.
     transformPoints(points) {
         const cameraPoint = [this.position.x, this.position.y, this.position.z];
         let cameraPoints = points.copy();
-        //rotate points around camera, first find vector from camera -> vertex
-        for (let i = 0; i != cameraPoints.width; i += 1) {
-            const vertex = cameraPoints.getColumn(i);
-            let cameraVertexVector = new matrix([[vertex[0] - cameraPoint[0], vertex[1] - cameraPoint[1], vertex[2] - cameraPoint[2]]]);
-            cameraVertexVector = multiplyMatrixs(this.rotationMatrix, cameraVertexVector); //rotate using our rotation matrix
-            const rotatedVector = cameraVertexVector.getColumn(0);
-            const newPosition = [cameraPoint[0] + rotatedVector[0], cameraPoint[1] + rotatedVector[1], cameraPoint[2] + rotatedVector[2]];
-            cameraPoints.setValue(i, 0, newPosition[0]);
-            cameraPoints.setValue(i, 1, newPosition[1]);
-            cameraPoints.setValue(i, 2, newPosition[2]);
-        }
         //prepare the points
         let pointsInFrontOfCamera = false;
         for (let i = 0; i != cameraPoints.width; i += 1) {
@@ -865,10 +854,9 @@ class PerspectiveCamera extends Camera {
             const vector = [vertex[0] - cameraPoint[0], vertex[1] - cameraPoint[1], vertex[2] - cameraPoint[2]];
             const zScaleFactor = this.nearDistance / vector[2];
             const intersectionVector = [vector[0] * zScaleFactor, vector[1] * zScaleFactor, vector[2] * zScaleFactor];
-            const intersectionPoint = [cameraPoint[0] + intersectionVector[0], cameraPoint[1] + intersectionVector[1], cameraPoint[2] + intersectionVector[2]];
+            const intersectionPoint = [cameraPoint[0] + intersectionVector[0], cameraPoint[1] + intersectionVector[1]]; //no z-axis, since it would have been normalized
             intersectionPoint[0] -= cameraPoint[0];
             intersectionPoint[1] -= cameraPoint[1];
-            intersectionPoint[2] -= cameraPoint[2];
             intersectionPoints.addColumn(intersectionPoint);
         }
         cameraPoints = intersectionPoints;
@@ -882,12 +870,21 @@ class PerspectiveCamera extends Camera {
         for (const object of objects) {
             const worldPoints = object.physicalMatrix.copy();
             worldPoints.translateMatrix(object.position.x, object.position.y, object.position.z);
+            //rotate points around camera
+            for (let i = 0; i != worldPoints.width; i += 1) {
+                const vertex = worldPoints.getColumn(i);
+                let cameraVertexVector = new matrix([[vertex[0] - cameraPoint[0], vertex[1] - cameraPoint[1], vertex[2] - cameraPoint[2]]]); //find vector from camera -> vertex
+                cameraVertexVector = multiplyMatrixs(this.rotationMatrix, cameraVertexVector); //rotate using our rotation matrix
+                const rotatedVector = cameraVertexVector.getColumn(0);
+                worldPoints.setValue(i, 0, cameraPoint[0] + rotatedVector[0]); //translate the object relative to the camera
+                worldPoints.setValue(i, 1, cameraPoint[1] + rotatedVector[1]);
+                worldPoints.setValue(i, 2, cameraPoint[2] + rotatedVector[2]);
+            }
             const cameraPoints = this.transformPoints(worldPoints);
             //find center using cameraPoints
             let [totalx, totaly, totalz] = [0, 0, 0];
-            for (let i = 0; i != cameraPoints.width; i += 1) {
-                cameraPoints.setValue(i, 2, worldPoints.getValue(i, 2)); //attach the point's original z coordinate with the cameraPoints, so that it is easy to sort them
-                const point = cameraPoints.getColumn(i);
+            for (let i = 0; i != worldPoints.width; i += 1) {
+                const point = worldPoints.getColumn(i);
                 totalx += point[0];
                 totaly += point[1];
                 totalz += point[2];
@@ -896,14 +893,15 @@ class PerspectiveCamera extends Camera {
             const [averagex, averagey, averagez] = [totalx / pointTotal, totaly / pointTotal, totalz / pointTotal];
             const center = [averagex, averagey, averagez];
             //push to objectData
-            objectData.push({ object: object, screenPoints: cameraPoints, center: center });
+            objectData.push({ object: object, worldPoints: worldPoints, screenPoints: cameraPoints, center: center });
         }
         //create a copy of object data before it gets wiped
         const objectDataCopy = [];
         for (const data of objectData) {
-            objectDataCopy.push({ object: data.object.clone(), screenPoints: data.screenPoints.copy(), center: JSON.parse(JSON.stringify(data.center)) });
+            objectDataCopy.push({ object: data.object.clone(), worldPoints: data.worldPoints.copy(), screenPoints: data.screenPoints.copy(), center: JSON.parse(JSON.stringify(data.center)) });
         }
-        this.renderObjectData(objectData, cameraPoint); //need to find another way of sorting faces, since it is quite bad rn
+        const viewportPosition = [cameraPoint[0], cameraPoint[1], cameraPoint[2] + this.nearDistance];
+        this.renderObjectData(objectData, cameraPoint);
         return objectDataCopy;
     }
     enableMovementControls(canvasID, options) {

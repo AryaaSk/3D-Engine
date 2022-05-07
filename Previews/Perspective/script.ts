@@ -1,7 +1,7 @@
 (function () { //local scope
 
 
-    
+
 linkCanvas("renderingWindow") ;
 
 //OBJECTS GO HERE...
@@ -20,11 +20,10 @@ sphere.position.z = 500;
 
 //CAMERA GOES HERE...
 const camera = new PerspectiveCamera();
-camera.position = Vector( 0, 500, -1500 )
+camera.position = Vector( 0, 500, -500 )
 camera.rotation.x = 20;
 camera.updateRotationMatrix();
 camera.enableMovementControls("renderingWindow", {  });
-
 
 setInterval(() => {
     clearCanvas();
@@ -43,7 +42,6 @@ document.onkeydown = ($e) => {
     else if (key == "arrowdown") { camera.position.y -= 50; }
 }
 console.log("WASD to move camera on x and z axis, arrow keys to move camera on y axis, use move to rotate camera and look around scene");
-
 
 
 })();

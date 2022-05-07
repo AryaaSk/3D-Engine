@@ -14,7 +14,7 @@
     sphere.position.z = 500;
     //CAMERA GOES HERE...
     const camera = new PerspectiveCamera();
-    camera.position = Vector(0, 500, -1500);
+    camera.position = Vector(0, 500, -500);
     camera.rotation.x = 20;
     camera.updateRotationMatrix();
     camera.enableMovementControls("renderingWindow", {});
