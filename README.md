@@ -1,6 +1,4 @@
-*# Currently outdated since I have added perspective and will require a lot of rewriting*
-
-# Aryaa 3D: A 3D Library which uses Parallel Projection, and comes with it's own Object Builder/Editor
+# Aryaa 3D: A 3D Library which uses Parallel or Perspective Projection, and comes with it's own Object Builder/Editor
 
 **I just made this to learn more about 3D rendering/modelling, and Matrix transformations**\
 If you want to know how it works go here [Rendering Pipeline](Docs/Pipeline.md)
@@ -9,7 +7,8 @@ If you want to know how it works go here [Rendering Pipeline](Docs/Pipeline.md)
 - [Importing](#Importing)
 - [Setup](#Setup)
 - [Creating Objects](#Creating-an-Object)
-- [Camera and Rendering](#Camera)
+- [Camera](#Camera)
+- [Rendering](#Rendering)
 - [Usage](#Usage)
 
 ## Importing
@@ -94,11 +93,17 @@ cube.faces[0].outline = true;
 ```
 
 ## Camera
-The camera is used to render objects. It is a parallel projection, and so will not use perspective which makes it ideal for programs where the camera is static and the object's are moving in a fixed space.
- 
-To create a camera object:
+The camera is used to render objects, there are 2 types of camera, the Absolute Camera and the Perspective Camera/
+- The Absolute Camera is useful for programs where the camera will not move, and the world is static, e.g. a board game or a simulation.
+- The Perspective Camera is useful for programs where the camera moves a lot, e.g. a game.
+*Note that the face sorting on the Perspective Camera is quite buggy at the moment, if you want stability then I would recommend the Absolute Camera*
+
+The 2 camera have slightly different properties and methods, so I will explain each one separately
+
+### Absolute Camera
+To create a new Absolute Camera object:
 ```javascript
-const camera = new Camera();
+const camera = new AbsoluteCamera();
 ```
 
 You can also change the camera's position:
@@ -131,6 +136,38 @@ If you want a visual marker of the center of the screen. The dot basically repre
 camera.showScreenOrigin = true;
 ```
 
+### Perspective Camera
+Create Perspective Camera object:
+```javascript
+const camera = new PerspectiveCamera();
+```
+
+Change position:
+```javascript
+camera.position.y = 300;
+camera.position.z = -1000;
+```
+
+Change Zoom Level:
+```javascript
+camera.zoom = 0.5;
+```
+
+Rotate camera:
+```javascript
+camera.rotation.x = 20;
+camera.updateRotationMatrix(); //remember to call this if you update rotation
+```
+*This works by rotating all the object around the camera by the opposite of the camera's rotation*
+
+You can also change the Near Distance, which is the distance from the Camera to the Near Plane
+```javascript
+camera.nearDistance = 1000; //1000 by default
+```
+*It can be used sort of like an FOV value*
+
+
+## Rendering
 Finally to actually render the object to the screen use: (if you have multiple objects make sure to pass them all in the same function call)
 ```javascript
 camera.render([cube]);
@@ -149,12 +186,16 @@ You can also just enable the inbuilt movement controls, which allow the user to 
 camera.enableMovementControls(canvasID);
 ```
 *Do not call this too many times, as it adds event listeners everytime which will cause lag if there are too many*
-- This function comes with 5 parameters:
+- The function comes with 2 paramters on both cameras
     1. CanvasID: The ID of the canvas which you use to render, this is so that it can attack event listeners to the canvas, to monitor for mouseclicks
-    2. Rotation?: Optional parameter to enable rotation, it is on by default
-    3. Movement?: Optional parameter to enable movement, it is on by default
-    4. Zoom?: Optional parameter to enable zoom, it is on by default
-    5. limitRotation?: Optional parameter, which will limit the X Axis rotation to only 90 degrees, it is off by default.
+    2. Options: Some options so you can configure the movement how you want, here are some of them.
+        - rotation: boolean, default = true
+        - movement: boolean, default = true
+        - zoom: boolean, default = true
+        - limitRotation: boolean, default = false
+        - limitRotationMin: number, default = 0
+        - limitRotationMax: number, default = -90
+    - *The Perspective Camera does not include the movement option*
 
 **If you are changing the camera's position, then I would recommend to disable movement, since that will change the absolute position of the objects, and then the rotation would also get messed up**
 
@@ -176,7 +217,6 @@ As well as a Lego Builder: https://github.com/AryaaSk/LegoBuilder
 
 ### Limitations
 There are some limitations to this engine:
-- No perspective projection, this is quite a big feature, but unfortunately this engine can only support parallel projection.
 - Sorting order, sometimes at weird angles, some shapes will be rendered in front of another shape, even if it was meant to be the other way round. This is usually caused by have shapes too large, due to how the engine calculates render order.
 - Performance, when you start to add many points and shapes, the performance does start to drop quite a bit, this can be seen in the chess game, which only runs at about 40fps on average.
 - No .obj files or textures, you have to make all custom shapes inside the Shape Builder, and you can't project images (textures) onto objects.
