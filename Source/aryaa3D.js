@@ -828,7 +828,7 @@ class PerspectiveCamera extends Camera {
         const [rX, rY, rZ] = [-(this.rotation.x % 360), -(this.rotation.y % 360), -(this.rotation.z % 360)];
         this.rotationMatrix = calculateRotationMatrix(rX, rY, rZ);
     }
-    //RENDERING PIPELINE FOR PERSPECTIVE MODE
+    //RENDERING PIPELINE FOR PERSPECTIVE MODE 
     //generate 3D world, applies position and rotates points around camera
     //prepare verteces, check if the object is behind the camera (if so then don't render), and if some are behind then clip the vertece to the near plane
     //find vector from camera -> (each vertex of object)
