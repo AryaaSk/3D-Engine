@@ -1017,7 +1017,6 @@ class PerspectiveCamera extends Camera {
 			objectData.push( { object: object, screenPoints: cameraPoints, center: center } )
         }
 
-
         //create a copy of object data before it gets wiped
         const objectDataCopy: { object: Shape, screenPoints: matrix, center: number[] }[] = [];
         for (const data of objectData) {
@@ -1073,11 +1072,15 @@ class PerspectiveCamera extends Camera {
         }
     }
 
-
-
     constructor () {
         super();
         this.updateRotationMatrix();
     }
 
+}
+
+class TwoPointPerspectiveCamera extends Camera {
+    render(objects: Shape[]) {
+
+    }
 }

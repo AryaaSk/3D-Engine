@@ -970,3 +970,7 @@ class PerspectiveCamera extends Camera {
         this.updateRotationMatrix();
     }
 }
+class TwoPointPerspectiveCamera extends Camera {
+    render(objects) {
+    }
+}
